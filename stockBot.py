@@ -12,6 +12,7 @@ import credentials
 # Make sure to update credentials.py with your secrets
 TOKEN = credentials.secrets['TOKEN']
 BRAVOS_API = credentials.secrets['BRAVOS_API']
+ALPHA_API = credentials.secrets['ALPHA_API']
 
 """Simple Bot to reply to Telegram messages.
 This program is dedicated to the public domain under the CC0 license.
@@ -24,6 +25,17 @@ Basic Echobot example, repeats messages.
 Press Ctrl-C on the command line or send a signal to the process to stop the
 bot.
 """
+
+
+news = {
+    'Bravos': 'https://bravos.co/' + ticker,
+    'Seeking Alpha': 'https://seekingalpha.com/symbol/' + ticker,
+    'MSN Money': 'https://www.msn.com/en-us/money/stockdetails?symbol=' + ticker,
+    'Yahoo Finance': 'https://finance.yahoo.com/quote/' + ticker,
+    'Wall Street Journal': 'https://quotes.wsj.com/' + ticker,
+    'The Street': 'https://www.thestreet.com/quote/' + ticker + '.html',
+    'Zacks': 'https://www.zacks.com/stock/quote/' + ticker
+}
 
 
 # Enable logging
@@ -60,6 +72,7 @@ def stockInfo(bot, update):
             data = json.loads(url.read().decode())
 
             for ticker in tickers:  # iterate through the tickers and print relevant info one message at a time
+
                 try:  # checks if data is a valid ticker, if it is not tells the user
 
                     # Get Stock ticker name from Data Object
@@ -69,11 +82,18 @@ def stockInfo(bot, update):
 
                     # Checks if !news is called, and prints news embed if it is
                     if message.startswith('!news'):
+                        newsMessage = 'The current stock price of ' + \
+                            nameTicker + ' is $**' + str(priceTicker) + '**'
+                        for source in news:
+                            print(source)
+                            newsMessage = newsMessage + \
+                                '\n [' + source + '](' + news[source] + ')'
+
                         update.message.reply_text(
-                            text='The current stock price of ' + nameTicker + ' is $<b>' + str(priceTicker) + '</b>', parse_mode=telegram.ParseMode.HTML)
+                            text=newsMessage, parse_mode=telegram.ParseMode.MARKDOWN)
                     else:  # If news embed isnt called, print normal stock price
                         update.message.reply_text(
-                            text='The current stock price of ' + nameTicker + ' is $<b>' + str(priceTicker) + '</b>', parse_mode=telegram.ParseMode.HTML)
+                            text='The current stock price of ' + nameTicker + ' is $**' + str(priceTicker) + '**', parse_mode=telegram.ParseMode.MARKDOWN)
 
                 except KeyError:  # If searching for the ticker in loaded data fails, then Bravos didnt provide it, so tell the user.
                     update.message.reply_text(
