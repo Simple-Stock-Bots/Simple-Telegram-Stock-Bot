@@ -1,0 +1,3 @@
+secrets = {
+    'TELEGRAM_TOKEN': "TELEGRAM BOT TOKEN HERE"
+}
