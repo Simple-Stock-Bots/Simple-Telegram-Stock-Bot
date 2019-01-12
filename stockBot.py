@@ -12,30 +12,6 @@ import tickerInfo
 
 TOKEN = credentials.secrets['TELEGRAM_TOKEN']
 
-"""Simple Bot to reply to Telegram messages.
-This program is dedicated to the public domain under the CC0 license.
-This Bot uses the Updater class to handle the bot.
-First, a few handler functions are defined. Then, those functions are passed to
-the Dispatcher and registered at their respective places.
-Then, the bot is started and runs until we press Ctrl-C on the command line.
-Usage:
-Basic Echobot example, repeats messages.
-Press Ctrl-C on the command line or send a signal to the process to stop the
-bot.
-"""
-
-
-news = {
-    'Bravos': 'https://bravos.co/' + ticker,
-    'Seeking Alpha': 'https://seekingalpha.com/symbol/' + ticker,
-    'MSN Money': 'https://www.msn.com/en-us/money/stockdetails?symbol=' + ticker,
-    'Yahoo Finance': 'https://finance.yahoo.com/quote/' + ticker,
-    'Wall Street Journal': 'https://quotes.wsj.com/' + ticker,
-    'The Street': 'https://www.thestreet.com/quote/' + ticker + '.html',
-    'Zacks': 'https://www.zacks.com/stock/quote/' + ticker
-}
-
-
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -61,42 +37,55 @@ def stockInfo(bot, update):
         # regex to find tickers in messages, looks for up to 4 word characters following a dollar sign and captures the 4 word characters
         tickers = re.findall('[$](\w{1,4})', message)
 
-        # get ticker information from bravos api, turns tickers into comma separated list so that only one api call is needed per message
-        url = 'https://data.bravos.co/v1/quote?symbols=' + ",".join(tickers) + \
-            '&apikey=' + BRAVOS_API + '&format=json'
+        # Checks if !news is called, and prints news embed if it is
+        if message.startswith('!news'):
+            tickerData = tickerInfo.tickerQuote(tickers)
+            for ticker in tickers:
+                ticker = ticker.upper()
+                # bot.send_photo(bot.get_updates()
+                #              [-1].message.chat_id, tickerData[ticker + 'Image'])
+                name = tickerData[ticker + 'Name']
+                price = tickerData[ticker + 'Price']
+                change = tickerData[ticker + 'Change']
 
-        # load json data from url as an object
-        with urllib.request.urlopen(url) as url:
-            data = json.loads(url.read().decode())
+                message = 'The current stock price of ' + \
+                    name + ' is $**' + str(price) + '**'
+                # if change > 0:
+                #     newsMessage = newsMessage + ', the stock is currently **up' + change + '%**'
+                # elif change < 0:
+                #     newsMessage = newsMessage + ', the stock is currently **down' + change + '%**'
+                # else:
+                #     newsMessage = newsMessage + ", the stock hasn't shown any movement today."
 
-            for ticker in tickers:  # iterate through the tickers and print relevant info one message at a time
+                news = tickerInfo.stockNewsList(ticker)
+                print(news)
+                for source in news:
+                    print(source)
+                    message = message + \
+                        '\n[' + source + '](' + news[source] + ')'
 
-                try:  # checks if data is a valid ticker, if it is not tells the user
+                update.message.reply_text(
+                    text=message, parse_mode=telegram.ParseMode.MARKDOWN)
 
-                    # Get Stock ticker name from Data Object
-                    nameTicker = data[ticker.upper()]['name']
-                    # Get Stock Ticker price from Object
-                    priceTicker = data[ticker.upper()]['price']
+        else:  # If news embed isnt called, print normal stock price
+            tickerData = tickerInfo.tickerQuote(tickers)
+            for ticker in tickers:
+                ticker = ticker.upper()
+                name = tickerData[ticker + 'Name']
+                price = tickerData[ticker + 'Price']
+                change = tickerData[ticker + 'Change']
+                message = 'The current stock price of ' + \
+                    name + ' is $**' + str(price) + '**'
+                # change = 0
 
-                    # Checks if !news is called, and prints news embed if it is
-                    if message.startswith('!news'):
-                        newsMessage = 'The current stock price of ' + \
-                            nameTicker + ' is $**' + str(priceTicker) + '**'
-                        for source in news:
-                            print(source)
-                            newsMessage = newsMessage + \
-                                '\n [' + source + '](' + news[source] + ')'
-
-                        update.message.reply_text(
-                            text=newsMessage, parse_mode=telegram.ParseMode.MARKDOWN)
-                    else:  # If news embed isnt called, print normal stock price
-                        update.message.reply_text(
-                            text='The current stock price of ' + nameTicker + ' is $**' + str(priceTicker) + '**', parse_mode=telegram.ParseMode.MARKDOWN)
-
-                except KeyError:  # If searching for the ticker in loaded data fails, then Bravos didnt provide it, so tell the user.
-                    update.message.reply_text(
-                        ticker.upper() + ' does not exist.')
-                    pass
+                # if change > 0:
+                #     move = ', the stock is currently **up' + change + '%**'
+                # elif change < 0:
+                #     move = ', the stock is currently **down' + change + '%**'
+                # else:
+                move = ", the stock hasn't shown any movement today."
+                update.message.reply_text(
+                    text=message + move, parse_mode=telegram.ParseMode.MARKDOWN)
     except:
         pass
 
