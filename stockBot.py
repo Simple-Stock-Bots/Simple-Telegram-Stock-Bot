@@ -8,11 +8,9 @@ import telegram
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
 import credentials
+import tickerInfo
 
-# Make sure to update credentials.py with your secrets
-TOKEN = credentials.secrets['TOKEN']
-BRAVOS_API = credentials.secrets['BRAVOS_API']
-ALPHA_API = credentials.secrets['ALPHA_API']
+TOKEN = credentials.secrets['TELEGRAM_TOKEN']
 
 """Simple Bot to reply to Telegram messages.
 This program is dedicated to the public domain under the CC0 license.
