@@ -50,24 +50,24 @@ def stockInfo(bot, update):
 
                 message = 'The current stock price of ' + \
                     name + ' is $**' + str(price) + '**'
-                # if change > 0:
-                #     newsMessage = newsMessage + ', the stock is currently **up' + change + '%**'
-                # elif change < 0:
-                #     newsMessage = newsMessage + ', the stock is currently **down' + change + '%**'
-                # else:
-                #     newsMessage = newsMessage + ", the stock hasn't shown any movement today."
+                if change > 0:
+                    message = message + \
+                        ', the stock is currently **up ' + str(change) + '%**'
+                elif change < 0:
+                    message = message + \
+                        ', the stock is currently **down' + str(change) + '%**'
+                else:
+                    message = message + ", the stock hasn't shown any movement today."
 
                 news = tickerInfo.stockNewsList(ticker)
-                print(news)
                 for source in news:
-                    print(source)
                     message = message + \
                         '\n[' + source + '](' + news[source] + ')'
 
                 update.message.reply_text(
                     text=message, parse_mode=telegram.ParseMode.MARKDOWN)
 
-        else:  # If news embed isnt called, print normal stock price
+        else:  # If news isnt called, print normal stock price
             tickerData = tickerInfo.tickerQuote(tickers)
             for ticker in tickers:
                 ticker = ticker.upper()
@@ -76,16 +76,16 @@ def stockInfo(bot, update):
                 change = tickerData[ticker + 'Change']
                 message = 'The current stock price of ' + \
                     name + ' is $**' + str(price) + '**'
-                # change = 0
-
-                # if change > 0:
-                #     move = ', the stock is currently **up' + change + '%**'
-                # elif change < 0:
-                #     move = ', the stock is currently **down' + change + '%**'
-                # else:
-                move = ", the stock hasn't shown any movement today."
+                if change > 0:
+                    message = message + ', the stock is currently **up ' + \
+                        str(change) + '%**'
+                elif change < 0:
+                    message = message + ', the stock is currently **down ' + \
+                        str(change) + '%**'
+                else:
+                    move = ", the stock hasn't shown any movement today."
                 update.message.reply_text(
-                    text=message + move, parse_mode=telegram.ParseMode.MARKDOWN)
+                    text=message, parse_mode=telegram.ParseMode.MARKDOWN)
     except:
         pass
 
