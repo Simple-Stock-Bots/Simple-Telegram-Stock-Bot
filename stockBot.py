@@ -10,7 +10,7 @@ from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 import credentials
 import tickerInfo
 
-TOKEN = credentials.secrets['TELEGRAM_TOKEN']
+TOKEN = "TELEGRAM BOT TOKEN HERE"
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
