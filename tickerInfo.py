@@ -17,7 +17,9 @@ def tickerQuote(tickers):
         ticker = ticker.upper()
         stockData[ticker + "Name"] = IEXData[ticker]["quote"]["companyName"]
         stockData[ticker + "Price"] = IEXData[ticker]["quote"]["latestPrice"]
-        stockData[ticker + "Change"] = IEXData[ticker]["quote"]["changePercent"] * 100
+        stockData[ticker + "Change"] = round(
+            (IEXData[ticker]["quote"]["changePercent"] * 100), 2
+        )
         stockData[ticker + "Image"] = stockLogo(ticker)
     print("Quote Gathered")
     return stockData
