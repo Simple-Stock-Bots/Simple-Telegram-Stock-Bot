@@ -34,9 +34,12 @@ def help(bot, update):
 
 def stockInfo(bot, update):
     message = update.message.text
+    chat_id = update.message.chat_id
+
     try:
         # regex to find tickers in messages, looks for up to 4 word characters following a dollar sign and captures the 4 word characters
         tickers = re.findall("[$](\w{1,4})", message)
+        bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
         # Checks if !news is called, and prints news embed if it is
         if message.startswith("!news"):
