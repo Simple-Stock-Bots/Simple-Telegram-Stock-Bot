@@ -15,13 +15,18 @@ def tickerQuote(tickers):
 
     for ticker in tickers:
         ticker = ticker.upper()
-        stockData[ticker + "Name"] = IEXData[ticker]["quote"]["companyName"]
-        stockData[ticker + "Price"] = IEXData[ticker]["quote"]["latestPrice"]
-        stockData[ticker + "Change"] = round(
-            (IEXData[ticker]["quote"]["changePercent"] * 100), 2
-        )
-        stockData[ticker + "Image"] = stockLogo(ticker)
-    print("Quote Gathered")
+        if ticker in IEXData:
+            stockData[ticker] = 1
+            stockData[ticker + "Name"] = IEXData[ticker]["quote"]["companyName"]
+            stockData[ticker + "Price"] = IEXData[ticker]["quote"]["latestPrice"]
+            stockData[ticker + "Change"] = round(
+                (IEXData[ticker]["quote"]["changePercent"] * 100), 2
+            )
+            stockData[ticker + "Image"] = stockLogo(ticker)
+            print(ticker + " Quote Gathered")
+        else:
+            stockData[ticker] = 0
+    print(stockData)
     return stockData
 
 

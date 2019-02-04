@@ -33,6 +33,68 @@ def help(bot, update):
     update.message.reply_text("I don't know how to help yet!")
 
 
+def news(bot, update):
+    """Send a message when the /news command is issued."""
+    message = update.message.text
+    chat_id = update.message.chat_id
+
+    try:
+        # regex to find tickers in messages, looks for up to 4 word characters following a dollar sign and captures the 4 word characters
+        tickers = re.findall("[$](\w{1,4})", message)
+        bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+
+        if tickers == []:
+            update.message.reply_text(
+                "Please type a ticker after your command: /news $tsla"
+            )
+        else:
+            tickerData = tickerInfo.tickerQuote(tickers)
+            for ticker in tickers:
+                ticker = ticker.upper()
+                if tickerData[ticker] == 1:
+                    name = tickerData[ticker + "Name"]
+                    price = tickerData[ticker + "Price"]
+                    change = tickerData[ticker + "Change"]
+
+                    message = (
+                        "The current stock price of "
+                        + name
+                        + " is $**"
+                        + str(price)
+                        + "**"
+                    )
+                    if change > 0:
+                        message = (
+                            message
+                            + ", the stock is currently **up "
+                            + str(change)
+                            + "%**"
+                        )
+                    elif change < 0:
+                        message = (
+                            message
+                            + ", the stock is currently **down"
+                            + str(change)
+                            + "%**"
+                        )
+                    else:
+                        message = (
+                            message + ", the stock hasn't shown any movement today."
+                        )
+
+                    news = tickerInfo.stockNewsList(ticker)
+                    for source in news:
+                        message = message + "\n[" + source + "](" + news[source] + ")"
+
+                    update.message.reply_text(
+                        text=message, parse_mode=telegram.ParseMode.MARKDOWN
+                    )
+                else:
+                    update.message.reply_text(ticker + " Does not exist.")
+    except:
+        pass
+
+
 def stockInfo(bot, update):
     message = update.message.text
     chat_id = update.message.chat_id
@@ -42,46 +104,10 @@ def stockInfo(bot, update):
         tickers = re.findall("[$](\w{1,4})", message)
         bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
-        # Checks if !news is called, and prints news embed if it is
-        if message.startswith("!news"):
-            tickerData = tickerInfo.tickerQuote(tickers)
-            for ticker in tickers:
-                ticker = ticker.upper()
-                # bot.send_photo(bot.get_updates()
-                #              [-1].message.chat_id, tickerData[ticker + 'Image'])
-                name = tickerData[ticker + "Name"]
-                price = tickerData[ticker + "Price"]
-                change = tickerData[ticker + "Change"]
-
-                message = (
-                    "The current stock price of " + name + " is $**" + str(price) + "**"
-                )
-                if change > 0:
-                    message = (
-                        message + ", the stock is currently **up " + str(change) + "%**"
-                    )
-                elif change < 0:
-                    message = (
-                        message
-                        + ", the stock is currently **down"
-                        + str(change)
-                        + "%**"
-                    )
-                else:
-                    message = message + ", the stock hasn't shown any movement today."
-
-                news = tickerInfo.stockNewsList(ticker)
-                for source in news:
-                    message = message + "\n[" + source + "](" + news[source] + ")"
-
-                update.message.reply_text(
-                    text=message, parse_mode=telegram.ParseMode.MARKDOWN
-                )
-
-        else:  # If news isnt called, print normal stock price
-            tickerData = tickerInfo.tickerQuote(tickers)
-            for ticker in tickers:
-                ticker = ticker.upper()
+        tickerData = tickerInfo.tickerQuote(tickers)
+        for ticker in tickers:
+            ticker = ticker.upper()
+            if tickerData[ticker] == 1:
                 name = tickerData[ticker + "Name"]
                 price = tickerData[ticker + "Price"]
                 change = tickerData[ticker + "Change"]
@@ -104,6 +130,8 @@ def stockInfo(bot, update):
                 update.message.reply_text(
                     text=message, parse_mode=telegram.ParseMode.MARKDOWN
                 )
+            else:
+                update.message.reply_text(ticker + " Does not exist.")
     except:
         pass
 
@@ -124,6 +152,7 @@ def main():
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
+    dp.add_handler(CommandHandler("news", news))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, stockInfo))
