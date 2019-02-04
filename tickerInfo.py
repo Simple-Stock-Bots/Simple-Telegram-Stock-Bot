@@ -29,7 +29,6 @@ def tickerQuote(tickers):
             print(ticker + " Quote Gathered")
         else:
             stockData[ticker] = 0
-    print(stockData)
     return stockData
 
 
