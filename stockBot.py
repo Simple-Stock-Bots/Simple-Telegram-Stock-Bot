@@ -96,7 +96,7 @@ def stockInfo(bot, update):
                         + "%**"
                     )
                 else:
-                    move = ", the stock hasn't shown any movement today."
+                    message = message + ", the stock hasn't shown any movement today."
                 update.message.reply_text(
                     text=message, parse_mode=telegram.ParseMode.MARKDOWN
                 )
