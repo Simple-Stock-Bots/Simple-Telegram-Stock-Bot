@@ -18,6 +18,7 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+print("Bot Online")
 
 
 # Define a few command handlers. These usually take the two arguments bot and
