@@ -1,4 +1,4 @@
-# Work with Python 3.6
+# Work with Python 3.7
 import json
 import logging
 import re
@@ -7,14 +7,14 @@ import urllib.request
 import telegram
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
-import credentials
 import tickerInfo
 
-TOKEN = "TELEGRAM BOT TOKEN HERE"
+TOKEN = "TELEGRAM_TOKEN
 
 # Enable logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+)
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 # update. Error handlers also receive the raised TelegramError object in error.
 def start(bot, update):
     """Send a message when the command /start is issued."""
-    update.message.reply_text('I am started and ready to go!')
+    update.message.reply_text("I am started and ready to go!")
 
 
 def help(bot, update):
@@ -35,57 +35,70 @@ def stockInfo(bot, update):
     message = update.message.text
     try:
         # regex to find tickers in messages, looks for up to 4 word characters following a dollar sign and captures the 4 word characters
-        tickers = re.findall('[$](\w{1,4})', message)
+        tickers = re.findall("[$](\w{1,4})", message)
 
         # Checks if !news is called, and prints news embed if it is
-        if message.startswith('!news'):
+        if message.startswith("!news"):
             tickerData = tickerInfo.tickerQuote(tickers)
             for ticker in tickers:
                 ticker = ticker.upper()
                 # bot.send_photo(bot.get_updates()
                 #              [-1].message.chat_id, tickerData[ticker + 'Image'])
-                name = tickerData[ticker + 'Name']
-                price = tickerData[ticker + 'Price']
-                change = tickerData[ticker + 'Change']
+                name = tickerData[ticker + "Name"]
+                price = tickerData[ticker + "Price"]
+                change = tickerData[ticker + "Change"]
 
-                message = 'The current stock price of ' + \
-                    name + ' is $**' + str(price) + '**'
+                message = (
+                    "The current stock price of " + name + " is $**" + str(price) + "**"
+                )
                 if change > 0:
-                    message = message + \
-                        ', the stock is currently **up ' + str(change) + '%**'
+                    message = (
+                        message + ", the stock is currently **up " + str(change) + "%**"
+                    )
                 elif change < 0:
-                    message = message + \
-                        ', the stock is currently **down' + str(change) + '%**'
+                    message = (
+                        message
+                        + ", the stock is currently **down"
+                        + str(change)
+                        + "%**"
+                    )
                 else:
                     message = message + ", the stock hasn't shown any movement today."
 
                 news = tickerInfo.stockNewsList(ticker)
                 for source in news:
-                    message = message + \
-                        '\n[' + source + '](' + news[source] + ')'
+                    message = message + "\n[" + source + "](" + news[source] + ")"
 
                 update.message.reply_text(
-                    text=message, parse_mode=telegram.ParseMode.MARKDOWN)
+                    text=message, parse_mode=telegram.ParseMode.MARKDOWN
+                )
 
         else:  # If news isnt called, print normal stock price
             tickerData = tickerInfo.tickerQuote(tickers)
             for ticker in tickers:
                 ticker = ticker.upper()
-                name = tickerData[ticker + 'Name']
-                price = tickerData[ticker + 'Price']
-                change = tickerData[ticker + 'Change']
-                message = 'The current stock price of ' + \
-                    name + ' is $**' + str(price) + '**'
+                name = tickerData[ticker + "Name"]
+                price = tickerData[ticker + "Price"]
+                change = tickerData[ticker + "Change"]
+                message = (
+                    "The current stock price of " + name + " is $**" + str(price) + "**"
+                )
                 if change > 0:
-                    message = message + ', the stock is currently **up ' + \
-                        str(change) + '%**'
+                    message = (
+                        message + ", the stock is currently **up " + str(change) + "%**"
+                    )
                 elif change < 0:
-                    message = message + ', the stock is currently **down ' + \
-                        str(change) + '%**'
+                    message = (
+                        message
+                        + ", the stock is currently **down "
+                        + str(change)
+                        + "%**"
+                    )
                 else:
                     move = ", the stock hasn't shown any movement today."
                 update.message.reply_text(
-                    text=message, parse_mode=telegram.ParseMode.MARKDOWN)
+                    text=message, parse_mode=telegram.ParseMode.MARKDOWN
+                )
     except:
         pass
 
@@ -122,5 +135,5 @@ def main():
     updater.idle()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
