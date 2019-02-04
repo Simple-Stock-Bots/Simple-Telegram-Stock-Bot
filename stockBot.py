@@ -7,9 +7,10 @@ import urllib.request
 import telegram
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
+import credentials
 import tickerInfo
 
-TOKEN = "TELEGRAM_TOKEN
+TOKEN = credentials.secrets["TELEGRAM_TOKEN"]
 
 # Enable logging
 logging.basicConfig(
