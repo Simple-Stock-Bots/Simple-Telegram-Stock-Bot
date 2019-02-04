@@ -3,6 +3,7 @@ import json
 
 
 def tickerQuote(tickers):
+    """Gathers information from IEX api on stock"""
     stockData = {}
     IEXURL = (
         "https://api.iextrading.com/1.0/stock/market/batch?symbols="
@@ -15,6 +16,8 @@ def tickerQuote(tickers):
 
     for ticker in tickers:
         ticker = ticker.upper()
+
+        # Makes sure ticker exists before populating a dictionary
         if ticker in IEXData:
             stockData[ticker] = 1
             stockData[ticker + "Name"] = IEXData[ticker]["quote"]["companyName"]
@@ -31,6 +34,7 @@ def tickerQuote(tickers):
 
 
 def stockNewsList(ticker):
+    """Makes a bunch of strings that are links to news websites for an input ticker"""
     print("Gather News on " + ticker)
     news = {
         "Bravos": "https://bravos.co/" + ticker,
@@ -46,5 +50,6 @@ def stockNewsList(ticker):
 
 
 def stockLogo(ticker):
+    """returns a png of an input ticker"""
     logoURL = "https://g.foolcdn.com/art/companylogos/mark/" + ticker + ".png"
     return logoURL

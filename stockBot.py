@@ -43,14 +43,16 @@ def news(bot, update):
         tickers = re.findall("[$](\w{1,4})", message)
         bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
+        ## Checks if a ticker was passed in
         if tickers == []:
             update.message.reply_text(
-                "Please type a ticker after your command: /news $tsla"
+                "Please type a ticker after your command with a dollar sign: /news $tsla"
             )
         else:
             tickerData = tickerInfo.tickerQuote(tickers)
             for ticker in tickers:
                 ticker = ticker.upper()
+                #Makes sure ticker exists
                 if tickerData[ticker] == 1:
                     name = tickerData[ticker + "Name"]
                     price = tickerData[ticker + "Price"]
@@ -107,6 +109,7 @@ def stockInfo(bot, update):
         tickerData = tickerInfo.tickerQuote(tickers)
         for ticker in tickers:
             ticker = ticker.upper()
+            #Makes sure ticker exists
             if tickerData[ticker] == 1:
                 name = tickerData[ticker + "Name"]
                 price = tickerData[ticker + "Price"]
