@@ -1,4 +1,5 @@
 site_name: Simple Stock Bot
+site_url: http://misterbiggs.gitlab.io/simple-telegram-bot
 nav:
     - Home: index.md
     # - Commands: commands.md
