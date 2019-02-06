@@ -22,7 +22,7 @@ I wonder how $aapl, $nflx, and $sono are performing today.
 
 Will return:
 
-![Conversation With Simple Telegram Bot](\img\telegramBotTickerReply.png)
+![Conversation With Simple Telegram Bot](img\telegramBotTickerReply.png)
 
 As long as the bot is in your chat it will reply to any stock tickers in your messages.
 
