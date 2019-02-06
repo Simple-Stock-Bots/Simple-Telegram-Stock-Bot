@@ -12,6 +12,6 @@ pages:
   - mv site public
   artifacts:
     paths:
-    - ./web/public
+    - ./web/public/
   only:
   - master
