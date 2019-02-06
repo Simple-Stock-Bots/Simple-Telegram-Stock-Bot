@@ -1,0 +1,12 @@
+site_name: Simple Stock Bot
+nav:
+    - Home: index.md
+    # - Commands: commands.md
+    # - About: about.md
+    # - Author's Website: https://blog.ansonbiggs.com/
+    - LICENSE: LICENSE.md
+theme: 'material'
+
+repo_url: https://gitlab.com/MisterBiggs/simple-telegram-bot
+repo_name: Simple Telegram Bot
+site_description: A Telegram Bot for stock market Data.
