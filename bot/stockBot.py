@@ -52,7 +52,7 @@ def news(bot, update):
             tickerData = tickerInfo.tickerQuote(tickers)
             for ticker in tickers:
                 ticker = ticker.upper()
-                #Makes sure ticker exists
+                # Makes sure ticker exists
                 if tickerData[ticker] == 1:
                     name = tickerData[ticker + "Name"]
                     price = tickerData[ticker + "Price"]
@@ -109,7 +109,7 @@ def stockInfo(bot, update):
         tickerData = tickerInfo.tickerQuote(tickers)
         for ticker in tickers:
             ticker = ticker.upper()
-            #Makes sure ticker exists
+            # Makes sure ticker exists
             if tickerData[ticker] == 1:
                 name = tickerData[ticker + "Name"]
                 price = tickerData[ticker + "Price"]
