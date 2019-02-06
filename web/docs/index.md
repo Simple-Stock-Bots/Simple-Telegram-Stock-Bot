@@ -58,9 +58,20 @@ You can also run your own bot super easily in a [Docker](https://hub.docker.com/
 1. Download the repository.
 2. Change information in [Credentials.py]() with your own Telegram Bot key, which can be found [here.]()
 3. Navigate to /bot directory in Powershell
-4. Build an image of the bot:   
-    `docker build -t stockbot .`
+4. Build an image of the bot:
+   
+```powershell
+docker build -t stockbot .
+```
+
 5. Run the image:  
-    `docker run -it --rm --detatch --name stockbot stockbot`
+   
+```powershell
+docker run -it --rm --detatch --name stockbot stockbot
+```
+
 6. Or you can run the image headless:  
-    `docker run -it --rm --detatch --name stockbot stockbot`
+
+```powershell
+docker run -it --rm --detatch --name stockbot stockbot
+```
