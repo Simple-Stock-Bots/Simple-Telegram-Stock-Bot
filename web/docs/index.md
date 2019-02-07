@@ -67,11 +67,11 @@ docker build -t stockbot .
 5. Run the image:  
    
 ```powershell
-docker run -it --rm --detatch --name stockbot stockbot
+docker run -it --rm --name stockbot stockbot
 ```
 
 6. Or you can run the image headless:  
 
 ```powershell
-docker run -it --rm --detatch --name stockbot stockbot
+docker run -it --rm -detatch --name stockbot stockbot
 ```
