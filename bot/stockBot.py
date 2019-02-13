@@ -29,8 +29,9 @@ def start(bot, update):
 
 
 def help(bot, update):
-    """Send a message when the command /help is issued."""
-    update.message.reply_text("I don't know how to help yet!")
+    """Send link to docs when the command /help is issued."""
+    message = "[Please see the docs for Bot information](https://misterbiggs.gitlab.io/simple-telegram-bot)"
+    update.message.reply_text(text=message, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
 def news(bot, update):
@@ -45,8 +46,14 @@ def news(bot, update):
 
         ## Checks if a ticker was passed in
         if tickers == []:
+            message = "No Ticker, showing Market News:"
+            news = tickerInfo.stockNews("market")
+            for i in range(3):
+                message = "{}\n\n[{}]({})".format(
+                    message, news["title"][i], news["link"][i]
+                )
             update.message.reply_text(
-                "Please type a ticker after your command with a dollar sign: /news $tsla"
+                text=message, parse_mode=telegram.ParseMode.MARKDOWN
             )
         else:
             tickerData = tickerInfo.tickerQuote(tickers)
@@ -84,9 +91,11 @@ def news(bot, update):
                             message + ", the stock hasn't shown any movement today."
                         )
 
-                    news = tickerInfo.stockNewsList(ticker)
-                    for source in news:
-                        message = message + "\n[" + source + "](" + news[source] + ")"
+                    news = tickerInfo.stockNews(ticker)
+                    for i in range(3):
+                        message = "{}\n\n[{}]({})".format(
+                            message, news["title"][i], news["link"][i]
+                        )
 
                     update.message.reply_text(
                         text=message, parse_mode=telegram.ParseMode.MARKDOWN
@@ -139,6 +148,25 @@ def stockInfo(bot, update):
         pass
 
 
+def dividend(bot, update):
+    message = update.message.text
+    chat_id = update.message.chat_id
+    print("div")
+    try:
+        # regex to find tickers in messages, looks for up to 4 word characters following a dollar sign and captures the 4 word characters
+        tickers = re.findall("[$](\w{1,4})", message)
+        bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+
+        for ticker in tickers:
+            message = tickerInfo.stockDividend(ticker)
+            update.message.reply_text(
+                text=message, parse_mode=telegram.ParseMode.MARKDOWN
+            )
+
+    except:
+        pass
+
+
 def error(bot, update, error):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, error)
@@ -156,6 +184,7 @@ def main():
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
     dp.add_handler(CommandHandler("news", news))
+    dp.add_handler(CommandHandler("dividend", dividend))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, stockInfo))

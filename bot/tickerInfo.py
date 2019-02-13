@@ -1,5 +1,8 @@
 import urllib.request
 import json
+import feedparser
+from datetime import datetime
+import time
 
 
 def tickerQuote(tickers):
@@ -32,19 +35,19 @@ def tickerQuote(tickers):
     return stockData
 
 
-def stockNewsList(ticker):
+def stockNews(ticker):
     """Makes a bunch of strings that are links to news websites for an input ticker"""
     print("Gather News on " + ticker)
-    news = {
-        "Bravos": "https://bravos.co/" + ticker,
-        "Seeking Alpha": "https://seekingalpha.com/symbol/" + ticker,
-        "MSN Money": "https://www.msn.com/en-us/money/stockdetails?symbol=" + ticker,
-        "Yahoo Finance": "https://finance.yahoo.com/quote/" + ticker,
-        "Wall Street Journal": "https://quotes.wsj.com/" + ticker,
-        "The Street": "https://www.thestreet.com/quote/" + ticker + ".html",
-        "Zacks": "https://www.zacks.com/stock/quote/" + ticker,
-    }
-    print("News gathered.")
+
+    newsLink = "https://api.iextrading.com/1.0/stock/{}/news/last/5".format(ticker)
+
+    with urllib.request.urlopen(newsLink) as url:
+        data = json.loads(url.read().decode())
+
+    news = {"link": [], "title": []}
+    for i in range(3):
+        news["link"].append(data[i]["url"])
+        news["title"].append(data[i]["headline"])
     return news
 
 
@@ -52,3 +55,54 @@ def stockLogo(ticker):
     """returns a png of an input ticker"""
     logoURL = "https://g.foolcdn.com/art/companylogos/mark/" + ticker + ".png"
     return logoURL
+
+
+def stockInfo(ticker):
+    infoURL = "https://api.iextrading.com/1.0/stock/{}/stats".format(ticker)
+
+    with urllib.request.urlopen(infoURL) as url:
+        data = json.loads(url.read().decode())
+
+    info = {}
+
+    info["companyName"] = data["companyName"]
+    info["marketCap"] = data["marketcap"]
+    info["yearHigh"] = data["week52high"]
+    info["yearLow"] = data["week52low"]
+    info["divRate"] = data["dividendRate"]
+    info["divYield"] = data["dividendYield"]
+    info["divDate"] = data["exDividendDate"]
+
+    return info
+
+
+def stockDividend(ticker):
+    data = stockInfo(ticker)
+    print(data["divDate"])
+    if data["divDate"] == 0:
+        return "{} has no dividend.".format(data["companyName"])
+
+    line1 = "{} current dividend yield is: {:.3f}%, or ${:.3f} per share.".format(
+        data["companyName"], data["divRate"], data["divYield"]
+    )
+
+    divDate = data["divDate"]
+
+    # Pattern IEX uses for dividend date.
+    pattern = "%Y-%m-%d %H:%M:%S.%f"
+
+    # Convert divDate to seconds, and subtract it from current time.
+    divSeconds = datetime.strptime(divDate, pattern).timestamp()
+    difference = divSeconds - int(time.time())
+
+    # Calculate (d)ays, (h)ours, (m)inutes, and (s)econds
+    d, h = divmod(difference, 86400)
+    h, m = divmod(h, 3600)
+    m, s = divmod(m, 60)
+
+    countdownMessage = "\n\nThe dividend is in: {:.0f} Days {:.0f} Hours {:.0f} Minutes {:.0f} Seconds.".format(
+        d, h, m, s
+    )
+
+    message = line1 + countdownMessage
+    return message
