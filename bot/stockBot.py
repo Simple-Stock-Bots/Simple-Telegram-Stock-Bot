@@ -45,8 +45,14 @@ def news(bot, update):
 
         ## Checks if a ticker was passed in
         if tickers == []:
+            message = "No Ticker, showing Market News:"
+            news = tickerInfo.stockNews("market")
+            for i in range(3):
+                message = "{}\n\n[{}]({})".format(
+                    message, news["title"][i], news["link"][i]
+                )
             update.message.reply_text(
-                "Please type a ticker after your command with a dollar sign: /news $tsla"
+                text=message, parse_mode=telegram.ParseMode.MARKDOWN
             )
         else:
             tickerData = tickerInfo.tickerQuote(tickers)
