@@ -29,8 +29,9 @@ def start(bot, update):
 
 
 def help(bot, update):
-    """Send a message when the command /help is issued."""
-    update.message.reply_text("I don't know how to help yet!")
+    """Send link to docs when the command /help is issued."""
+    message = "[Please see the docs for Bot information](https://misterbiggs.gitlab.io/simple-telegram-bot)"
+    update.message.reply_text(text=message, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
 def news(bot, update):
