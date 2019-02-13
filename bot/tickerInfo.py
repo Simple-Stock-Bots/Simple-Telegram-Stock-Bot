@@ -1,5 +1,6 @@
 import urllib.request
 import json
+import feedparser
 
 
 def tickerQuote(tickers):
@@ -32,19 +33,19 @@ def tickerQuote(tickers):
     return stockData
 
 
-def stockNewsList(ticker):
+def stockNews(ticker):
     """Makes a bunch of strings that are links to news websites for an input ticker"""
     print("Gather News on " + ticker)
-    news = {
-        "Bravos": "https://bravos.co/" + ticker,
-        "Seeking Alpha": "https://seekingalpha.com/symbol/" + ticker,
-        "MSN Money": "https://www.msn.com/en-us/money/stockdetails?symbol=" + ticker,
-        "Yahoo Finance": "https://finance.yahoo.com/quote/" + ticker,
-        "Wall Street Journal": "https://quotes.wsj.com/" + ticker,
-        "The Street": "https://www.thestreet.com/quote/" + ticker + ".html",
-        "Zacks": "https://www.zacks.com/stock/quote/" + ticker,
-    }
-    print("News gathered.")
+
+    newsLink = "https://api.iextrading.com/1.0/stock/{}/news/last/5".format(ticker)
+
+    with urllib.request.urlopen(newsLink) as url:
+        data = json.loads(url.read().decode())
+
+    news = {"link": [], "title": []}
+    for i in range(3):
+        news["link"].append(data[i]["url"])
+        news["title"].append(data[i]["headline"])
     return news
 
 

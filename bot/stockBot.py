@@ -84,9 +84,11 @@ def news(bot, update):
                             message + ", the stock hasn't shown any movement today."
                         )
 
-                    news = tickerInfo.stockNewsList(ticker)
-                    for source in news:
-                        message = message + "\n[" + source + "](" + news[source] + ")"
+                    news = tickerInfo.stockNews(ticker)
+                    for i in range(3):
+                        message = "{}\n[{}]({})".format(
+                            message, news["title"][i], news["link"][i]
+                        )
 
                     update.message.reply_text(
                         text=message, parse_mode=telegram.ParseMode.MARKDOWN
