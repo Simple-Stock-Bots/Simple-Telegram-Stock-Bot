@@ -86,7 +86,7 @@ def news(bot, update):
 
                     news = tickerInfo.stockNews(ticker)
                     for i in range(3):
-                        message = "{}\n[{}]({})".format(
+                        message = "{}\n\n[{}]({})".format(
                             message, news["title"][i], news["link"][i]
                         )
 
