@@ -7,11 +7,10 @@ before_script:
 
 pages:
   script:
-    - cd ./web
-    - mkdocs build
-    - mv site ../public
+  - mkdocs build
+  - mv site public
   artifacts:
     paths:
-      - public
+    - public
   only:
-    - master
+  - master
