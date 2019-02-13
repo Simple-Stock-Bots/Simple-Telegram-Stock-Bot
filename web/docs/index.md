@@ -66,7 +66,13 @@ The dividend command will give you the `dividend yield`, `dividend rate`, and wi
 
 ---
 
-## Run your own Bot
+## Run your own bot using latest build
+
+```powershell
+docker run --detach registry.gitlab.com/misterbiggs/simple-telegram-bot:latest
+```
+
+## Built and Run your own Bot
 
 You can also run your own bot super easily in a [Docker](https://hub.docker.com/) Container.
 
