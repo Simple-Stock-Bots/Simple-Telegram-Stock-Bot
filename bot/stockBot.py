@@ -82,7 +82,7 @@ def news(bot, update):
                     elif change < 0:
                         message = (
                             message
-                            + ", the stock is currently **down"
+                            + ", the stock is currently **down "
                             + str(change)
                             + "%**"
                         )
