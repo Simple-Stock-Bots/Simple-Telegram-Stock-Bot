@@ -148,6 +148,25 @@ def stockInfo(bot, update):
         pass
 
 
+def dividend(bot, update):
+    message = update.message.text
+    chat_id = update.message.chat_id
+    print("div")
+    try:
+        # regex to find tickers in messages, looks for up to 4 word characters following a dollar sign and captures the 4 word characters
+        tickers = re.findall("[$](\w{1,4})", message)
+        bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+
+        for ticker in tickers:
+            message = tickerInfo.stockDividend(ticker)
+            update.message.reply_text(
+                text=message, parse_mode=telegram.ParseMode.MARKDOWN
+            )
+
+    except:
+        pass
+
+
 def error(bot, update, error):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, error)
@@ -165,6 +184,7 @@ def main():
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
     dp.add_handler(CommandHandler("news", news))
+    dp.add_handler(CommandHandler("dividend", dividend))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, stockInfo))
