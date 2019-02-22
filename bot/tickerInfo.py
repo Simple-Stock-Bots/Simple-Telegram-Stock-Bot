@@ -1,6 +1,5 @@
 import urllib.request
 import json
-import feedparser
 from datetime import datetime
 import time
 
