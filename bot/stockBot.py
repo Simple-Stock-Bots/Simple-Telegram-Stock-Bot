@@ -48,10 +48,8 @@ def news(bot, update):
         if tickers == []:
             message = "No Ticker, showing Market News:"
             news = tickerInfo.stockNews("market")
-            for i in range(3):
-                message = "{}\n\n[{}]({})".format(
-                    message, news["title"][i], news["link"][i]
-                )
+            for i in range(len(news["title"])):
+                message = f"{message}\n\n[{news['title'][i]}]({news['link'][i]})"
             update.message.reply_text(
                 text=message, parse_mode=telegram.ParseMode.MARKDOWN
             )
@@ -78,7 +76,7 @@ def news(bot, update):
                         )
 
                     news = tickerInfo.stockNews(ticker)
-                    for i in range(3):
+                    for i in range(len(news["title"])):
                         message = (
                             f"{message}\n\n[{news['title'][i]}]({news['link'][i]})"
                         )
