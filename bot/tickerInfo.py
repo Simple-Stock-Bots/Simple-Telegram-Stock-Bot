@@ -48,7 +48,6 @@ def stockNews(ticker):
     for i in range(len(data)):
         news["link"].append(data[i]["url"])
         news["title"].append(data[i]["headline"])
-        print(i)
     return news
 
 
