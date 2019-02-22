@@ -39,7 +39,7 @@ def stockNews(ticker):
     """Makes a bunch of strings that are links to news websites for an input ticker"""
     print("Gather News on " + ticker)
 
-    newsLink = "https://api.iextrading.com/1.0/stock/{}/news/last/5".format(ticker)
+    newsLink = f"https://api.iextrading.com/1.0/stock/{ticker}/news/last/5"
 
     with urllib.request.urlopen(newsLink) as url:
         data = json.loads(url.read().decode())
@@ -53,12 +53,12 @@ def stockNews(ticker):
 
 def stockLogo(ticker):
     """returns a png of an input ticker"""
-    logoURL = "https://g.foolcdn.com/art/companylogos/mark/" + ticker + ".png"
+    logoURL = f"https://g.foolcdn.com/art/companylogos/mark/{ticker}.png"
     return logoURL
 
 
 def stockInfo(ticker):
-    infoURL = "https://api.iextrading.com/1.0/stock/{}/stats".format(ticker)
+    infoURL = f"https://api.iextrading.com/1.0/stock/{ticker}/stats"
 
     with urllib.request.urlopen(infoURL) as url:
         data = json.loads(url.read().decode())
@@ -100,9 +100,7 @@ def stockDividend(ticker):
     h, m = divmod(h, 3600)
     m, s = divmod(m, 60)
 
-    countdownMessage = "\n\nThe dividend is in: {:.0f} Days {:.0f} Hours {:.0f} Minutes {:.0f} Seconds.".format(
-        d, h, m, s
-    )
+    countdownMessage = f"\n\nThe dividend is in: {d:.0f} Days {h:.0f} Hours {m:.0f} Minutes {s:.0f} Seconds."
 
     message = line1 + countdownMessage
     return message
