@@ -11,6 +11,7 @@ import credentials
 import tickerInfo
 
 TOKEN = credentials.secrets["TELEGRAM_TOKEN"]
+TICKER_REGEX = "[$]([a-zA-Z]{1,4})"
 
 # Enable logging
 logging.basicConfig(
@@ -41,7 +42,7 @@ def news(bot, update):
 
     try:
         # regex to find tickers in messages, looks for up to 4 word characters following a dollar sign and captures the 4 word characters
-        tickers = re.findall("[$](\w{1,4})", message)
+        tickers = re.findall(TICKER_REGEX, message)
         bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
         ## Checks if a ticker was passed in
@@ -96,10 +97,11 @@ def stockInfo(bot, update):
 
     try:
         # regex to find tickers in messages, looks for up to 4 word characters following a dollar sign and captures the 4 word characters
-        tickers = re.findall("[$](\w{1,4})", message)
+        tickers = re.findall(TICKER_REGEX, message)
 
-        tickerData = tickerInfo.tickerQuote(tickers)
-        bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+        if len(tickers) > 0:
+            tickerData = tickerInfo.tickerQuote(tickers)
+            bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
         for ticker in tickers:
             ticker = ticker.upper()
