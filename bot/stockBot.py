@@ -129,7 +129,7 @@ def dividend(bot, update):
     chat_id = update.message.chat_id
     try:
         # regex to find tickers in messages, looks for up to 4 word characters following a dollar sign and captures the 4 word characters
-        tickers = re.findall("[$](\w{1,4})", message)
+        tickers = re.findall(TICKER_REGEX, message)
         bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
         for ticker in tickers:
