@@ -11,6 +11,7 @@ import credentials
 import tickerInfo
 
 TOKEN = credentials.secrets["TELEGRAM_TOKEN"]
+TICKER_REGEX = "[$]([a-zA-Z]{1,4})"
 
 # Enable logging
 logging.basicConfig(
@@ -41,17 +42,15 @@ def news(bot, update):
 
     try:
         # regex to find tickers in messages, looks for up to 4 word characters following a dollar sign and captures the 4 word characters
-        tickers = re.findall("[$](\w{1,4})", message)
+        tickers = re.findall(TICKER_REGEX, message)
         bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
         ## Checks if a ticker was passed in
         if tickers == []:
             message = "No Ticker, showing Market News:"
             news = tickerInfo.stockNews("market")
-            for i in range(3):
-                message = "{}\n\n[{}]({})".format(
-                    message, news["title"][i], news["link"][i]
-                )
+            for i in range(len(news["title"])):
+                message = f"{message}\n\n[{news['title'][i]}]({news['link'][i]})"
             update.message.reply_text(
                 text=message, parse_mode=telegram.ParseMode.MARKDOWN
             )
@@ -65,36 +64,22 @@ def news(bot, update):
                     price = tickerData[ticker + "Price"]
                     change = tickerData[ticker + "Change"]
 
-                    message = (
-                        "The current stock price of "
-                        + name
-                        + " is $**"
-                        + str(price)
-                        + "**"
-                    )
+                    message = f"The current stock price of {name} is $**{price}**"
                     if change > 0:
-                        message = (
-                            message
-                            + ", the stock is currently **up "
-                            + str(change)
-                            + "%**"
-                        )
+                        message = f"{message}, the stock is currently **up {change}%**"
                     elif change < 0:
                         message = (
-                            message
-                            + ", the stock is currently **down "
-                            + str(change)
-                            + "%**"
+                            f"{message}, the stock is currently **down {change}%**"
                         )
                     else:
                         message = (
-                            message + ", the stock hasn't shown any movement today."
+                            f"{message}, the stock hasn't shown any movement today."
                         )
 
                     news = tickerInfo.stockNews(ticker)
-                    for i in range(3):
-                        message = "{}\n\n[{}]({})".format(
-                            message, news["title"][i], news["link"][i]
+                    for i in range(len(news["title"])):
+                        message = (
+                            f"{message}\n\n[{news['title'][i]}]({news['link'][i]})"
                         )
 
                     update.message.reply_text(
@@ -112,10 +97,11 @@ def stockInfo(bot, update):
 
     try:
         # regex to find tickers in messages, looks for up to 4 word characters following a dollar sign and captures the 4 word characters
-        tickers = re.findall("[$](\w{1,4})", message)
+        tickers = re.findall(TICKER_REGEX, message)
 
-        tickerData = tickerInfo.tickerQuote(tickers)
-        bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+        if len(tickers) > 0:
+            tickerData = tickerInfo.tickerQuote(tickers)
+            bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
         for ticker in tickers:
             ticker = ticker.upper()
@@ -124,22 +110,13 @@ def stockInfo(bot, update):
                 name = tickerData[ticker + "Name"]
                 price = tickerData[ticker + "Price"]
                 change = tickerData[ticker + "Change"]
-                message = (
-                    "The current stock price of " + name + " is $**" + str(price) + "**"
-                )
+                message = f"The current stock price of {name} is $**{price}**"
                 if change > 0:
-                    message = (
-                        message + ", the stock is currently **up " + str(change) + "%**"
-                    )
+                    message = f"{message}, the stock is currently **up {change}%**"
                 elif change < 0:
-                    message = (
-                        message
-                        + ", the stock is currently **down "
-                        + str(change)
-                        + "%**"
-                    )
+                    message = f"{message}, the stock is currently **down {change}%**"
                 else:
-                    message = message + ", the stock hasn't shown any movement today."
+                    message = f"{message}, the stock hasn't shown any movement today."
                 update.message.reply_text(
                     text=message, parse_mode=telegram.ParseMode.MARKDOWN
                 )
@@ -152,10 +129,9 @@ def stockInfo(bot, update):
 def dividend(bot, update):
     message = update.message.text
     chat_id = update.message.chat_id
-    print("div")
     try:
         # regex to find tickers in messages, looks for up to 4 word characters following a dollar sign and captures the 4 word characters
-        tickers = re.findall("[$](\w{1,4})", message)
+        tickers = re.findall(TICKER_REGEX, message)
         bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
         for ticker in tickers:
