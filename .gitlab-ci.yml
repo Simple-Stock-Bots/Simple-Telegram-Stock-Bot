@@ -5,6 +5,7 @@ stages:
   - docker
 
 before_script:
+  - apt install -y python3-pip
   - pip install mkdocs
   - pip install mkdocs-material
 
