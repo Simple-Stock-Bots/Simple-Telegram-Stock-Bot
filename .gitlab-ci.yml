@@ -1,18 +1,14 @@
-image: python:alpine
-
 stages:
   - docs
   - docker
 
-before_script:
-  - pip install mkdocs
-  - pip install mkdocs-material
-
-  - apk add docker
-  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-
 pages:
   stage: docs
+  image: python:alpine
+
+  before_script:
+    - pip install mkdocs
+    - pip install mkdocs-material
 
   script:
     - cd ./web
@@ -27,6 +23,11 @@ pages:
 
 docker build:
   stage: docker
+  image: docker
+
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+
   script:
     - cd ./bot
     - docker build -t registry.gitlab.com/misterbiggs/simple-telegram-bot .
