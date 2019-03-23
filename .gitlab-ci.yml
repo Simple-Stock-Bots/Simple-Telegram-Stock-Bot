@@ -1,5 +1,4 @@
 stages:
-  - docker
   - docs
 
 pages:
@@ -19,17 +18,4 @@ pages:
     paths:
       - public
   only:
-    - master
-
-docker build:
-  stage: docker
-  image: docker
-
-  before_script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - sudo systemctl start docker
-
-  script:
-    - cd ./bot
-    - docker build -t registry.gitlab.com/misterbiggs/simple-telegram-bot .
-    - docker push registry.gitlab.com/misterbiggs/simple-telegram-bot
+    - documentation
