@@ -8,7 +8,7 @@ before_script:
   - pip install mkdocs
   - pip install mkdocs-material
 
-  - sudo apt get install docker
+  - apt get install docker
   - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
 
 pages:
