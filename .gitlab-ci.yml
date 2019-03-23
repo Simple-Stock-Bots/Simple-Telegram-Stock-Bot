@@ -1,4 +1,5 @@
 stages:
+  - heroku
   - docs
 
 pages:
@@ -19,3 +20,14 @@ pages:
       - public
   only:
     - documentation
+
+staging:
+  stage: heroku
+  type: deploy
+  script:
+    - apt-get update -qy
+    - apt-get install -y ruby-dev
+    - gem install dpl
+    - dpl --provider=heroku --app=my_app --api-key=$HEROKU_API_KEY
+  only:
+    - master
