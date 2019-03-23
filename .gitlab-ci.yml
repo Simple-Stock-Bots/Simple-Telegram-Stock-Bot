@@ -1,6 +1,6 @@
 stages:
-  - docs
   - docker
+  - docs
 
 pages:
   stage: docs
@@ -30,5 +30,6 @@ docker build:
 
   script:
     - cd ./bot
+    - ls
     - docker build -t registry.gitlab.com/misterbiggs/simple-telegram-bot .
     - docker push registry.gitlab.com/misterbiggs/simple-telegram-bot
