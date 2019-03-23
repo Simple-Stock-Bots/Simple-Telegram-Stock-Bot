@@ -39,12 +39,12 @@ def stockNews(ticker):
     print("Gather News on " + ticker)
 
     newsLink = f"https://api.iextrading.com/1.0/stock/{ticker}/news/last/5"
-
+    print(newsLink)
     with urllib.request.urlopen(newsLink) as url:
         data = json.loads(url.read().decode())
 
     news = {"link": [], "title": []}
-    for i in range(3):
+    for i in range(len(data)):
         news["link"].append(data[i]["url"])
         news["title"].append(data[i]["headline"])
     return news

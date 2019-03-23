@@ -11,6 +11,7 @@ import credentials
 import tickerInfo
 
 TOKEN = credentials.secrets["TELEGRAM_TOKEN"]
+TICKER_REGEX = "[$]([a-zA-Z]{1,4})"
 
 # Enable logging
 logging.basicConfig(
@@ -41,17 +42,15 @@ def news(bot, update):
 
     try:
         # regex to find tickers in messages, looks for up to 4 word characters following a dollar sign and captures the 4 word characters
-        tickers = re.findall("[$](\w{1,4})", message)
+        tickers = re.findall(TICKER_REGEX, message)
         bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
         ## Checks if a ticker was passed in
         if tickers == []:
             message = "No Ticker, showing Market News:"
             news = tickerInfo.stockNews("market")
-            for i in range(3):
-                message = "{}\n\n[{}]({})".format(
-                    message, news["title"][i], news["link"][i]
-                )
+            for i in range(len(news["title"])):
+                message = f"{message}\n\n[{news['title'][i]}]({news['link'][i]})"
             update.message.reply_text(
                 text=message, parse_mode=telegram.ParseMode.MARKDOWN
             )
@@ -78,7 +77,7 @@ def news(bot, update):
                         )
 
                     news = tickerInfo.stockNews(ticker)
-                    for i in range(3):
+                    for i in range(len(news["title"])):
                         message = (
                             f"{message}\n\n[{news['title'][i]}]({news['link'][i]})"
                         )
@@ -98,10 +97,11 @@ def stockInfo(bot, update):
 
     try:
         # regex to find tickers in messages, looks for up to 4 word characters following a dollar sign and captures the 4 word characters
-        tickers = re.findall("[$](\w{1,4})", message)
+        tickers = re.findall(TICKER_REGEX, message)
 
-        tickerData = tickerInfo.tickerQuote(tickers)
-        bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+        if len(tickers) > 0:
+            tickerData = tickerInfo.tickerQuote(tickers)
+            bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
         for ticker in tickers:
             ticker = ticker.upper()
@@ -131,7 +131,7 @@ def dividend(bot, update):
     chat_id = update.message.chat_id
     try:
         # regex to find tickers in messages, looks for up to 4 word characters following a dollar sign and captures the 4 word characters
-        tickers = re.findall("[$](\w{1,4})", message)
+        tickers = re.findall(TICKER_REGEX, message)
         bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
         for ticker in tickers:
