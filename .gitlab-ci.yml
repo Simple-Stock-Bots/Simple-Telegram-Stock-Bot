@@ -1,15 +1,14 @@
-image: ubuntu:18.04
+image: python:alpine
 
 stages:
   - docs
   - docker
 
 before_script:
-  - apt install -y python3-pip
   - pip install mkdocs
   - pip install mkdocs-material
 
-  - apt get install -y docker
+  - apt-get install -y docker
   - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
 
 pages:
