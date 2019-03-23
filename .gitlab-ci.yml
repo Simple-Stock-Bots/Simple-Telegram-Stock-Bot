@@ -1,17 +1,32 @@
 image: python:alpine
 
+stages:
+  - docs
+  - docker
+
 before_script:
   - pip install mkdocs
-
   - pip install mkdocs-material
 
+  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+
 pages:
+  stage: docs
+
   script:
-  - cd ./web
-  - mkdocs build
-  - mv site ../public
+    - cd ./web
+    - mkdocs build
+    - mv site ../public
+    - cd ../
   artifacts:
     paths:
-    - public
+      - public
   only:
-  - master
+    - master
+
+docker build:
+  stage: docker
+  script:
+    - cd ./bot
+    - docker build -t registry.gitlab.com/misterbiggs/simple-telegram-bot .
+    - docker push registry.gitlab.com/misterbiggs/simple-telegram-bot
