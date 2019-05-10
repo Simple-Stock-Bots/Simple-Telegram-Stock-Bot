@@ -1,14 +1,14 @@
 # Work with Python 3.7
 import logging
 import re
+import os
 
 import telegram
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
-import credentials
 from functions import *
 
-TOKEN = credentials.secrets["TELEGRAM_TOKEN"]
+TOKEN = os.environ["TELEGRAM"]
 TICKER_REGEX = "[$]([a-zA-Z]{1,4})"
 
 # Enable logging
@@ -45,16 +45,20 @@ def tickerDetect(bot, update):
     data = tickerData(tickers) if tickers else {}
 
     for ticker in data:
-        
+
         # Keep track of which tickers had a return from tickerData()
-        if ticker.lower() in tickers : tickers.remove(ticker.lower())
+        if ticker.lower() in tickers:
+            tickers.remove(ticker.lower())
 
         reply = tickerDataReply(data[ticker])
         update.message.reply_text(text=reply, parse_mode=telegram.ParseMode.MARKDOWN)
-    
+
     # For any tickers that didnt have data, return that they don't exist.
     for ticker in tickers:
-        update.message.reply_text(ticker.upper() + " does not exist, you should search for a real stock like $PSEC")
+        update.message.reply_text(
+            ticker.upper()
+            + " does not exist, you should search for a real stock like $PSEC"
+        )
 
 
 def news(bot, update):
@@ -72,10 +76,11 @@ def news(bot, update):
     for ticker in news:
 
         reply = tickerNewsReply(news[ticker])
-        update.message.reply_text(text=reply, parse_mode=telegram.ParseMode.MARKDOWN) 
+        update.message.reply_text(text=reply, parse_mode=telegram.ParseMode.MARKDOWN)
 
         # Keep track of which tickers had a return from tickerData()
-        if ticker.lower() in tickers : tickers.remove(ticker.lower())
+        if ticker.lower() in tickers:
+            tickers.remove(ticker.lower())
 
 
 def dividend(bot, update):
@@ -91,10 +96,7 @@ def dividend(bot, update):
 
     for ticker in tickers:
         message = tickerDividend(ticker)
-        update.message.reply_text(
-            text=message, parse_mode=telegram.ParseMode.MARKDOWN
-        )
-
+        update.message.reply_text(text=message, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
 def error(bot, update, error):
