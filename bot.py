@@ -39,6 +39,9 @@ def tickerDetect(bot, update):
     message = update.message.text
     chat_id = update.message.chat_id
 
+    # Let user know bot is working
+    bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+
     tickers = getTickers(message)
 
     data = tickerData(tickers) if tickers else {}
@@ -67,6 +70,9 @@ def news(bot, update):
     """
     message = update.message.text
     chat_id = update.message.chat_id
+
+    # Let user know bot is working
+    bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
     tickers = getTickers(message)
 
