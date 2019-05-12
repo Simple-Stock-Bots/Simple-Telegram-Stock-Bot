@@ -1,6 +1,5 @@
 # Work with Python 3.7
 import logging
-import re
 import os
 
 import telegram
@@ -40,7 +39,7 @@ def tickerDetect(bot, update):
     message = update.message.text
     chat_id = update.message.chat_id
 
-    tickers = re.findall(TICKER_REGEX, message)
+    tickers = getTickers(message)
 
     data = tickerData(tickers) if tickers else {}
 
@@ -69,7 +68,7 @@ def news(bot, update):
     message = update.message.text
     chat_id = update.message.chat_id
 
-    tickers = re.findall(TICKER_REGEX, message)
+    tickers = getTickers(message)
 
     news = tickerNews(tickers) if tickers else {}
 

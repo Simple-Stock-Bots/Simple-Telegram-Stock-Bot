@@ -2,6 +2,17 @@ import urllib.request
 import json
 from datetime import datetime
 import time
+import re
+
+
+def getTickers(text: str):
+    """
+    Takes a blob of text and returns any stock tickers found.
+    """
+
+    TICKER_REGEX = "[$]([a-zA-Z]{1,4})"
+
+    return list(set(re.findall(TICKER_REGEX, text)))
 
 
 def tickerData(tickers: list):
@@ -127,12 +138,15 @@ def tickerNewsReply(ticker: dict):
             [Is Vanguard's VIG Better Than Its WisdomTree Counterpart?](https://api.iextrading.com/1.0/stock/aapl/article/7238581261167527)
     """
     reply = tickerDataReply(ticker)
-    if len(ticker["news"]) == 0 : return reply + f"\n\tNo News was found for {ticker['name']}"
+    if len(ticker["news"]) == 0:
+        return reply + f"\n\tNo News was found for {ticker['name']}"
     for title, url in ticker["news"]:
         reply = reply + f"\n\t[{title}]({url})"
     return reply
 
+
 # Below Functions are incomplete
+
 
 def tickerInfo(ticker):
     infoURL = f"https://api.iextrading.com/1.0/stock/{ticker}/stats"
@@ -151,6 +165,7 @@ def tickerInfo(ticker):
     info["divDate"] = data["exDividendDate"]
 
     return info
+
 
 def tickerDividend(ticker):
     data = tickerInfo(ticker)
