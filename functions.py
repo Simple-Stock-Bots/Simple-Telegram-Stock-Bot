@@ -1,8 +1,8 @@
-import urllib.request
 import json
-from datetime import datetime
-import time
 import re
+import time
+import urllib.request
+from datetime import datetime
 
 
 def getTickers(text: str):
