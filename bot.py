@@ -38,29 +38,16 @@ def tickerDetect(bot, update):
     """
     message = update.message.text
     chat_id = update.message.chat_id
-
-    # Let user know bot is working
-    bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-
     tickers = getTickers(message)
 
-    data = tickerData(tickers) if tickers else {}
+    # Let user know bot is working
+    if tickers:
+        bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+    replies = tickerDataReply(tickers)
 
-    for ticker in data:
+    for symbol, reply in replies.items():
 
-        # Keep track of which tickers had a return from tickerData()
-        if ticker.lower() in tickers:
-            tickers.remove(ticker.lower())
-
-        reply = tickerDataReply(data[ticker])
         update.message.reply_text(text=reply, parse_mode=telegram.ParseMode.MARKDOWN)
-
-    # For any tickers that didnt have data, return that they don't exist.
-    for ticker in tickers:
-        update.message.reply_text(
-            ticker.upper()
-            + " does not exist, you should search for a real stock like $PSEC"
-        )
 
 
 def news(bot, update):

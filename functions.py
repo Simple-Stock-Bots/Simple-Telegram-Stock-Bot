@@ -4,6 +4,8 @@ import time
 import urllib.request
 from datetime import datetime
 
+import cred
+
 
 def getTickers(text: str):
     """
@@ -15,60 +17,32 @@ def getTickers(text: str):
     return list(set(re.findall(TICKER_REGEX, text)))
 
 
-def tickerData(tickers: list):
+def tickerDataReply(tickers: list):
     """
-    Takes a list of tickers and returns a dictionary of information on ticker.
-    example: 
-        input list: ["aapl","tsla"]
-    returns:
-    {
-        "AAPL": {"name": "Apple Inc.", "price": 200.72, "change": -0.01074},
-        "TSLA": {"name": "Tesla Inc.", "price": 241.98, "change": -0.01168},
-    }
+    Takes a list of tickers and returns a list of strings with information about the ticker.
     """
-
-    stockData = {}
-    IEXURL = (
-        "https://api.iextrading.com/1.0/stock/market/batch?symbols="
-        + ",".join(tickers)
-        + "&types=quote"
-    )
-    with urllib.request.urlopen(IEXURL) as url:
-        IEXData = json.loads(url.read().decode())
-
+    tickerReplies = {}
     for ticker in tickers:
-        ticker = ticker.upper()
+        IEXURL = (
+            f"https://cloud.iexapis.com/stable/stock/{ticker}/quote?token={cred.secret}"
+        )
+        with urllib.request.urlopen(IEXURL) as url:
+            IEXData = json.loads(url.read().decode())
 
-        # Makes sure ticker exists before populating a dictionary
-        if ticker in IEXData:
-            stockData[ticker] = {}
-            stockData[ticker]["name"] = IEXData[ticker]["quote"]["companyName"]
-            stockData[ticker]["price"] = IEXData[ticker]["quote"]["latestPrice"]
-            stockData[ticker]["change"] = IEXData[ticker]["quote"]["changePercent"]
+        reply = f"The current stock price of {IEXData['companyName']} is $**{IEXData['latestPrice']}**"
 
-    return stockData
+        # Determine wording of change text
+        change = round(IEXData["changePercent"] * 100, 2)
+        if change > 0:
+            reply += f", the stock is currently **up {change}%**"
+        elif change < 0:
+            reply += f", the stock is currently **down {change}%**"
+        else:
+            reply += ", the stock hasn't shown any movement today."
 
+        tickerReplies[ticker] = reply
 
-def tickerDataReply(ticker: dict):
-    """
-    Takes a dictionary, likely produced from tickerData(), and returns a markdown string with information on the ticker.
-    example:  
-        input dict: {"AAPL": {"name": "Apple Inc.", "price": 200.72, "change": -0.01074}}
-    returns:
-        The current stock price of Apple Inc. is $**200.72**, the stock is currently **down -1.07**%
-    """
-    reply = f"The current stock price of {ticker['name']} is $**{ticker['price']}**"
-
-    # Determine wording of change text
-    change = round(ticker["change"] * 100, 2)
-    if change > 0:
-        changeText = f", the stock is currently **up {change}%**"
-    elif change < 0:
-        changeText = f", the stock is currently **down {change}%**"
-    else:
-        changeText = ", the stock hasn't shown any movement today."
-
-    return reply + changeText
+    return tickerReplies
 
 
 def tickerNews(tickers: list):
