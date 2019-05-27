@@ -50,31 +50,6 @@ def tickerDetect(bot, update):
         update.message.reply_text(text=reply, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
-def news(bot, update):
-    """
-    /news
-    Returns a small snippet of general information, and any news articles that are found.
-    """
-    message = update.message.text
-    chat_id = update.message.chat_id
-
-    # Let user know bot is working
-    bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-
-    tickers = getTickers(message)
-
-    news = tickerNews(tickers) if tickers else {}
-
-    for ticker in news:
-
-        reply = tickerNewsReply(news[ticker])
-        update.message.reply_text(text=reply, parse_mode=telegram.ParseMode.MARKDOWN)
-
-        # Keep track of which tickers had a return from tickerData()
-        if ticker.lower() in tickers:
-            tickers.remove(ticker.lower())
-
-
 def dividend(bot, update):
     """
     This Functions is incomplete.
