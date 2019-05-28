@@ -26,19 +26,22 @@ def tickerDataReply(tickers: list):
         IEXURL = (
             f"https://cloud.iexapis.com/stable/stock/{ticker}/quote?token={cred.secret}"
         )
-        with urllib.request.urlopen(IEXURL) as url:
-            IEXData = json.loads(url.read().decode())
+        try:
+            with urllib.request.urlopen(IEXURL) as url:
+                IEXData = json.loads(url.read().decode())
 
-        reply = f"The current stock price of {IEXData['companyName']} is $**{IEXData['latestPrice']}**"
+            reply = f"The current stock price of {IEXData['companyName']} is $**{IEXData['latestPrice']}**"
 
-        # Determine wording of change text
-        change = round(IEXData["changePercent"] * 100, 2)
-        if change > 0:
-            reply += f", the stock is currently **up {change}%**"
-        elif change < 0:
-            reply += f", the stock is currently **down {change}%**"
-        else:
-            reply += ", the stock hasn't shown any movement today."
+            # Determine wording of change text
+            change = round(IEXData["changePercent"] * 100, 2)
+            if change > 0:
+                reply += f", the stock is currently **up {change}%**"
+            elif change < 0:
+                reply += f", the stock is currently **down {change}%**"
+            else:
+                reply += ", the stock hasn't shown any movement today."
+        except:
+            reply = f"The ticker: {ticker} was not found."
 
         tickerReplies[ticker] = reply
 
