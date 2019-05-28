@@ -40,35 +40,33 @@ def tickerDetect(bot, update):
     chat_id = update.message.chat_id
     tickers = getTickers(message)
 
-    # Let user know bot is working
     if tickers:
+        # Let user know bot is working
         bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-    replies = tickerDataReply(tickers)
 
-    for symbol, reply in replies.items():
+        for symbol, reply in tickerDataReply(tickers).items():
 
-        update.message.reply_text(text=reply, parse_mode=telegram.ParseMode.MARKDOWN)
+            update.message.reply_text(
+                text=reply, parse_mode=telegram.ParseMode.MARKDOWN
+            )
 
 
 def dividend(bot, update):
     """
-    This Functions is incomplete.
+    waits for /dividend or /div command and then finds dividend info on that ticker.
     """
     message = update.message.text
     chat_id = update.message.chat_id
+    tickers = getTickers(message)
 
-    # regex to find tickers in messages, looks for up to 4 word characters following a dollar sign and captures the 4 word characters
-    tickers = re.findall(TICKER_REGEX, message)
-    bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+    if tickers:
+        bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
-    for ticker in tickers:
-        message = tickerDividend(ticker)
-        update.message.reply_text(text=message, parse_mode=telegram.ParseMode.MARKDOWN)
+        for symbol, reply in tickerDividend(tickers).items():
 
-
-def error(bot, update, error):
-    """Log Errors caused by Updates."""
-    logger.warning('Update "%s" caused error "%s"', update, error)
+            update.message.reply_text(
+                text=reply, parse_mode=telegram.ParseMode.MARKDOWN
+            )
 
 
 def main():
@@ -83,6 +81,7 @@ def main():
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
     dp.add_handler(CommandHandler("dividend", dividend))
+    dp.add_handler(CommandHandler("div", dividend))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, tickerDetect))
