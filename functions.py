@@ -45,51 +45,28 @@ def tickerDataReply(tickers: list):
     return tickerReplies
 
 
-# Below Functions are incomplete
+def tickerDividend(tickers: list):
+    messages = {}
 
+    for ticker in tickers:
+        IEXurl = f"https://cloud.iexapis.com/stable/stock/{ticker}/dividends/next?token={cred.secret}"
+        with urllib.request.urlopen(IEXurl) as url:
+            data = json.loads(url.read().decode())
 
-def tickerInfo(ticker):
-    infoURL = f"https://api.iextrading.com/1.0/stock/{ticker}/stats"
+        # Pattern IEX uses for dividend date.
+        pattern = "%Y-%m-%d"
 
-    with urllib.request.urlopen(infoURL) as url:
-        data = json.loads(url.read().decode())
+        # Convert divDate to seconds, and subtract it from current time.
+        dividendSeconds = datetime.strptime(data["paymentDate"], pattern).timestamp()
+        difference = dividendSeconds - int(time.time())
 
-    info = {}
+        # Calculate (d)ays, (h)ours, (m)inutes, and (s)econds
+        d, h = divmod(difference, 86400)
+        h, m = divmod(h, 3600)
+        m, s = divmod(m, 60)
 
-    info["companyName"] = data["companyName"]
-    info["marketCap"] = data["marketcap"]
-    info["yearHigh"] = data["week52high"]
-    info["yearLow"] = data["week52low"]
-    info["divRate"] = data["dividendRate"]
-    info["divYield"] = data["dividendYield"]
-    info["divDate"] = data["exDividendDate"]
+        messages[
+            "ticker"
+        ] = f"{data['description']}\n\nThe dividend is in: {d:.0f} Days {h:.0f} Hours {m:.0f} Minutes {s:.0f} Seconds."
 
-    return info
-
-
-def tickerDividend(ticker):
-    data = tickerInfo(ticker)
-    if data["divDate"] == 0:
-        return "{} has no dividend.".format(data["companyName"])
-
-    dividendInfo = "{} current dividend yield is: {:.3f}%, or ${:.3f} per share.".format(
-        data["companyName"], data["divRate"], data["divYield"]
-    )
-
-    divDate = data["divDate"]
-
-    # Pattern IEX uses for dividend date.
-    pattern = "%Y-%m-%d %H:%M:%S.%f"
-
-    # Convert divDate to seconds, and subtract it from current time.
-    divSeconds = datetime.strptime(divDate, pattern).timestamp()
-    difference = divSeconds - int(time.time())
-
-    # Calculate (d)ays, (h)ours, (m)inutes, and (s)econds
-    d, h = divmod(difference, 86400)
-    h, m = divmod(h, 3600)
-    m, s = divmod(m, 60)
-
-    countdownMessage = f"\n\nThe dividend is in: {d:.0f} Days {h:.0f} Hours {m:.0f} Minutes {s:.0f} Seconds."
-
-    return dividendInfo + countdownMessage
+    return messages
