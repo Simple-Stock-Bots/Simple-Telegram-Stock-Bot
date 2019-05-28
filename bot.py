@@ -67,6 +67,10 @@ def dividend(bot, update):
             update.message.reply_text(
                 text=reply, parse_mode=telegram.ParseMode.MARKDOWN
             )
+            
+def error(bot, update, error):
+    """Log Errors caused by Updates."""
+    logger.warning('Update "%s" caused error "%s"', update, error)
 
 
 def main():
