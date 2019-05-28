@@ -3,11 +3,10 @@ import logging
 import os
 
 import telegram
+from functions import *
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
-from functions import *
-
-TOKEN = os.environ["TELEGRAM"]
+TELEGRAM_TOKEN = os.environ["TELEGRAM"]
 TICKER_REGEX = "[$]([a-zA-Z]{1,4})"
 
 # Enable logging
@@ -38,72 +37,36 @@ def tickerDetect(bot, update):
     """
     message = update.message.text
     chat_id = update.message.chat_id
-
-    # Let user know bot is working
-    bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-
     tickers = getTickers(message)
 
-    data = tickerData(tickers) if tickers else {}
+    if tickers:
+        # Let user know bot is working
+        bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
-    for ticker in data:
+        for symbol, reply in tickerDataReply(tickers).items():
 
-        # Keep track of which tickers had a return from tickerData()
-        if ticker.lower() in tickers:
-            tickers.remove(ticker.lower())
-
-        reply = tickerDataReply(data[ticker])
-        update.message.reply_text(text=reply, parse_mode=telegram.ParseMode.MARKDOWN)
-
-    # For any tickers that didnt have data, return that they don't exist.
-    for ticker in tickers:
-        update.message.reply_text(
-            ticker.upper()
-            + " does not exist, you should search for a real stock like $PSEC"
-        )
-
-
-def news(bot, update):
-    """
-    /news
-    Returns a small snippet of general information, and any news articles that are found.
-    """
-    message = update.message.text
-    chat_id = update.message.chat_id
-
-    # Let user know bot is working
-    bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-
-    tickers = getTickers(message)
-
-    news = tickerNews(tickers) if tickers else {}
-
-    for ticker in news:
-
-        reply = tickerNewsReply(news[ticker])
-        update.message.reply_text(text=reply, parse_mode=telegram.ParseMode.MARKDOWN)
-
-        # Keep track of which tickers had a return from tickerData()
-        if ticker.lower() in tickers:
-            tickers.remove(ticker.lower())
+            update.message.reply_text(
+                text=reply, parse_mode=telegram.ParseMode.MARKDOWN
+            )
 
 
 def dividend(bot, update):
     """
-    This Functions is incomplete.
+    waits for /dividend or /div command and then finds dividend info on that ticker.
     """
     message = update.message.text
     chat_id = update.message.chat_id
+    tickers = getTickers(message)
 
-    # regex to find tickers in messages, looks for up to 4 word characters following a dollar sign and captures the 4 word characters
-    tickers = re.findall(TICKER_REGEX, message)
-    bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+    if tickers:
+        bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
-    for ticker in tickers:
-        message = tickerDividend(ticker)
-        update.message.reply_text(text=message, parse_mode=telegram.ParseMode.MARKDOWN)
+        for symbol, reply in tickerDividend(tickers).items():
 
-
+            update.message.reply_text(
+                text=reply, parse_mode=telegram.ParseMode.MARKDOWN
+            )
+            
 def error(bot, update, error):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, error)
@@ -112,7 +75,7 @@ def error(bot, update, error):
 def main():
     """Start the bot."""
     # Create the EventHandler and pass it your bot's token.
-    updater = Updater(TOKEN)
+    updater = Updater(TELEGRAM_TOKEN)
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
@@ -120,8 +83,8 @@ def main():
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
-    dp.add_handler(CommandHandler("news", news))
     dp.add_handler(CommandHandler("dividend", dividend))
+    dp.add_handler(CommandHandler("div", dividend))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, tickerDetect))
