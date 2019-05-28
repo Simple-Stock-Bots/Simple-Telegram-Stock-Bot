@@ -1,12 +1,11 @@
 import json
+import os
 import re
 import time
 import urllib.request
 from datetime import datetime
 
-import cred
-
-
+IEX_TOKEN = os.environ["IEX"]
 def getTickers(text: str):
     """
     Takes a blob of text and returns any stock tickers found.
@@ -24,7 +23,7 @@ def tickerDataReply(tickers: list):
     tickerReplies = {}
     for ticker in tickers:
         IEXURL = (
-            f"https://cloud.iexapis.com/stable/stock/{ticker}/quote?token={cred.secret}"
+            f"https://cloud.iexapis.com/stable/stock/{ticker}/quote?token={IEX_TOKEN}"
         )
         try:
             with urllib.request.urlopen(IEXURL) as url:
@@ -52,7 +51,7 @@ def tickerDividend(tickers: list):
     messages = {}
 
     for ticker in tickers:
-        IEXurl = f"https://cloud.iexapis.com/stable/stock/{ticker}/dividends/next?token={cred.secret}"
+        IEXurl = f"https://cloud.iexapis.com/stable/stock/{ticker}/dividends/next?token={IEX_TOKEN}"
         with urllib.request.urlopen(IEXurl) as url:
             data = json.loads(url.read().decode())
         if data:
@@ -77,4 +76,3 @@ def tickerDividend(tickers: list):
             messages[ticker] = f"{ticker} either doesn't exist or pays no dividend."
 
     return messages
-

@@ -3,11 +3,10 @@ import logging
 import os
 
 import telegram
+from functions import *
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
-from functions import *
-
-TOKEN = os.environ["TELEGRAM"]
+TELEGRAM_TOKEN = os.environ["TELEGRAM"]
 TICKER_REGEX = "[$]([a-zA-Z]{1,4})"
 
 # Enable logging
@@ -76,7 +75,7 @@ def error(bot, update, error):
 def main():
     """Start the bot."""
     # Create the EventHandler and pass it your bot's token.
-    updater = Updater(TOKEN)
+    updater = Updater(TELEGRAM_TOKEN)
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
