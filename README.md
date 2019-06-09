@@ -69,6 +69,11 @@ The dividend is in: 38 Days 3 Hours 53 Minutes 22 Seconds.
 ```
 
 ## 🏁 Getting Started <a name = "getting_started"></a>
+
+You can either choose to use the hosted version of the bot by [clicking here](https://t.me/SimpleStockBot) or you can host your own bot with the instructions below. 
+
+### Self Hosted Bot
+
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See [deployment](#deployment) for notes on how to deploy the project on a live system.
 
 ### Prerequisites
@@ -93,8 +98,8 @@ Then run the bot using your API keys.
 
 ```
 docker run --detach \
-     -e TELEGRAM=746244453:AAEpsL3Vjq578keKD0SJH4dCxFHmObBpGkw \
-     -e IEX=sk_a5712328bee74c9ca059121cfe0e6432 \
+     -e TELEGRAM=TELEGRAM_API \
+     -e IEX=IEX_API \
       simple-telegram-bot
 ```
 
