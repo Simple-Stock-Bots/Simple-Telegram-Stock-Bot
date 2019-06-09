@@ -93,8 +93,8 @@ Then run the bot using your API keys.
 
 ```
 docker run --detach \
-     -e TELEGRAM=746244453:AAEpsL3Vjq578keKD0SJH4dCxFHmObBpGkw \
-     -e IEX=sk_a5712328bee74c9ca059121cfe0e6432 \
+     -e TELEGRAM=TELEGRAM_API \
+     -e IEX=IEX_API \
       simple-telegram-bot
 ```
 
