@@ -27,7 +27,7 @@ def start(bot, update):
 
 def help(bot, update):
     """Send link to docs when the command /help is issued."""
-    message = "[Please see the docs for Bot information](https://misterbiggs.gitlab.io/simple-telegram-bot)"
+    message = "[Please see the docs for Bot information](https://simple-stock-bots.gitlab.io/site/telegram/)"
     update.message.reply_text(text=message, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
@@ -66,7 +66,44 @@ def dividend(bot, update):
             update.message.reply_text(
                 text=reply, parse_mode=telegram.ParseMode.MARKDOWN
             )
-            
+
+
+def news(bot, update):
+    """
+    waits for /news command and then finds news info on that ticker.
+    """
+    message = update.message.text
+    chat_id = update.message.chat_id
+    tickers = getTickers(message)
+
+    if tickers:
+        bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+
+        for symbol, reply in tickerNews(tickers).items():
+
+            update.message.reply_text(
+                text=reply, parse_mode=telegram.ParseMode.MARKDOWN
+            )
+
+
+def info(bot, update):
+    """
+    waits for /info command and then finds info on that ticker.
+    """
+    message = update.message.text
+    chat_id = update.message.chat_id
+    tickers = getTickers(message)
+
+    if tickers:
+        bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+
+        for symbol, reply in tickerInfo(tickers).items():
+
+            update.message.reply_text(
+                text=reply, parse_mode=telegram.ParseMode.MARKDOWN
+            )
+
+
 def error(bot, update, error):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, error)
@@ -85,6 +122,8 @@ def main():
     dp.add_handler(CommandHandler("help", help))
     dp.add_handler(CommandHandler("dividend", dividend))
     dp.add_handler(CommandHandler("div", dividend))
+    dp.add_handler(CommandHandler("news", news))
+    dp.add_handler(CommandHandler("info", info))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, tickerDetect))
