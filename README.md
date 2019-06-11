@@ -68,6 +68,36 @@ Prospect Capital Corp. Declares June 2019 Dividend of $0.06 Per Share
 The dividend is in: 38 Days 3 Hours 53 Minutes 22 Seconds.
 ```
 
+💡 you can also call the dividend command using /div
+
+### /news
+
+To get the latest news about a stock symbol use `/news` followed by any text that has symbols with a dollar sign in front of them. So, the following command:
+```
+/news $psec
+```
+Would return news for Prospect Capital:
+
+News for PSEC:
+
+  [Yield-Starved Investors Still Accumulating BDCs Paying More Than 10% Annually](https://cloud.iexapis.com/v1/news/article/d994b8b5-9fbf-4ceb-afbe-e6defcfc6352)
+
+  [Assessing Main Street Capital's Results For Q1 2019 (Includes Updated Price Target And Investment Ratings Analysis)](https://cloud.iexapis.com/v1/news/article/e60899bc-5230-4388-a609-fc2b8736a7d4)
+
+  [Fully Assessing Prospect Capital's Fiscal Q3 2019 (Includes Current Recommendation And Price Target)](https://cloud.iexapis.com/v1/news/article/08881160-72c5-4f5d-885b-1751187d24eb)
+
+### /info
+
+To get information about a stock type `/info` followed by any text that has symbols with a dollar sign in front of them. So, the following command:
+```
+/info $psec
+```
+Would return information about Prospect Capitals:
+```
+Prospect Capital Corp. Declares June 2019 Dividend of $0.06 Per Share 
+The dividend is in: 38 Days 3 Hours 53 Minutes 22 Seconds.
+```
+
 ## 🏁 Getting Started <a name = "getting_started"></a>
 
 You can either choose to use the hosted version of the bot by [clicking here](https://t.me/SimpleStockBot) or you can host your own bot with the instructions below. 
