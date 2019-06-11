@@ -93,10 +93,12 @@ To get information about a stock type `/info` followed by any text that has symb
 /info $psec
 ```
 Would return information about Prospect Capitals:
-```
-Prospect Capital Corp. Declares June 2019 Dividend of $0.06 Per Share 
-The dividend is in: 38 Days 3 Hours 53 Minutes 22 Seconds.
-```
+
+Company Name: [Prospect Capital Corp.](http://www.prospectstreet.com/)  
+Industry: Investment Managers  
+Sector: Finance  
+CEO: John Francis Barry  
+Description: Prospect Capital Corp. is a business development company, which engages in lending to and investing in private businesses. It also involves in generating current income and long-term capital appreciation through debt and equity investments. The company was founded on April 13, 2004 and is headquartered in New York, NY.
 
 ## 🏁 Getting Started <a name = "getting_started"></a>
 
