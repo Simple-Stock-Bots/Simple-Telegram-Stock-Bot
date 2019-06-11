@@ -27,7 +27,7 @@ def start(bot, update):
 
 def help(bot, update):
     """Send link to docs when the command /help is issued."""
-    message = "[Please see the docs for Bot information](https://misterbiggs.gitlab.io/simple-telegram-bot)"
+    message = "[Please see the docs for Bot information](https://simple-stock-bots.gitlab.io/site/telegram/)"
     update.message.reply_text(text=message, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
