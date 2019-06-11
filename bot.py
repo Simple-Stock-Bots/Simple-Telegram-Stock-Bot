@@ -86,6 +86,24 @@ def news(bot, update):
             )
 
 
+def info(bot, update):
+    """
+    waits for /info command and then finds info on that ticker.
+    """
+    message = update.message.text
+    chat_id = update.message.chat_id
+    tickers = getTickers(message)
+
+    if tickers:
+        bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+
+        for symbol, reply in tickerInfo(tickers).items():
+
+            update.message.reply_text(
+                text=reply, parse_mode=telegram.ParseMode.MARKDOWN
+            )
+
+
 def error(bot, update, error):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, error)
@@ -105,6 +123,7 @@ def main():
     dp.add_handler(CommandHandler("dividend", dividend))
     dp.add_handler(CommandHandler("div", dividend))
     dp.add_handler(CommandHandler("news", news))
+    dp.add_handler(CommandHandler("info", info))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, tickerDetect))

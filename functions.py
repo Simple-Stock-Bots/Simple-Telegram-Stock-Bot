@@ -98,3 +98,26 @@ def tickerNews(tickers: list):
             ] = f"No news found for: {ticker}\nEither today is boring or the ticker does not exist."
 
     return messages
+
+
+def tickerInfo(tickers: list):
+    messages = {}
+
+    for ticker in tickers:
+        IEXurl = (
+            f"https://cloud.iexapis.com/stable/stock/{ticker}/company?token={IEX_TOKEN}"
+        )
+        with urllib.request.urlopen(IEXurl) as url:
+            data = json.loads(url.read().decode())
+        if data:
+            messages[
+                ticker
+            ] = f"Company Name: [{data['companyName']}]({data['website']})\nIndustry: {data['industry']}\nSector: {data['sector']}\nCEO: {data['CEO']}\nDescription: {data['description']}\n"
+
+        else:
+            messages[
+                ticker
+            ] = f"No information found for: {ticker}\nEither today is boring or the ticker does not exist."
+
+    return messages
+
