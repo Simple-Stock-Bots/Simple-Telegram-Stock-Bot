@@ -6,6 +6,8 @@ import urllib.request
 from datetime import datetime
 
 IEX_TOKEN = os.environ["IEX"]
+
+
 def getTickers(text: str):
     """
     Takes a blob of text and returns any stock tickers found.
@@ -74,5 +76,25 @@ def tickerDividend(tickers: list):
             ] = f"{data['description']}\n\nThe dividend is in: {d:.0f} Days {h:.0f} Hours {m:.0f} Minutes {s:.0f} Seconds."
         else:
             messages[ticker] = f"{ticker} either doesn't exist or pays no dividend."
+
+    return messages
+
+
+def tickerNews(tickers: list):
+    messages = {}
+
+    for ticker in tickers:
+        IEXurl = f"https://cloud.iexapis.com/stable/stock/{ticker}/news/last/3?token={IEX_TOKEN}"
+        with urllib.request.urlopen(IEXurl) as url:
+            data = json.loads(url.read().decode())
+        if data:
+            messages[ticker] = f"News for **{ticker.upper()}**:\n"
+            for news in data:
+                message = f"\t[{news['headline']}]({news['url']})\n\n"
+                messages[ticker] = messages[ticker] + message
+        else:
+            messages[
+                ticker
+            ] = f"No news found for: {ticker}\nEither today is boring or the ticker does not exist."
 
     return messages
