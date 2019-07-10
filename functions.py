@@ -6,7 +6,6 @@ from datetime import datetime
 import requests
 
 IEX_TOKEN = os.environ["IEX"]
-# "sk_130b8e8f75ba4e14a5683ff37a655584"
 
 
 def getSymbols(text: str):
