@@ -122,7 +122,3 @@ def symbolInfo(symbols: list):
 
     return messages
 
-
-# symbolDividend(["psec", "f", "tsla"])
-
-print(symbolDividend(["f"]))
