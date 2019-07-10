@@ -5,27 +5,27 @@ import urllib.request
 import requests
 from datetime import datetime
 
-IEX_TOKEN = os.environ["IEX"]
+IEX_TOKEN = "sk_130b8e8f75ba4e14a5683ff37a655584"  # os.environ["IEX"]
 
 
-def getTickers(text: str):
+def getSymbols(text: str):
     """
-    Takes a blob of text and returns any stock tickers found.
+    Takes a blob of text and returns any stock symbols found.
     """
 
-    TICKER_REGEX = "[$]([a-zA-Z]{1,4})"
+    SYMBOL_REGEX = "[$]([a-zA-Z]{1,4})"
 
-    return list(set(re.findall(TICKER_REGEX, text)))
+    return list(set(re.findall(SYMBOL_REGEX, text)))
 
 
-def tickerDataReply(tickers: list):
+def symbolDataReply(symbols: list):
     """
-    Takes a list of tickers and returns a list of strings with information about the ticker.
+    Takes a list of symbols and returns a list of strings with information about the symbol.
     """
-    tickerReplies = {}
-    for ticker in tickers:
+    symbolReplies = {}
+    for symbol in symbols:
         IEXURL = (
-            f"https://cloud.iexapis.com/stable/stock/{ticker}/quote?token={IEX_TOKEN}"
+            f"https://cloud.iexapis.com/stable/stock/{symbol}/quote?token={IEX_TOKEN}"
         )
         try:
             with urllib.request.urlopen(IEXURL) as url:
@@ -42,74 +42,87 @@ def tickerDataReply(tickers: list):
             else:
                 reply += ", the stock hasn't shown any movement today."
         except:
-            reply = f"The ticker: {ticker} was not found."
+            reply = f"The symbol: {symbol} was not found."
 
-        tickerReplies[ticker] = reply
+        symbolReplies[symbol] = reply
 
-    return tickerReplies
+    return symbolReplies
 
 
-def tickerDividend(tickers: list):
+def symbolDividend(symbols: list):
     messages = {}
 
-    for ticker in tickers:
-        IEXurl = f"https://cloud.iexapis.com/stable/data-points/{ticker}/NEXTDIVIDENDDATE?token={IEX_TOKEN}"
-        date = requests.get(IEXurl).json()
-        if date:
+    for symbol in symbols:
+        IEXurl = f"https://cloud.iexapis.com/stable/data-points/{symbol}/NEXTDIVIDENDDATE?token={IEX_TOKEN}"
+        response = requests.get(IEXurl)
+        if response.status_code is 200:
+
+            date = response.json()
             # Pattern IEX uses for dividend date.
             pattern = "%Y-%m-%d"
             divDate = datetime.strptime(date, pattern)
             #
-            daysDelta = divDate - datetime.now()
+            daysDelta = (divDate - datetime.now()).days
             datePretty = divDate.strftime("%A, %B %w")
+            if daysDelta < 0:
+                messages[
+                    symbol
+                ] = f"{symbol.upper()} dividend was on {datePretty} and a new date hasn't been announced yet."
+            elif daysDelta > 0:
+                messages[
+                    symbol
+                ] = f"{symbol.upper()} dividend is on {datePretty} which is in {daysDelta} Days."
+            else:
+                messages[symbol] = f"{symbol.upper()} is today."
 
-            messages[
-                ticker
-            ] = f"{ticker.upper()} dividend is on {datePretty} which is in {daysDelta} Days."
         else:
-            messages[ticker] = f"{ticker} either doesn't exist or pays no dividend."
+            messages[symbol] = f"{symbol} either doesn't exist or pays no dividend."
 
     return messages
 
 
-def tickerNews(tickers: list):
+def symbolNews(symbols: list):
     messages = {}
 
-    for ticker in tickers:
-        IEXurl = f"https://cloud.iexapis.com/stable/stock/{ticker}/news/last/3?token={IEX_TOKEN}"
+    for symbol in symbols:
+        IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/news/last/3?token={IEX_TOKEN}"
         with urllib.request.urlopen(IEXurl) as url:
             data = json.loads(url.read().decode())
         if data:
-            messages[ticker] = f"News for **{ticker.upper()}**:\n"
+            messages[symbol] = f"News for **{symbol.upper()}**:\n"
             for news in data:
                 message = f"\t[{news['headline']}]({news['url']})\n\n"
-                messages[ticker] = messages[ticker] + message
+                messages[symbol] = messages[symbol] + message
         else:
             messages[
-                ticker
-            ] = f"No news found for: {ticker}\nEither today is boring or the ticker does not exist."
+                symbol
+            ] = f"No news found for: {symbol}\nEither today is boring or the symbol does not exist."
 
     return messages
 
 
-def tickerInfo(tickers: list):
+def symbolInfo(symbols: list):
     messages = {}
 
-    for ticker in tickers:
+    for symbol in symbols:
         IEXurl = (
-            f"https://cloud.iexapis.com/stable/stock/{ticker}/company?token={IEX_TOKEN}"
+            f"https://cloud.iexapis.com/stable/stock/{symbol}/company?token={IEX_TOKEN}"
         )
         with urllib.request.urlopen(IEXurl) as url:
             data = json.loads(url.read().decode())
         if data:
             messages[
-                ticker
+                symbol
             ] = f"Company Name: [{data['companyName']}]({data['website']})\nIndustry: {data['industry']}\nSector: {data['sector']}\nCEO: {data['CEO']}\nDescription: {data['description']}\n"
 
         else:
             messages[
-                ticker
-            ] = f"No information found for: {ticker}\nEither today is boring or the ticker does not exist."
+                symbol
+            ] = f"No information found for: {symbol}\nEither today is boring or the symbol does not exist."
 
     return messages
 
+
+# symbolDividend(["psec", "f", "tsla"])
+
+print(symbolDividend(["f"]))
