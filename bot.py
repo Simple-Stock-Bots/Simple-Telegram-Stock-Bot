@@ -1,4 +1,4 @@
-# Work with Python 3.7
+# Works with Python 3.7
 import logging
 import os
 
@@ -7,7 +7,6 @@ from functions import *
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
 TELEGRAM_TOKEN = os.environ["TELEGRAM"]
-TICKER_REGEX = "[$]([a-zA-Z]{1,4})"
 
 # Enable logging
 logging.basicConfig(
@@ -27,80 +26,80 @@ def start(bot, update):
 
 def help(bot, update):
     """Send link to docs when the command /help is issued."""
-    message = "[Please see the docs for Bot information](https://simple-stock-bots.gitlab.io/site/telegram/)"
+    message = "[Please see the documentaion for Bot information](https://simple-stock-bots.gitlab.io/site/telegram/)"
     update.message.reply_text(text=message, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
-def tickerDetect(bot, update):
+def symbolDetect(bot, update):
     """
-    Runs on any message that doesn't have a command and searches for tickers, then returns the prices of any tickers found. 
+    Runs on any message that doesn't have a command and searches for symbols, then returns the prices of any symbols found. 
     """
     message = update.message.text
     chat_id = update.message.chat_id
-    tickers = getTickers(message)
+    symbols = getSymbols(message)
 
-    if tickers:
+    if symbols:
         # Let user know bot is working
         bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
-        for symbol, reply in tickerDataReply(tickers).items():
+        for reply in symbolDataReply(symbols).items():
 
             update.message.reply_text(
-                text=reply, parse_mode=telegram.ParseMode.MARKDOWN
+                text=reply[1], parse_mode=telegram.ParseMode.MARKDOWN
             )
 
 
 def dividend(bot, update):
     """
-    waits for /dividend or /div command and then finds dividend info on that ticker.
+    waits for /dividend or /div command and then finds dividend info on that symbol.
     """
     message = update.message.text
     chat_id = update.message.chat_id
-    tickers = getTickers(message)
+    symbols = getSymbols(message)
 
-    if tickers:
+    if symbols:
         bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
-        for symbol, reply in tickerDividend(tickers).items():
+        for reply in symbolDividend(symbols).items():
 
             update.message.reply_text(
-                text=reply, parse_mode=telegram.ParseMode.MARKDOWN
+                text=reply[1], parse_mode=telegram.ParseMode.MARKDOWN
             )
 
 
 def news(bot, update):
     """
-    waits for /news command and then finds news info on that ticker.
+    waits for /news command and then finds news info on that symbol.
     """
     message = update.message.text
     chat_id = update.message.chat_id
-    tickers = getTickers(message)
+    symbols = getSymbols(message)
 
-    if tickers:
+    if symbols:
         bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
-        for symbol, reply in tickerNews(tickers).items():
+        for reply in symbolNews(symbols).items():
 
             update.message.reply_text(
-                text=reply, parse_mode=telegram.ParseMode.MARKDOWN
+                text=reply[1], parse_mode=telegram.ParseMode.MARKDOWN
             )
 
 
 def info(bot, update):
     """
-    waits for /info command and then finds info on that ticker.
+    waits for /info command and then finds info on that symbol.
     """
     message = update.message.text
     chat_id = update.message.chat_id
-    tickers = getTickers(message)
+    symbols = getSymbols(message)
 
-    if tickers:
+    if symbols:
         bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
-        for symbol, reply in tickerInfo(tickers).items():
+        for reply in symbolInfo(symbols).items():
 
             update.message.reply_text(
-                text=reply, parse_mode=telegram.ParseMode.MARKDOWN
+                text=reply[1], parse_mode=telegram.ParseMode.MARKDOWN
             )
 
 
@@ -126,7 +125,7 @@ def main():
     dp.add_handler(CommandHandler("info", info))
 
     # on noncommand i.e message - echo the message on Telegram
-    dp.add_handler(MessageHandler(Filters.text, tickerDetect))
+    dp.add_handler(MessageHandler(Filters.text, symbolDetect))
 
     # log all errors
     dp.add_error_handler(error)
