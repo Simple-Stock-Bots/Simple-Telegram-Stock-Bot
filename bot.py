@@ -1,4 +1,4 @@
-# Work with Python 3.7
+# Works with Python 3.7
 import logging
 import os
 
@@ -7,7 +7,6 @@ from functions import *
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
 TELEGRAM_TOKEN = os.environ["TELEGRAM"]
-symbol_REGEX = "[$]([a-zA-Z]{1,4})"
 
 # Enable logging
 logging.basicConfig(
@@ -27,7 +26,7 @@ def start(bot, update):
 
 def help(bot, update):
     """Send link to docs when the command /help is issued."""
-    message = "[Please see the docs for Bot information](https://simple-stock-bots.gitlab.io/site/telegram/)"
+    message = "[Please see the documentaion for Bot information](https://simple-stock-bots.gitlab.io/site/telegram/)"
     update.message.reply_text(text=message, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
@@ -43,10 +42,10 @@ def symbolDetect(bot, update):
         # Let user know bot is working
         bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
-        for symbol, reply in symbolDataReply(symbols).items():
+        for reply in symbolDataReply(symbols).items():
 
             update.message.reply_text(
-                text=reply, parse_mode=telegram.ParseMode.MARKDOWN
+                text=reply[1], parse_mode=telegram.ParseMode.MARKDOWN
             )
 
 
@@ -61,10 +60,10 @@ def dividend(bot, update):
     if symbols:
         bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
-        for symbol, reply in symbolDividend(symbols).items():
+        for reply in symbolDividend(symbols).items():
 
             update.message.reply_text(
-                text=reply, parse_mode=telegram.ParseMode.MARKDOWN
+                text=reply[1], parse_mode=telegram.ParseMode.MARKDOWN
             )
 
 
@@ -79,10 +78,10 @@ def news(bot, update):
     if symbols:
         bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
-        for symbol, reply in symbolNews(symbols).items():
+        for reply in symbolNews(symbols).items():
 
             update.message.reply_text(
-                text=reply, parse_mode=telegram.ParseMode.MARKDOWN
+                text=reply[1], parse_mode=telegram.ParseMode.MARKDOWN
             )
 
 
@@ -97,10 +96,10 @@ def info(bot, update):
     if symbols:
         bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
-        for symbol, reply in symbolInfo(symbols).items():
+        for reply in symbolInfo(symbols).items():
 
             update.message.reply_text(
-                text=reply, parse_mode=telegram.ParseMode.MARKDOWN
+                text=reply[1], parse_mode=telegram.ParseMode.MARKDOWN
             )
 
 
