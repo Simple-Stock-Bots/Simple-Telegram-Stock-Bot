@@ -1,8 +1,8 @@
 import json
 import os
 import re
-import time
 import urllib.request
+import requests
 from datetime import datetime
 
 IEX_TOKEN = os.environ["IEX"]
@@ -53,27 +53,19 @@ def tickerDividend(tickers: list):
     messages = {}
 
     for ticker in tickers:
-        IEXurl = f"https://cloud.iexapis.com/stable/stock/{ticker}/dividends/next?token={IEX_TOKEN}"
-        with urllib.request.urlopen(IEXurl) as url:
-            data = json.loads(url.read().decode())
-        if data:
+        IEXurl = f"https://cloud.iexapis.com/stable/data-points/{ticker}/NEXTDIVIDENDDATE?token={IEX_TOKEN}"
+        date = requests.get(IEXurl).json()
+        if date:
             # Pattern IEX uses for dividend date.
             pattern = "%Y-%m-%d"
-
-            # Convert divDate to seconds, and subtract it from current time.
-            dividendSeconds = datetime.strptime(
-                data["paymentDate"], pattern
-            ).timestamp()
-            difference = dividendSeconds - int(time.time())
-
-            # Calculate (d)ays, (h)ours, (m)inutes, and (s)econds
-            d, h = divmod(difference, 86400)
-            h, m = divmod(h, 3600)
-            m, s = divmod(m, 60)
+            divDate = datetime.strptime(date, pattern)
+            #
+            daysDelta = divDate - datetime.now()
+            datePretty = divDate.strftime("%A, %B %w")
 
             messages[
                 ticker
-            ] = f"{data['description']}\n\nThe dividend is in: {d:.0f} Days {h:.0f} Hours {m:.0f} Minutes {s:.0f} Seconds."
+            ] = f"{ticker.upper()} dividend is on {datePretty} which is in {daysDelta} Days."
         else:
             messages[ticker] = f"{ticker} either doesn't exist or pays no dividend."
 
