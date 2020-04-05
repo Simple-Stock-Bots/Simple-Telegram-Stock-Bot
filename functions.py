@@ -6,119 +6,116 @@ from datetime import datetime
 import requests
 
 
-
-def getSymbols(text: str):
-    """
-    Takes a blob of text and returns a list of symbols without any repeats.
-    """
-
+class Symbol:
     SYMBOL_REGEX = "[$]([a-zA-Z]{1,4})"
 
-    return list(set(re.findall(SYMBOL_REGEX, text)))
+    def __init__(self, IEX_TOKEN: str):
+        self.IEX_TOKEN = IEX_TOKEN
 
+    def find_symbols(self, text: str):
+        """
+        Takes a blob of text and returns a list of symbols without any repeats.
+        """
 
-def symbolDataReply(symbols: list):
-    """
-    Takes a list of symbols and returns a dictionary of strings with information about the symbol.
-    """
-    dataMessages = {}
-    for symbol in symbols:
-        IEXurl = (
-            f"https://cloud.iexapis.com/stable/stock/{symbol}/quote?token={IEX_TOKEN}"
-        )
+        return list(set(re.findall(self.SYMBOL_REGEX, text)))
 
-        response = requests.get(IEXurl)
-        if response.status_code == 200:
-            IEXData = response.json()
-            message = f"The current stock price of {IEXData['companyName']} is $**{IEXData['latestPrice']}**"
+    def price_reply(self, symbols: list):
+        """
+        Takes a list of symbols and returns a dictionary of strings with information about the symbol.
+        """
+        dataMessages = {}
+        for symbol in symbols:
+            IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/quote?token={self.IEX_TOKEN}"
 
-            # Determine wording of change text
-            change = round(IEXData["changePercent"] * 100, 2)
-            if change > 0:
-                message += f", the stock is currently **up {change}%**"
-            elif change < 0:
-                message += f", the stock is currently **down {change}%**"
+            response = requests.get(IEXurl)
+            if response.status_code == 200:
+                IEXData = response.json()
+                message = f"The current stock price of {IEXData['companyName']} is $**{IEXData['latestPrice']}**"
+
+                # Determine wording of change text
+                change = round(IEXData["changePercent"] * 100, 2)
+                if change > 0:
+                    message += f", the stock is currently **up {change}%**"
+                elif change < 0:
+                    message += f", the stock is currently **down {change}%**"
+                else:
+                    message += ", the stock hasn't shown any movement today."
             else:
-                message += ", the stock hasn't shown any movement today."
-        else:
-            message = f"The symbol: {symbol} was not found."
+                message = f"The symbol: {symbol} was not found."
 
-        dataMessages[symbol] = message
+            dataMessages[symbol] = message
 
-    return dataMessages
+        return dataMessages
 
+    def symbol_name(self, symbols: list):
+        divMessages = {}
 
-def symbolDividend(symbols: list):
-    divMessages = {}
+        for symbol in symbols:
+            IEXurl = f"https://cloud.iexapis.com/stable/data-points/{symbol}/NEXTDIVIDENDDATE?token={self.IEX_TOKEN}"
+            response = requests.get(IEXurl)
+            if response.status_code == 200:
 
-    for symbol in symbols:
-        IEXurl = f"https://cloud.iexapis.com/stable/data-points/{symbol}/NEXTDIVIDENDDATE?token={IEX_TOKEN}"
-        response = requests.get(IEXurl)
-        if response.status_code == 200:
+                # extract date from json
+                date = response.json()
+                # Pattern IEX uses for dividend date.
+                pattern = "%Y-%m-%d"
+                divDate = datetime.strptime(date, pattern)
 
-            # extract date from json
-            date = response.json()
-            # Pattern IEX uses for dividend date.
-            pattern = "%Y-%m-%d"
-            divDate = datetime.strptime(date, pattern)
+                daysDelta = (divDate - datetime.now()).days
+                datePretty = divDate.strftime("%A, %B %w")
+                if daysDelta < 0:
+                    divMessages[
+                        symbol
+                    ] = f"{symbol.upper()} dividend was on {datePretty} and a new date hasn't been announced yet."
+                elif daysDelta > 0:
+                    divMessages[
+                        symbol
+                    ] = f"{symbol.upper()} dividend is on {datePretty} which is in {daysDelta} Days."
+                else:
+                    divMessages[symbol] = f"{symbol.upper()} is today."
 
-            daysDelta = (divDate - datetime.now()).days
-            datePretty = divDate.strftime("%A, %B %w")
-            if daysDelta < 0:
+            else:
                 divMessages[
                     symbol
-                ] = f"{symbol.upper()} dividend was on {datePretty} and a new date hasn't been announced yet."
-            elif daysDelta > 0:
-                divMessages[
-                    symbol
-                ] = f"{symbol.upper()} dividend is on {datePretty} which is in {daysDelta} Days."
+                ] = f"{symbol} either doesn't exist or pays no dividend."
+
+        return divMessages
+
+    def news_reply(self, symbols: list):
+        newsMessages = {}
+
+        for symbol in symbols:
+            IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/news/last/3?token={self.IEX_TOKEN}"
+            response = requests.get(IEXurl)
+            if response.status_code == 200:
+                data = response.json()
+                newsMessages[symbol] = f"News for **{symbol.upper()}**:\n"
+                for news in data:
+                    message = f"\t[{news['headline']}]({news['url']})\n\n"
+                    newsMessages[symbol] = newsMessages[symbol] + message
             else:
-                divMessages[symbol] = f"{symbol.upper()} is today."
+                newsMessages[
+                    symbol
+                ] = f"No news found for: {symbol}\nEither today is boring or the symbol does not exist."
 
-        else:
-            divMessages[symbol] = f"{symbol} either doesn't exist or pays no dividend."
+        return newsMessages
 
-    return divMessages
+    def info_reply(self, symbols: list):
+        infoMessages = {}
 
+        for symbol in symbols:
+            IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/company?token={self.IEX_TOKEN}"
+            response = requests.get(IEXurl)
 
-def symbolNews(symbols: list):
-    newsMessages = {}
+            if response.status_code == 200:
+                data = response.json()
+                infoMessages[
+                    symbol
+                ] = f"Company Name: [{data['companyName']}]({data['website']})\nIndustry: {data['industry']}\nSector: {data['sector']}\nCEO: {data['CEO']}\nDescription: {data['description']}\n"
 
-    for symbol in symbols:
-        IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/news/last/3?token={IEX_TOKEN}"
-        response = requests.get(IEXurl)
-        if response.status_code == 200:
-            data = response.json()
-            newsMessages[symbol] = f"News for **{symbol.upper()}**:\n"
-            for news in data:
-                message = f"\t[{news['headline']}]({news['url']})\n\n"
-                newsMessages[symbol] = newsMessages[symbol] + message
-        else:
-            newsMessages[
-                symbol
-            ] = f"No news found for: {symbol}\nEither today is boring or the symbol does not exist."
+            else:
+                infoMessages[
+                    symbol
+                ] = f"No information found for: {symbol}\nEither today is boring or the symbol does not exist."
 
-    return newsMessages
-
-
-def symbolInfo(symbols: list):
-    infoMessages = {}
-
-    for symbol in symbols:
-        IEXurl = (
-            f"https://cloud.iexapis.com/stable/stock/{symbol}/company?token={IEX_TOKEN}"
-        )
-        response = requests.get(IEXurl)
-
-        if response.status_code == 200:
-            data = response.json()
-            infoMessages[
-                symbol
-            ] = f"Company Name: [{data['companyName']}]({data['website']})\nIndustry: {data['industry']}\nSector: {data['sector']}\nCEO: {data['CEO']}\nDescription: {data['description']}\n"
-
-        else:
-            infoMessages[
-                symbol
-            ] = f"No information found for: {symbol}\nEither today is boring or the symbol does not exist."
-
-    return infoMessages
+        return infoMessages

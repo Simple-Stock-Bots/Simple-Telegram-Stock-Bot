@@ -3,11 +3,15 @@ import logging
 import os
 
 import telegram
-from functions import *
+from functions import Symbol
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
-TELEGRAM_TOKEN = os.environ["TELEGRAM"]
+TELEGRAM_TOKEN = (
+    "724630968:AAHL_cpMgrw-B9zSbVlVe7iTYyo0XXL8fi4"  # os.environ["TELEGRAM"]
+)
+IEX_TOKEN = "sk_9e8d93b7cac84cd4b800f34d15b72ad6"  # os.environ["IEX"]
 
+s = Symbol(IEX_TOKEN)
 # Enable logging
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
@@ -30,19 +34,19 @@ def help(bot, update):
     update.message.reply_text(text=message, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
-def symbolDetect(bot, update):
+def symbol_detect(bot, update):
     """
     Runs on any message that doesn't have a command and searches for symbols, then returns the prices of any symbols found. 
     """
     message = update.message.text
     chat_id = update.message.chat_id
-    symbols = getSymbols(message)
+    symbols = s.find_symbols(message)
 
     if symbols:
         # Let user know bot is working
         bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
-        for reply in symbolDataReply(symbols).items():
+        for reply in s.price_reply(symbols).items():
 
             update.message.reply_text(
                 text=reply[1], parse_mode=telegram.ParseMode.MARKDOWN
@@ -55,12 +59,12 @@ def dividend(bot, update):
     """
     message = update.message.text
     chat_id = update.message.chat_id
-    symbols = getSymbols(message)
+    symbols = s.find_symbols(message)
 
     if symbols:
         bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
-        for reply in symbolDividend(symbols).items():
+        for reply in s.symbol_name(symbols).items():
 
             update.message.reply_text(
                 text=reply[1], parse_mode=telegram.ParseMode.MARKDOWN
@@ -73,12 +77,12 @@ def news(bot, update):
     """
     message = update.message.text
     chat_id = update.message.chat_id
-    symbols = getSymbols(message)
+    symbols = s.find_symbols(message)
 
     if symbols:
         bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
-        for reply in symbolNews(symbols).items():
+        for reply in s.news_reply(symbols).items():
 
             update.message.reply_text(
                 text=reply[1], parse_mode=telegram.ParseMode.MARKDOWN
@@ -91,12 +95,12 @@ def info(bot, update):
     """
     message = update.message.text
     chat_id = update.message.chat_id
-    symbols = getSymbols(message)
+    symbols = s.find_symbols(message)
 
     if symbols:
         bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
-        for reply in symbolInfo(symbols).items():
+        for reply in s.info_reply(symbols).items():
 
             update.message.reply_text(
                 text=reply[1], parse_mode=telegram.ParseMode.MARKDOWN
@@ -125,7 +129,7 @@ def main():
     dp.add_handler(CommandHandler("info", info))
 
     # on noncommand i.e message - echo the message on Telegram
-    dp.add_handler(MessageHandler(Filters.text, symbolDetect))
+    dp.add_handler(MessageHandler(Filters.text, symbol_detect))
 
     # log all errors
     dp.add_error_handler(error)
