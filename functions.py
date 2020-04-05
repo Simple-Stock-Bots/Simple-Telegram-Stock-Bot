@@ -5,7 +5,6 @@ from datetime import datetime
 
 import requests
 
-IEX_TOKEN = os.environ["IEX"]
 
 
 def getSymbols(text: str):
@@ -29,7 +28,7 @@ def symbolDataReply(symbols: list):
         )
 
         response = requests.get(IEXurl)
-        if response.status_code is 200:
+        if response.status_code == 200:
             IEXData = response.json()
             message = f"The current stock price of {IEXData['companyName']} is $**{IEXData['latestPrice']}**"
 
@@ -55,7 +54,7 @@ def symbolDividend(symbols: list):
     for symbol in symbols:
         IEXurl = f"https://cloud.iexapis.com/stable/data-points/{symbol}/NEXTDIVIDENDDATE?token={IEX_TOKEN}"
         response = requests.get(IEXurl)
-        if response.status_code is 200:
+        if response.status_code == 200:
 
             # extract date from json
             date = response.json()
@@ -88,7 +87,7 @@ def symbolNews(symbols: list):
     for symbol in symbols:
         IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/news/last/3?token={IEX_TOKEN}"
         response = requests.get(IEXurl)
-        if response.status_code is 200:
+        if response.status_code == 200:
             data = response.json()
             newsMessages[symbol] = f"News for **{symbol.upper()}**:\n"
             for news in data:
@@ -111,7 +110,7 @@ def symbolInfo(symbols: list):
         )
         response = requests.get(IEXurl)
 
-        if response.status_code is 200:
+        if response.status_code == 200:
             data = response.json()
             infoMessages[
                 symbol
@@ -123,4 +122,3 @@ def symbolInfo(symbols: list):
             ] = f"No information found for: {symbol}\nEither today is boring or the symbol does not exist."
 
     return infoMessages
-
