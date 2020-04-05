@@ -1,16 +1,45 @@
 import json
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
-import requests
+import pandas as pd
+import requests as r
+from fuzzywuzzy import fuzz
 
 
 class Symbol:
     SYMBOL_REGEX = "[$]([a-zA-Z]{1,4})"
+    LIST_URL = "http://oatsreportable.finra.org/OATSReportableSecurities-SOD.txt"
 
     def __init__(self, IEX_TOKEN: str):
         self.IEX_TOKEN = IEX_TOKEN
+        self.symbol_list, self.symbol_ts = self.get_symbol_list()
+
+    def get_symbol_list(self):
+        raw_symbols = r.get(self.LIST_URL).text
+        symbols = pd.DataFrame(
+            [line.split("|") for line in raw_symbols.split("\n")][:-1]
+        )
+        symbols.columns = symbols.iloc[0]
+        symbols = symbols.drop(symbols.index[0])
+        symbols = symbols.drop(symbols.index[-1])
+        symbols["Description"] = symbols["Symbol"] + ": " + symbols["Issue_Name"]
+        return symbols, datetime.now()
+
+    def search_symbols(self, search: str):
+        if self.symbol_ts - datetime.now() > timedelta(hours=12):
+            self.symbol_list, self.symbol_ts = self.get_symbol_list()
+
+        symbols = self.symbol_list
+        symbols["Match"] = symbols.apply(
+            lambda x: fuzz.partial_ratio(
+                search.lower(), f"{x['Symbol']} {x['Issue_Name']}".lower()
+            ),
+            axis=1,
+        )
+        symbols.sort_values(by="Match", ascending=False, inplace=True)
+        return list(zip(list(symbols["Symbol"]), list(symbols["Description"])))
 
     def find_symbols(self, text: str):
         """
@@ -27,11 +56,10 @@ class Symbol:
         for symbol in symbols:
             IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/quote?token={self.IEX_TOKEN}"
 
-            response = requests.get(IEXurl)
+            response = r.get(IEXurl)
             if response.status_code == 200:
                 IEXData = response.json()
                 message = f"The current stock price of {IEXData['companyName']} is $**{IEXData['latestPrice']}**"
-
                 # Determine wording of change text
                 change = round(IEXData["changePercent"] * 100, 2)
                 if change > 0:
@@ -52,7 +80,7 @@ class Symbol:
 
         for symbol in symbols:
             IEXurl = f"https://cloud.iexapis.com/stable/data-points/{symbol}/NEXTDIVIDENDDATE?token={self.IEX_TOKEN}"
-            response = requests.get(IEXurl)
+            response = r.get(IEXurl)
             if response.status_code == 200:
 
                 # extract date from json
@@ -86,7 +114,7 @@ class Symbol:
 
         for symbol in symbols:
             IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/news/last/3?token={self.IEX_TOKEN}"
-            response = requests.get(IEXurl)
+            response = r.get(IEXurl)
             if response.status_code == 200:
                 data = response.json()
                 newsMessages[symbol] = f"News for **{symbol.upper()}**:\n"
@@ -105,7 +133,7 @@ class Symbol:
 
         for symbol in symbols:
             IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/company?token={self.IEX_TOKEN}"
-            response = requests.get(IEXurl)
+            response = r.get(IEXurl)
 
             if response.status_code == 200:
                 data = response.json()

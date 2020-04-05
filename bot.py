@@ -3,13 +3,20 @@ import logging
 import os
 
 import telegram
-from functions import Symbol
-from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
-
-TELEGRAM_TOKEN = (
-    "724630968:AAHL_cpMgrw-B9zSbVlVe7iTYyo0XXL8fi4"  # os.environ["TELEGRAM"]
+from telegram import InlineQueryResultArticle, InputTextMessageContent
+from telegram.ext import (
+    CommandHandler,
+    Filters,
+    InlineQueryHandler,
+    MessageHandler,
+    Updater,
 )
-IEX_TOKEN = "sk_9e8d93b7cac84cd4b800f34d15b72ad6"  # os.environ["IEX"]
+
+from functions import Symbol
+
+TELEGRAM_TOKEN = os.environ["TELEGRAM"]
+
+IEX_TOKEN = os.environ["IEX"]
 
 s = Symbol(IEX_TOKEN)
 # Enable logging
@@ -107,6 +114,34 @@ def info(bot, update):
             )
 
 
+def inline_query(bot, update):
+    """
+    Handles inline query. 
+    Does a fuzzy search on input and returns stocks that are close.
+    """
+    matches = s.search_symbols(update.inline_query.query)
+    results = []
+    for match in matches:
+        try:
+            price = s.price_reply([match[0]])[match[0]]
+            print(price)
+            results.append(
+                InlineQueryResultArticle(
+                    match[0],
+                    title=match[1],
+                    input_message_content=InputTextMessageContent(
+                        price, parse_mode=telegram.ParseMode.MARKDOWN
+                    ),
+                )
+            )
+        except TypeError:
+            pass
+
+        if len(results) == 5:
+            bot.answerInlineQuery(update.inline_query.id, results)
+            return
+
+
 def error(bot, update, error):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, error)
@@ -130,6 +165,9 @@ def main():
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, symbol_detect))
+
+    # Inline Bot commands
+    dp.add_handler(InlineQueryHandler(inline_query))
 
     # log all errors
     dp.add_error_handler(error)

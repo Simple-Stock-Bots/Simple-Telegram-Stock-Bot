@@ -1,2 +1,5 @@
 python-telegram-bot==11.1.0
 requests==2.21.0
+pandas==0.25.3
+fuzzywuzzy==0.18.0
+python-Levenshtein==0.12.0
