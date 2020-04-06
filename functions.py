@@ -33,12 +33,19 @@ class Symbol:
 
         symbols = self.symbol_list
         symbols["Match"] = symbols.apply(
-            lambda x: fuzz.partial_ratio(
-                search.lower(), f"{x['Symbol']} {x['Issue_Name']}".lower()
-            ),
-            axis=1,
+            lambda x: fuzz.ratio(search.lower(), f"{x['Symbol']}".lower()), axis=1,
         )
+
         symbols.sort_values(by="Match", ascending=False, inplace=True)
+        if symbols["Match"].head().sum():
+            symbols["Match"] = symbols.apply(
+                lambda x: fuzz.partial_ratio(
+                    search.lower(), f"{x['Symbol']} {x['Issue_Name']}".lower()
+                ),
+                axis=1,
+            )
+            symbols.sort_values(by="Match", ascending=False, inplace=True)
+        print(symbols.head())
         return list(zip(list(symbols["Symbol"]), list(symbols["Description"])))
 
     def find_symbols(self, text: str):
