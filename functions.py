@@ -39,9 +39,7 @@ class Symbol:
         symbols.sort_values(by="Match", ascending=False, inplace=True)
         if symbols["Match"].head().sum() < 300:
             symbols["Match"] = symbols.apply(
-                lambda x: fuzz.partial_ratio(
-                    search.lower(), f"{x['Symbol']} {x['Issue_Name']}".lower()
-                ),
+                lambda x: fuzz.partial_ratio(search.lower(), x["Issue_Name"].lower()),
                 axis=1,
             )
             symbols.sort_values(by="Match", ascending=False, inplace=True)
