@@ -9,6 +9,10 @@ from fuzzywuzzy import fuzz
 
 
 class Symbol:
+    """
+    Functions for finding stock market information about symbols.
+    """
+
     SYMBOL_REGEX = "[$]([a-zA-Z]{1,4})"
     LIST_URL = "http://oatsreportable.finra.org/OATSReportableSecurities-SOD.txt"
 
@@ -17,6 +21,13 @@ class Symbol:
         self.symbol_list, self.symbol_ts = self.get_symbol_list()
 
     def get_symbol_list(self):
+        """
+        Fetches a list of stock market symbols from FINRA
+        
+        Returns:
+            pd.DataFrame -- [DataFrame with columns: Symbol | Issue_Name | Primary_Listing_Mkt
+            datetime -- The time when the list of symbols was fetched. The Symbol list is updated every open and close of every trading day. 
+        """
         raw_symbols = r.get(self.LIST_URL).text
         symbols = pd.DataFrame(
             [line.split("|") for line in raw_symbols.split("\n")][:-1]
@@ -28,6 +39,15 @@ class Symbol:
         return symbols, datetime.now()
 
     def search_symbols(self, search: str):
+        """
+        Performs a fuzzy search to find stock symbols closest to a search term.
+        
+        Arguments:
+            search {str} -- String used to search, could be a company name or something close to the companies stock ticker.
+        
+        Returns:
+            List of Tuples -- A list tuples of every stock sorted in order of how well they match. Each tuple contains: (Symbol, Issue Name).
+        """
         if self.symbol_ts - datetime.now() > timedelta(hours=12):
             self.symbol_list, self.symbol_ts = self.get_symbol_list()
 
@@ -48,14 +68,26 @@ class Symbol:
 
     def find_symbols(self, text: str):
         """
-        Takes a blob of text and returns a list of symbols without any repeats.
+        Finds stock tickers starting with a dollar sign in a blob of text and returns them in a list. Only returns each match once. Example: Whats the price of $tsla? -> ['tsla']
+        
+        Arguments:
+            text {str} -- Blob of text that might contain tickers with the format: $TICKER
+        
+        Returns:
+            list -- List of every found match without the dollar sign. 
         """
 
         return list(set(re.findall(self.SYMBOL_REGEX, text)))
 
     def price_reply(self, symbols: list):
         """
-        Takes a list of symbols and returns a dictionary of strings with information about the symbol.
+        Takes a list of symbols and replies with Markdown formatted text about the symbols price change for the day.
+        
+        Arguments:
+            symbols {list} -- List of stock market symbols.
+        
+        Returns:
+            dict -- Dictionary with keys of symbols and values of markdown formatted text example: {'tsla': 'The current stock price of Tesla Motors is $**420$$, the stock price is currently **up 42%**}
         """
         dataMessages = {}
         for symbol in symbols:
@@ -80,7 +112,7 @@ class Symbol:
 
         return dataMessages
 
-    def symbol_name(self, symbols: list):
+    def dividend_reply(self, symbols: list):
         divMessages = {}
 
         for symbol in symbols:

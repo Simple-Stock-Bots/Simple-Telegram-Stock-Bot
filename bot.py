@@ -68,7 +68,7 @@ def dividend(update, context):
     if symbols:
         context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
-        for reply in s.symbol_name(symbols).items():
+        for reply in s.dividend_reply(symbols).items():
 
             update.message.reply_text(
                 text=reply[1], parse_mode=telegram.ParseMode.MARKDOWN
@@ -87,7 +87,6 @@ def news(update, context):
         context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
         for reply in s.news_reply(symbols).items():
-
             update.message.reply_text(
                 text=reply[1], parse_mode=telegram.ParseMode.MARKDOWN
             )
@@ -105,7 +104,6 @@ def info(update, context):
         context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
         for reply in s.info_reply(symbols).items():
-
             update.message.reply_text(
                 text=reply[1], parse_mode=telegram.ParseMode.MARKDOWN
             )
@@ -113,7 +111,7 @@ def info(update, context):
 
 def inline_query(update, context):
     """
-    Handles inline query. 
+    Handles inline query.
     Does a fuzzy search on input and returns stocks that are close.
     """
     print(update.inline_query.query)
@@ -132,6 +130,7 @@ def inline_query(update, context):
                 )
             )
         except TypeError:
+            logging.warning(str(match))
             pass
 
         if len(results) == 5:
