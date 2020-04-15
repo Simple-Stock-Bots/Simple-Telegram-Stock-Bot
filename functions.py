@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 import requests as r
 from fuzzywuzzy import fuzz
+import schedule
 
 
 class Symbol:
@@ -14,14 +15,15 @@ class Symbol:
     """
 
     SYMBOL_REGEX = "[$]([a-zA-Z]{1,4})"
-    LIST_URL = "http://oatsreportable.finra.org/OATSReportableSecurities-SOD.txt"
+
     searched_symbols = {}
 
     def __init__(self, IEX_TOKEN: str):
         self.IEX_TOKEN = IEX_TOKEN
-        self.symbol_list, self.symbol_ts = self.get_symbol_list()
+        self.get_symbol_list()
+        schedule.every().day.do(self.get_symbol_list)
 
-    def get_symbol_list(self):
+    def get_symbol_list(self, return_df=False):
         """
         Fetches a list of stock market symbols from FINRA
         
@@ -29,15 +31,15 @@ class Symbol:
             pd.DataFrame -- [DataFrame with columns: Symbol | Issue_Name | Primary_Listing_Mkt
             datetime -- The time when the list of symbols was fetched. The Symbol list is updated every open and close of every trading day. 
         """
-        raw_symbols = r.get(self.LIST_URL).text
-        symbols = pd.DataFrame(
-            [line.split("|") for line in raw_symbols.split("\n")][:-1]
-        )
-        symbols.columns = symbols.iloc[0]
-        symbols = symbols.drop(symbols.index[0])
-        symbols = symbols.drop(symbols.index[-1])
-        symbols["Description"] = symbols["Symbol"] + ": " + symbols["Issue_Name"]
-        return symbols, datetime.now()
+        raw_symbols = r.get(
+            f"https://cloud.iexapis.com/stable/ref-data/symbols?token={self.IEX_TOKEN}"
+        ).json()
+        symbols = pd.DataFrame(data=raw_symbols)
+
+        symbols["description"] = symbols["symbol"] + ": " + symbols["name"]
+        self.symbol_list = symbols
+        if return_df:
+            return symbols, datetime.now()
 
     def search_symbols(self, search: str):
         """
@@ -49,28 +51,26 @@ class Symbol:
         Returns:
             List of Tuples -- A list tuples of every stock sorted in order of how well they match. Each tuple contains: (Symbol, Issue Name).
         """
+        schedule.run_pending()
         try:  # https://stackoverflow.com/a/3845776/8774114
             return self.searched_symbols[search]
         except KeyError:
             pass
-        if self.symbol_ts - datetime.now() > timedelta(hours=3):
-            self.symbol_list, self.symbol_ts = self.get_symbol_list()
 
         symbols = self.symbol_list
         symbols["Match"] = symbols.apply(
-            lambda x: fuzz.ratio(search.lower(), f"{x['Symbol']}".lower()), axis=1,
+            lambda x: fuzz.ratio(search.lower(), f"{x['symbol']}".lower()), axis=1,
         )
 
         symbols.sort_values(by="Match", ascending=False, inplace=True)
         if symbols["Match"].head().sum() < 300:
             symbols["Match"] = symbols.apply(
-                lambda x: fuzz.partial_ratio(search.lower(), x["Issue_Name"].lower()),
-                axis=1,
+                lambda x: fuzz.partial_ratio(search.lower(), x["name"].lower()), axis=1,
             )
 
             symbols.sort_values(by="Match", ascending=False, inplace=True)
         symbols = symbols.head(10)
-        symbol_list = list(zip(list(symbols["Symbol"]), list(symbols["Description"])))
+        symbol_list = list(zip(list(symbols["symbol"]), list(symbols["description"])))
         self.searched_symbols[search] = symbol_list
         return symbol_list
 
