@@ -52,6 +52,7 @@ class Symbol:
             List of Tuples -- A list tuples of every stock sorted in order of how well they match. Each tuple contains: (Symbol, Issue Name).
         """
         schedule.run_pending()
+        search = search.lower()
         try:  # https://stackoverflow.com/a/3845776/8774114
             return self.searched_symbols[search]
         except KeyError:
@@ -59,13 +60,13 @@ class Symbol:
 
         symbols = self.symbol_list
         symbols["Match"] = symbols.apply(
-            lambda x: fuzz.ratio(search.lower(), f"{x['symbol']}".lower()), axis=1,
+            lambda x: fuzz.ratio(search, f"{x['symbol']}".lower()), axis=1,
         )
 
         symbols.sort_values(by="Match", ascending=False, inplace=True)
         if symbols["Match"].head().sum() < 300:
             symbols["Match"] = symbols.apply(
-                lambda x: fuzz.partial_ratio(search.lower(), x["name"].lower()), axis=1,
+                lambda x: fuzz.partial_ratio(search, x["name"].lower()), axis=1,
             )
 
             symbols.sort_values(by="Match", ascending=False, inplace=True)
