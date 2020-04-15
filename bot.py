@@ -1,4 +1,4 @@
-# Works with Python 3.7
+# Works with Python 3.8
 import logging
 import os
 
@@ -15,7 +15,6 @@ from telegram.ext import (
 from functions import Symbol
 
 TELEGRAM_TOKEN = os.environ["TELEGRAM"]
-
 IEX_TOKEN = os.environ["IEX"]
 
 s = Symbol(IEX_TOKEN)
@@ -28,20 +27,18 @@ logger = logging.getLogger(__name__)
 print("Bot Online")
 
 
-# Define a few command handlers. These usually take the two arguments bot and
-# update. Error handlers also receive the raised TelegramError object in error.
-def start(bot, update):
+def start(update, context):
     """Send a message when the command /start is issued."""
     update.message.reply_text("I am started and ready to go!")
 
 
-def help(bot, update):
+def help(update, context):
     """Send link to docs when the command /help is issued."""
     message = "[Please see the documentaion for Bot information](https://simple-stock-bots.gitlab.io/site/telegram/)"
     update.message.reply_text(text=message, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
-def symbol_detect(bot, update):
+def symbol_detect(update, context):
     """
     Runs on any message that doesn't have a command and searches for symbols, then returns the prices of any symbols found. 
     """
@@ -51,7 +48,7 @@ def symbol_detect(bot, update):
 
     if symbols:
         # Let user know bot is working
-        bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+        context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
         for reply in s.price_reply(symbols).items():
 
@@ -60,7 +57,7 @@ def symbol_detect(bot, update):
             )
 
 
-def dividend(bot, update):
+def dividend(update, context):
     """
     waits for /dividend or /div command and then finds dividend info on that symbol.
     """
@@ -69,16 +66,16 @@ def dividend(bot, update):
     symbols = s.find_symbols(message)
 
     if symbols:
-        bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+        context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
-        for reply in s.symbol_name(symbols).items():
+        for reply in s.dividend_reply(symbols).items():
 
             update.message.reply_text(
                 text=reply[1], parse_mode=telegram.ParseMode.MARKDOWN
             )
 
 
-def news(bot, update):
+def news(update, context):
     """
     waits for /news command and then finds news info on that symbol.
     """
@@ -87,16 +84,15 @@ def news(bot, update):
     symbols = s.find_symbols(message)
 
     if symbols:
-        bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+        context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
         for reply in s.news_reply(symbols).items():
-
             update.message.reply_text(
                 text=reply[1], parse_mode=telegram.ParseMode.MARKDOWN
             )
 
 
-def info(bot, update):
+def info(update, context):
     """
     waits for /info command and then finds info on that symbol.
     """
@@ -105,26 +101,26 @@ def info(bot, update):
     symbols = s.find_symbols(message)
 
     if symbols:
-        bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+        context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
         for reply in s.info_reply(symbols).items():
-
             update.message.reply_text(
                 text=reply[1], parse_mode=telegram.ParseMode.MARKDOWN
             )
 
 
-def inline_query(bot, update):
+def inline_query(update, context):
     """
-    Handles inline query. 
+    Handles inline query.
     Does a fuzzy search on input and returns stocks that are close.
     """
+
     matches = s.search_symbols(update.inline_query.query)
+
     results = []
     for match in matches:
         try:
             price = s.price_reply([match[0]])[match[0]]
-            print(price)
             results.append(
                 InlineQueryResultArticle(
                     match[0],
@@ -135,22 +131,23 @@ def inline_query(bot, update):
                 )
             )
         except TypeError:
+            logging.warning(str(match))
             pass
 
         if len(results) == 5:
-            bot.answerInlineQuery(update.inline_query.id, results)
+            update.inline_query.answer(results)
             return
 
 
-def error(bot, update, error):
+def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, error)
 
 
 def main():
-    """Start the bot."""
+    """Start the context.bot."""
     # Create the EventHandler and pass it your bot's token.
-    updater = Updater(TELEGRAM_TOKEN)
+    updater = Updater(TELEGRAM_TOKEN, use_context=True)
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
