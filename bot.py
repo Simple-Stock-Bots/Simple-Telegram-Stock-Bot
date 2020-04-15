@@ -114,8 +114,9 @@ def inline_query(update, context):
     Handles inline query.
     Does a fuzzy search on input and returns stocks that are close.
     """
-    print(update.inline_query.query)
+
     matches = s.search_symbols(update.inline_query.query)
+
     results = []
     for match in matches:
         try:
