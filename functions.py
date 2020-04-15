@@ -15,6 +15,7 @@ class Symbol:
 
     SYMBOL_REGEX = "[$]([a-zA-Z]{1,4})"
     LIST_URL = "http://oatsreportable.finra.org/OATSReportableSecurities-SOD.txt"
+    searched_symbols = {}
 
     def __init__(self, IEX_TOKEN: str):
         self.IEX_TOKEN = IEX_TOKEN
@@ -48,6 +49,10 @@ class Symbol:
         Returns:
             List of Tuples -- A list tuples of every stock sorted in order of how well they match. Each tuple contains: (Symbol, Issue Name).
         """
+        try:  # https://stackoverflow.com/a/3845776/8774114
+            return self.searched_symbols[search]
+        except KeyError:
+            pass
         if self.symbol_ts - datetime.now() > timedelta(hours=3):
             self.symbol_list, self.symbol_ts = self.get_symbol_list()
 
@@ -65,7 +70,9 @@ class Symbol:
 
             symbols.sort_values(by="Match", ascending=False, inplace=True)
         symbols = symbols.head(10)
-        return list(zip(list(symbols["Symbol"]), list(symbols["Description"])))
+        symbol_list = list(zip(list(symbols["Symbol"]), list(symbols["Description"])))
+        self.searched_symbols[search] = symbol_list
+        return symbol_list
 
     def find_symbols(self, text: str):
         """
