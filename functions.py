@@ -48,7 +48,7 @@ class Symbol:
         Returns:
             List of Tuples -- A list tuples of every stock sorted in order of how well they match. Each tuple contains: (Symbol, Issue Name).
         """
-        if self.symbol_ts - datetime.now() > timedelta(hours=12):
+        if self.symbol_ts - datetime.now() > timedelta(hours=3):
             self.symbol_list, self.symbol_ts = self.get_symbol_list()
 
         symbols = self.symbol_list
@@ -62,8 +62,9 @@ class Symbol:
                 lambda x: fuzz.partial_ratio(search.lower(), x["Issue_Name"].lower()),
                 axis=1,
             )
-            symbols.sort_values(by="Match", ascending=False, inplace=True)
 
+            symbols.sort_values(by="Match", ascending=False, inplace=True)
+        symbols = symbols.head(10)
         return list(zip(list(symbols["Symbol"]), list(symbols["Description"])))
 
     def find_symbols(self, text: str):
