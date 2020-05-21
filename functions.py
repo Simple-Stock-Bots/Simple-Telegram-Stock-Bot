@@ -18,6 +18,24 @@ class Symbol:
 
     searched_symbols = {}
 
+    help_text = """
+Thanks for using this bot, consider supporting it by [buying me a beer.](https://www.buymeacoffee.com/Anson)
+
+Full documentation can be found [here.](https://simple-stock-bots.gitlab.io/site/telegram/)
+
+**Commands**
+    - /dividend `$[symbol]` will return dividend information for the symbol.
+    - /news `$[symbol]` will return news about the symbol.
+    - /info `$[symbol]` will return general information about the symbol.
+
+**Inline Features**
+    You can type @SimpleStockBot `[search]` in any chat or direct message to search for the stock bots full list of stock symbols and return the price of the ticker. 
+
+The bot also looks at every message in any chat it is in for stock symbols. Symbols start with a `$` followed by the stock symbol. For example: $tsla would return price information for Tesla Motors. 
+
+Market data is provided by [IEX Cloud](https://iexcloud.io)
+    """
+
     def __init__(self, IEX_TOKEN: str):
         self.IEX_TOKEN = IEX_TOKEN
         self.get_symbol_list()

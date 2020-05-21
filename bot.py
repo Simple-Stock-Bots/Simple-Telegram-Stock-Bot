@@ -29,13 +29,17 @@ print("Bot Online")
 
 def start(update, context):
     """Send a message when the command /start is issued."""
-    update.message.reply_text("I am started and ready to go!")
+    update.message.reply_text(
+        text=Symbol.help_text, parse_mode=telegram.ParseMode.MARKDOWN
+    )
 
 
 def help(update, context):
     """Send link to docs when the command /help is issued."""
-    message = "[Please see the documentaion for Bot information](https://simple-stock-bots.gitlab.io/site/telegram/)"
-    update.message.reply_text(text=message, parse_mode=telegram.ParseMode.MARKDOWN)
+
+    update.message.reply_text(
+        text=Symbol.help_text, parse_mode=telegram.ParseMode.MARKDOWN
+    )
 
 
 def symbol_detect(update, context):
