@@ -1,11 +1,10 @@
+<div align="center">
 <p align="center">
   <a href="" rel="noopener">
  <img width=200px height=200px src="https://assets.gitlab-static.net/uploads/-/system/project/avatar/10295651/TelegramLogo.jpg?width=64" alt="Simple Telegram Stock Bot"></a>
 </p>
 
 <h3 align="center">Simple Telegram Stock Bot</h3>
-
-<div align="center">
 
 <a href="https://www.buymeacoffee.com/Anson" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Beer" style="height: 51px !important;width: 217px !important;" ></a>
 
