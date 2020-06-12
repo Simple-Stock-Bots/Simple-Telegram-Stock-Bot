@@ -113,6 +113,18 @@ def info(update, context):
             )
 
 
+def search(update, context):
+    message = update.message.text
+    chat_id = update.message.chat_id
+
+    queries = s.search_symbols(message)[:6]
+    if queries:
+        reply = "*Search Results:*\n`$ticker: Company Name`\n"
+        for query in queries:
+            reply += "`" + query[1] + "`\n"
+        update.message.reply_text(text=reply, parse_mode=telegram.ParseMode.MARKDOWN)
+
+
 def inline_query(update, context):
     """
     Handles inline query.
@@ -163,6 +175,7 @@ def main():
     dp.add_handler(CommandHandler("div", dividend))
     dp.add_handler(CommandHandler("news", news))
     dp.add_handler(CommandHandler("info", info))
+    dp.add_handler(CommandHandler("search", search))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, symbol_detect))
