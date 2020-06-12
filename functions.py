@@ -21,7 +21,7 @@ class Symbol:
     help_text = """
 Thanks for using this bot, consider supporting it by [buying me a beer.](https://www.buymeacoffee.com/Anson)
 
-Full documentation can be found [here.](https://simple-stock-bots.gitlab.io/site/telegram/)
+Full documentation can be found [here.](https://simple-stock-bots.gitlab.io/site)
 
 **Commands**
     - /dividend `$[symbol]` will return dividend information for the symbol.
