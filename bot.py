@@ -1,7 +1,9 @@
 # Works with Python 3.8
+import io
 import logging
 import os
 
+import mplfinance as mpf
 import telegram
 from telegram import InlineQueryResultArticle, InputTextMessageContent
 from telegram.ext import (
@@ -117,12 +119,52 @@ def search(update, context):
     message = update.message.text
     chat_id = update.message.chat_id
 
+    usage = """
+    To use this command 
+    """
+
     queries = s.search_symbols(message)[:6]
     if queries:
         reply = "*Search Results:*\n`$ticker: Company Name`\n"
         for query in queries:
             reply += "`" + query[1] + "`\n"
         update.message.reply_text(text=reply, parse_mode=telegram.ParseMode.MARKDOWN)
+
+
+def historical(update, context):
+    # TODO: Document usage of this command. https://iexcloud.io/docs/api/#historical-prices
+
+    message = update.message.text
+    chat_id = update.message.chat_id
+
+    try:
+        cmd, symbol, period = message.split(" ")
+        symbol = symbol.replace("$", "")
+    except TypeError:
+        update.message.reply_text(
+            text="example: /historical tsla 5d", parse_mode=telegram.ParseMode.MARKDOWN
+        )
+
+    h = s.historical_reply(symbol, period)
+    if h.empty:
+        update.message.reply_text(
+            text="Invalid symbol or time period, please see `/help` or `/historical help` for usage details.",
+            parse_mode=telegram.ParseMode.MARKDOWN,
+        )
+
+    context.bot.send_chat_action(
+        chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO
+    )
+
+    buf = io.BytesIO()
+    mpf.plot(h, type="candle", savefig=dict(fname=buf, dpi=400))
+    buf.seek(0)
+
+    update.message.reply_photo(
+        photo=buf,
+        caption=f"*{period} chart for {symbol}*",
+        parse_mode=telegram.ParseMode.MARKDOWN,
+    )
 
 
 def inline_query(update, context):
@@ -176,7 +218,8 @@ def main():
     dp.add_handler(CommandHandler("news", news))
     dp.add_handler(CommandHandler("info", info))
     dp.add_handler(CommandHandler("search", search))
-
+    dp.add_handler(CommandHandler("historical", historical))
+    dp.add_handler(CommandHandler("h", historical))
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, symbol_detect))
 

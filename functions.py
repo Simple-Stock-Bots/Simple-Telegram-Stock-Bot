@@ -5,8 +5,8 @@ from datetime import datetime, timedelta
 
 import pandas as pd
 import requests as r
-from fuzzywuzzy import fuzz
 import schedule
+from fuzzywuzzy import fuzz
 
 
 class Symbol:
@@ -211,3 +211,19 @@ Market data is provided by [IEX Cloud](https://iexcloud.io)
                 ] = f"No information found for: {symbol}\nEither today is boring or the symbol does not exist."
 
         return infoMessages
+
+    def historical_reply(self, symbol: str, period: str):
+        if symbol.upper() not in list(self.symbol_list["symbol"]):
+            return pd.DataFrame()
+
+        time_periods = ["max", "5y", "2y", "1y", "ytd", "6m", "3m", "1m", "5d"]
+        if period not in time_periods:
+            return pd.DataFrame()
+
+        IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/chart/{period}?token={self.IEX_TOKEN}"
+        response = r.get(IEXurl)
+        if response.status_code == 200:
+            df = pd.DataFrame(response.json())
+            df["date"] = pd.to_datetime(df["date"])
+            df = df.set_index("date")
+            return df
