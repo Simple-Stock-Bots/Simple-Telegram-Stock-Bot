@@ -155,7 +155,7 @@ def intra(update, context):
     mpf.plot(
         df,
         type="renko",
-        title=f"Intraday chart for ${symbol.upper()}\n{datetime.date.today().strftime('%d, %b %Y')}",
+        title=f"\nIntraday chart for ${symbol.upper()} on {datetime.date.today().strftime('%d, %b %Y')}",
         volume=True,
         style="yahoo",
         mav=20,
