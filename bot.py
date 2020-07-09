@@ -219,6 +219,7 @@ def main():
     dp.add_handler(CommandHandler("news", news))
     dp.add_handler(CommandHandler("info", info))
     dp.add_handler(CommandHandler("search", search))
+    dp.add_handler(CommandHandler("intraday", intra))
     dp.add_handler(CommandHandler("intra", intra))
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, symbol_detect))
