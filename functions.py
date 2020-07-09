@@ -212,18 +212,15 @@ Market data is provided by [IEX Cloud](https://iexcloud.io)
 
         return infoMessages
 
-    def historical_reply(self, symbol: str, period: str):
+    def intra_reply(self, symbol: str):
         if symbol.upper() not in list(self.symbol_list["symbol"]):
             return pd.DataFrame()
 
-        time_periods = ["max", "5y", "2y", "1y", "ytd", "6m", "3m", "1m", "5d"]
-        if period not in time_periods:
-            return pd.DataFrame()
-
-        IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/chart/{period}?token={self.IEX_TOKEN}"
+        IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/intraday-prices?token={self.IEX_TOKEN}"
         response = r.get(IEXurl)
         if response.status_code == 200:
             df = pd.DataFrame(response.json())
-            df["date"] = pd.to_datetime(df["date"])
-            df = df.set_index("date")
+            df.dropna(inplace=True)
+            df["DT"] = pd.to_datetime(df["date"] + "T" + df["minute"])
+            df = df.set_index("DT")
             return df

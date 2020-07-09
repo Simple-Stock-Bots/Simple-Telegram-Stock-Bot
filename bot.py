@@ -1,4 +1,5 @@
 # Works with Python 3.8
+import datetime
 import io
 import logging
 import os
@@ -131,24 +132,18 @@ def search(update, context):
         update.message.reply_text(text=reply, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
-def historical(update, context):
+def intra(update, context):
     # TODO: Document usage of this command. https://iexcloud.io/docs/api/#historical-prices
 
     message = update.message.text
     chat_id = update.message.chat_id
 
-    try:
-        cmd, symbol, period = message.split(" ")
-        symbol = symbol.replace("$", "")
-    except TypeError:
-        update.message.reply_text(
-            text="example: /historical tsla 5d", parse_mode=telegram.ParseMode.MARKDOWN
-        )
+    symbol = s.find_symbols(message)[0]
 
-    h = s.historical_reply(symbol, period)
-    if h.empty:
+    df = s.intra_reply(symbol)
+    if df.empty:
         update.message.reply_text(
-            text="Invalid symbol or time period, please see `/help` or `/historical help` for usage details.",
+            text="Invalid symbol please see `/help` for usage details.",
             parse_mode=telegram.ParseMode.MARKDOWN,
         )
 
@@ -157,13 +152,19 @@ def historical(update, context):
     )
 
     buf = io.BytesIO()
-    mpf.plot(h, type="candle", savefig=dict(fname=buf, dpi=400))
+    mpf.plot(
+        df,
+        type="renko",
+        title=f"Intraday chart for ${symbol.upper()}\n{datetime.date.today().strftime('%d, %b %Y')}",
+        volume=True,
+        style="yahoo",
+        mav=20,
+        savefig=dict(fname=buf, dpi=400),
+    )
     buf.seek(0)
 
     update.message.reply_photo(
-        photo=buf,
-        caption=f"*{period} chart for {symbol}*",
-        parse_mode=telegram.ParseMode.MARKDOWN,
+        photo=buf, caption=f"", parse_mode=telegram.ParseMode.MARKDOWN,
     )
 
 
@@ -218,8 +219,7 @@ def main():
     dp.add_handler(CommandHandler("news", news))
     dp.add_handler(CommandHandler("info", info))
     dp.add_handler(CommandHandler("search", search))
-    dp.add_handler(CommandHandler("historical", historical))
-    dp.add_handler(CommandHandler("h", historical))
+    dp.add_handler(CommandHandler("intra", intra))
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, symbol_detect))
 
