@@ -3,6 +3,7 @@ import datetime
 import io
 import logging
 import os
+import random
 
 import mplfinance as mpf
 import telegram
@@ -198,6 +199,19 @@ def inline_query(update, context):
             return
 
 
+def rand_pick(update, context):
+
+    choice = random.choice(list(s.symbol_list["description"]))
+    hold = (
+        datetime.date.today() + datetime.timedelta(random.randint(1, 365))
+    ).strftime("%b %d, %Y")
+
+    update.message.reply_text(
+        text=f"{choice}\nBuy and hold until: {hold}",
+        parse_mode=telegram.ParseMode.MARKDOWN,
+    )
+
+
 def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, error)
@@ -221,6 +235,8 @@ def main():
     dp.add_handler(CommandHandler("search", search))
     dp.add_handler(CommandHandler("intraday", intra))
     dp.add_handler(CommandHandler("intra", intra))
+    dp.add_handler(CommandHandler("random", rand_pick))
+
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, symbol_detect))
 
