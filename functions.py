@@ -39,7 +39,7 @@ Market data is provided by [IEX Cloud](https://iexcloud.io)
     def __init__(self, IEX_TOKEN: str):
         self.IEX_TOKEN = IEX_TOKEN
         self.get_symbol_list()
-        schedule.every().day.do(self.get_symbol_list)
+        schedule.every().monday.do(self.get_symbol_list)
 
     def get_symbol_list(self, return_df=False):
         """
