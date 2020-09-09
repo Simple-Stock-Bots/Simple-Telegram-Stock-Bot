@@ -177,14 +177,16 @@ Market data is provided by [IEX Cloud](https://iexcloud.io)
         newsMessages = {}
 
         for symbol in symbols:
-            IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/news/last/3?token={self.IEX_TOKEN}"
+            IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/news/last/5?token={self.IEX_TOKEN}"
             response = r.get(IEXurl)
             if response.status_code == 200:
                 data = response.json()
-                newsMessages[symbol] = f"News for **{symbol.upper()}**:\n"
-                for news in data:
-                    message = f"\t[{news['headline']}]({news['url']})\n\n"
-                    newsMessages[symbol] = newsMessages[symbol] + message
+                if len(data):
+                    newsMessages[symbol] = f"News for **{symbol.upper()}**:\n\n"
+                    for news in data:
+                        if news["lang"] == "en" and not news["hasPaywall"]:
+                            message = f"*{news['source']}*: [{news['headline']}]({news['url']})\n"
+                            newsMessages[symbol] = newsMessages[symbol] + message
             else:
                 newsMessages[
                     symbol
