@@ -44,10 +44,10 @@ Market data is provided by [IEX Cloud](https://iexcloud.io)
     def get_symbol_list(self, return_df=False):
         """
         Fetches a list of stock market symbols from FINRA
-        
+
         Returns:
             pd.DataFrame -- [DataFrame with columns: Symbol | Issue_Name | Primary_Listing_Mkt
-            datetime -- The time when the list of symbols was fetched. The Symbol list is updated every open and close of every trading day. 
+            datetime -- The time when the list of symbols was fetched. The Symbol list is updated every open and close of every trading day.
         """
         raw_symbols = r.get(
             f"https://cloud.iexapis.com/stable/ref-data/symbols?token={self.IEX_TOKEN}"
@@ -62,10 +62,10 @@ Market data is provided by [IEX Cloud](https://iexcloud.io)
     def search_symbols(self, search: str):
         """
         Performs a fuzzy search to find stock symbols closest to a search term.
-        
+
         Arguments:
             search {str} -- String used to search, could be a company name or something close to the companies stock ticker.
-        
+
         Returns:
             List of Tuples -- A list tuples of every stock sorted in order of how well they match. Each tuple contains: (Symbol, Issue Name).
         """
@@ -78,13 +78,15 @@ Market data is provided by [IEX Cloud](https://iexcloud.io)
 
         symbols = self.symbol_list
         symbols["Match"] = symbols.apply(
-            lambda x: fuzz.ratio(search, f"{x['symbol']}".lower()), axis=1,
+            lambda x: fuzz.ratio(search, f"{x['symbol']}".lower()),
+            axis=1,
         )
 
         symbols.sort_values(by="Match", ascending=False, inplace=True)
         if symbols["Match"].head().sum() < 300:
             symbols["Match"] = symbols.apply(
-                lambda x: fuzz.partial_ratio(search, x["name"].lower()), axis=1,
+                lambda x: fuzz.partial_ratio(search, x["name"].lower()),
+                axis=1,
             )
 
             symbols.sort_values(by="Match", ascending=False, inplace=True)
@@ -96,12 +98,12 @@ Market data is provided by [IEX Cloud](https://iexcloud.io)
     def find_symbols(self, text: str):
         """
         Finds stock tickers starting with a dollar sign in a blob of text and returns them in a list. Only returns each match once. Example: Whats the price of $tsla? -> ['tsla']
-        
+
         Arguments:
             text {str} -- Blob of text that might contain tickers with the format: $TICKER
-        
+
         Returns:
-            list -- List of every found match without the dollar sign. 
+            list -- List of every found match without the dollar sign.
         """
 
         return list(set(re.findall(self.SYMBOL_REGEX, text)))
@@ -109,10 +111,10 @@ Market data is provided by [IEX Cloud](https://iexcloud.io)
     def price_reply(self, symbols: list):
         """
         Takes a list of symbols and replies with Markdown formatted text about the symbols price change for the day.
-        
+
         Arguments:
             symbols {list} -- List of stock market symbols.
-        
+
         Returns:
             dict -- Dictionary with keys of symbols and values of markdown formatted text example: {'tsla': 'The current stock price of Tesla Motors is $**420$$, the stock price is currently **up 42%**}
         """
@@ -224,3 +226,33 @@ Market data is provided by [IEX Cloud](https://iexcloud.io)
             df["DT"] = pd.to_datetime(df["date"] + "T" + df["minute"])
             df = df.set_index("DT")
             return df
+
+    def stat_reply(self, symbols: list):
+        infoMessages = {}
+
+        for symbol in symbols:
+            IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/stats?token={self.IEX_TOKEN}"
+            response = r.get(IEXurl)
+
+            if response.status_code == 200:
+                data = response.json()
+                infoMessages[
+                    symbol
+                ] = f"""
+                Company Name: {data['companyName']}\n
+Market Cap: {data['marketcap']}
+52 Week (high-low):{data['week52high']}-{data['week52low']}
+Number of Employees: {data['employees']}
+Next Earnings Date: {data['nextEarningsDate']}
+Dividend Info:
+                \tYield: {round(data['dividendYield'],4)*100}%
+                \tNext Date: {data['nextDividendDate']}
+                \tEx Date: {data['exDividendDate']}
+                """
+
+            else:
+                infoMessages[
+                    symbol
+                ] = f"No information found for: {symbol}\nEither today is boring or the symbol does not exist."
+
+        return infoMessages

@@ -48,7 +48,7 @@ def help(update, context):
 
 def symbol_detect(update, context):
     """
-    Runs on any message that doesn't have a command and searches for symbols, then returns the prices of any symbols found. 
+    Runs on any message that doesn't have a command and searches for symbols, then returns the prices of any symbols found.
     """
     message = update.message.text
     chat_id = update.message.chat_id
@@ -165,8 +165,27 @@ def intra(update, context):
     buf.seek(0)
 
     update.message.reply_photo(
-        photo=buf, caption=f"", parse_mode=telegram.ParseMode.MARKDOWN,
+        photo=buf,
+        caption=f"",
+        parse_mode=telegram.ParseMode.MARKDOWN,
     )
+
+
+def stat(update, context):
+    """
+    https://iexcloud.io/docs/api/#key-stats
+    """
+    message = update.message.text
+    chat_id = update.message.chat_id
+    symbols = s.find_symbols(message)
+
+    if symbols:
+        context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+
+        for reply in s.stat_reply(symbols).items():
+            update.message.reply_text(
+                text=reply[1], parse_mode=telegram.ParseMode.MARKDOWN
+            )
 
 
 def inline_query(update, context):
@@ -232,6 +251,8 @@ def main():
     dp.add_handler(CommandHandler("div", dividend))
     dp.add_handler(CommandHandler("news", news))
     dp.add_handler(CommandHandler("info", info))
+    dp.add_handler(CommandHandler("stat", stat))
+    dp.add_handler(CommandHandler("stats", stat))
     dp.add_handler(CommandHandler("search", search))
     dp.add_handler(CommandHandler("intraday", intra))
     dp.add_handler(CommandHandler("intra", intra))
