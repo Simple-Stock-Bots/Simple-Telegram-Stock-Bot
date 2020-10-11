@@ -78,15 +78,13 @@ Market data is provided by [IEX Cloud](https://iexcloud.io)
 
         symbols = self.symbol_list
         symbols["Match"] = symbols.apply(
-            lambda x: fuzz.ratio(search, f"{x['symbol']}".lower()),
-            axis=1,
+            lambda x: fuzz.ratio(search, f"{x['symbol']}".lower()), axis=1,
         )
 
         symbols.sort_values(by="Match", ascending=False, inplace=True)
         if symbols["Match"].head().sum() < 300:
             symbols["Match"] = symbols.apply(
-                lambda x: fuzz.partial_ratio(search, x["name"].lower()),
-                axis=1,
+                lambda x: fuzz.partial_ratio(search, x["name"].lower()), axis=1,
             )
 
             symbols.sort_values(by="Match", ascending=False, inplace=True)
@@ -238,19 +236,22 @@ Market data is provided by [IEX Cloud](https://iexcloud.io)
 
             if response.status_code == 200:
                 data = response.json()
-                infoMessages[
-                    symbol
-                ] = f"""
-                Company Name: {data['companyName']}\n
-Market Cap: {data['marketcap']}
-52 Week (high-low):{data['week52high']}-{data['week52low']}
-Number of Employees: {data['employees']}
-Next Earnings Date: {data['nextEarningsDate']}
-Dividend Info:
-                \tYield: {round(data['dividendYield'],4)*100}%
-                \tNext Date: {data['nextDividendDate']}
-                \tEx Date: {data['exDividendDate']}
+                try:
+                    infoMessages[
+                        symbol
+                    ] = f"""
+                    Company Name: {data['companyName']}
+                    Market Cap: {data['marketcap']:,}
+                    52 Week (high-low): {data['week52high']:,}-{data['week52low']:,}
+                    Number of Employees: {data['employees']:,}
+                    Next Earnings Date: {data['nextEarningsDate']}
+                    Price to Earnings: {data['peRatio']}
+                    Beta: {data['beta']:.3f}
                 """
+                except KeyError:
+                    infoMessages[
+                        symbol
+                    ] = f"Data for {data['companyName']} is not available. This could be due to them not announcing their earnings date."
 
             else:
                 infoMessages[

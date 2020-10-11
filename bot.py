@@ -156,7 +156,7 @@ def intra(update, context):
     mpf.plot(
         df,
         type="renko",
-        title=f"\nIntraday chart for ${symbol.upper()} on {datetime.date.today().strftime('%d, %b %Y')}",
+        title=f"\n${symbol.upper()}",
         volume=True,
         style="yahoo",
         mav=20,
@@ -166,7 +166,7 @@ def intra(update, context):
 
     update.message.reply_photo(
         photo=buf,
-        caption=f"",
+        caption=f"\nIntraday chart for ${symbol.upper()} on {datetime.date.today().strftime('%d, %b %Y')}",
         parse_mode=telegram.ParseMode.MARKDOWN,
     )
 
