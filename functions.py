@@ -25,8 +25,10 @@ Full documentation can be found [here.](https://simple-stock-bots.gitlab.io/site
 
 **Commands**
     - /dividend `$[symbol]` will return dividend information for the symbol.
+    - /intra `$[symbol]` will return a plot of the stocks movement since the last market open. 
     - /news `$[symbol]` will return news about the symbol.
     - /info `$[symbol]` will return general information about the symbol.
+    - /stat `$[symbol]` will return important statistics about the symbol. 
 
 **Inline Features**
     You can type @SimpleStockBot `[search]` in any chat or direct message to search for the stock bots full list of stock symbols and return the price of the ticker. 
