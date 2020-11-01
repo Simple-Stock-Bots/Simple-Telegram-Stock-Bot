@@ -188,6 +188,26 @@ def stat(update, context):
             )
 
 
+def crypto(update, context):
+    """
+    https://iexcloud.io/docs/api/#cryptocurrency-quote
+    """
+    context.bot.send_chat_action(
+        chat_id=update.message.chat_id, action=telegram.ChatAction.TYPING
+    )
+    message = update.message.text
+
+    reply = s.crypto(message)
+
+    if reply:
+        update.message.reply_text(text=reply, parse_mode=telegram.ParseMode.MARKDOWN)
+    else:
+        update.message.reply_text(
+            text=f"Pair: f{message} returned an error.",
+            parse_mode=telegram.ParseMode.MARKDOWN,
+        )
+
+
 def inline_query(update, context):
     """
     Handles inline query.
@@ -256,6 +276,7 @@ def main():
     dp.add_handler(CommandHandler("search", search))
     dp.add_handler(CommandHandler("intraday", intra))
     dp.add_handler(CommandHandler("intra", intra))
+    dp.add_handler(CommandHandler("crypto", crypto))
     dp.add_handler(CommandHandler("random", rand_pick))
 
     # on noncommand i.e message - echo the message on Telegram

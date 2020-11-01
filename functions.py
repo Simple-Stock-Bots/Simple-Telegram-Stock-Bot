@@ -261,3 +261,33 @@ Market data is provided by [IEX Cloud](https://iexcloud.io)
                 ] = f"No information found for: {symbol}\nEither today is boring or the symbol does not exist."
 
         return infoMessages
+
+    def crypto(self, pair):
+        """Get quote for a cryptocurrency pair.
+
+        Args:
+            pair (string): Cryptocurrency
+        """
+
+        pair = pair.split(" ")[-1].replace("/", "").upper()
+        IEXurl = f"https://cloud.iexapis.com/stable/crypto/{pair}/quote?token={self.IEX_TOKEN}"
+
+        response = r.get(IEXurl)
+
+        if response.status_code == 200:
+            data = response.json()
+
+            quote = f"Symbol: {data['symbol']}\n"
+            quote += f"Price: {data['latestPrice']}\n"
+            quote += f"Volume: {data['latestVolume']}\n"
+
+            new, old = data["latestPrice"], data["previousClose"]
+            if old is not None:
+                change = (float(new) - float(old)) / float(old)
+                quote += f"Change: {change}\n"
+
+            return quote
+
+        else:
+            return False
+
