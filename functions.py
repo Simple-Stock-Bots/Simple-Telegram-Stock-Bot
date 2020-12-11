@@ -224,7 +224,7 @@ Market data is provided by [IEX Cloud](https://iexcloud.io)
         response = r.get(IEXurl)
         if response.status_code == 200:
             df = pd.DataFrame(response.json())
-            df.dropna(inplace=True)
+            df.dropna(inplace=True, subset=["date", "minute", "high", "low", "volume"])
             df["DT"] = pd.to_datetime(df["date"] + "T" + df["minute"])
             df = df.set_index("DT")
             return df
