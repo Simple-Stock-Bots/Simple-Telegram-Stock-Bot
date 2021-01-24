@@ -197,13 +197,13 @@ def crypto(update, context):
     )
     message = update.message.text
 
-    reply = s.crypto(message)
+    reply = s.crypto_reply(message)
 
     if reply:
         update.message.reply_text(text=reply, parse_mode=telegram.ParseMode.MARKDOWN)
     else:
         update.message.reply_text(
-            text=f"Pair: f{message} returned an error.",
+            text=f"Pair: {message} returned an error.",
             parse_mode=telegram.ParseMode.MARKDOWN,
         )
 

@@ -268,7 +268,7 @@ Market data is provided by [IEX Cloud](https://iexcloud.io)
 
         return infoMessages
 
-    def crypto(self, pair):
+    def crypto_reply(self, pair):
         """Get quote for a cryptocurrency pair.
 
         Args:
@@ -276,6 +276,8 @@ Market data is provided by [IEX Cloud](https://iexcloud.io)
         """
 
         pair = pair.split(" ")[-1].replace("/", "").upper()
+        pair += "USD" if len(pair) == 3 else pair
+
         IEXurl = f"https://cloud.iexapis.com/stable/crypto/{pair}/quote?token={self.IEX_TOKEN}"
 
         response = r.get(IEXurl)
@@ -284,8 +286,7 @@ Market data is provided by [IEX Cloud](https://iexcloud.io)
             data = response.json()
 
             quote = f"Symbol: {data['symbol']}\n"
-            quote += f"Price: {data['latestPrice']}\n"
-            quote += f"Volume: {data['latestVolume']}\n"
+            quote += f"Price: ${data['latestPrice']}\n"
 
             new, old = data["latestPrice"], data["previousClose"]
             if old is not None:
