@@ -80,13 +80,15 @@ Market data is provided by [IEX Cloud](https://iexcloud.io)
 
         symbols = self.symbol_list
         symbols["Match"] = symbols.apply(
-            lambda x: fuzz.ratio(search, f"{x['symbol']}".lower()), axis=1,
+            lambda x: fuzz.ratio(search, f"{x['symbol']}".lower()),
+            axis=1,
         )
 
         symbols.sort_values(by="Match", ascending=False, inplace=True)
         if symbols["Match"].head().sum() < 300:
             symbols["Match"] = symbols.apply(
-                lambda x: fuzz.partial_ratio(search, x["name"].lower()), axis=1,
+                lambda x: fuzz.partial_ratio(search, x["name"].lower()),
+                axis=1,
             )
 
             symbols.sort_values(by="Match", ascending=False, inplace=True)
@@ -189,6 +191,10 @@ Market data is provided by [IEX Cloud](https://iexcloud.io)
                         if news["lang"] == "en" and not news["hasPaywall"]:
                             message = f"*{news['source']}*: [{news['headline']}]({news['url']})\n"
                             newsMessages[symbol] = newsMessages[symbol] + message
+                else:
+                    newsMessages[
+                        symbol
+                    ] = f"No news found for: {symbol}\nEither today is boring or the symbol does not exist."
             else:
                 newsMessages[
                     symbol
@@ -290,4 +296,3 @@ Market data is provided by [IEX Cloud](https://iexcloud.io)
 
         else:
             return False
-
