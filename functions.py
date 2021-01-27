@@ -235,6 +235,20 @@ Market data is provided by [IEX Cloud](https://iexcloud.io)
             df = df.set_index("DT")
             return df
 
+    def chart_reply(self, symbol: str):
+        if symbol.upper() not in list(self.symbol_list["symbol"]):
+            return pd.DataFrame()
+
+        IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/chart/1mm?token={self.IEX_TOKEN}&chartInterval=3&includeToday=true"
+        print(IEXurl)
+        response = r.get(IEXurl)
+        if response.status_code == 200:
+            df = pd.DataFrame(response.json())
+            df.dropna(inplace=True, subset=["date", "minute", "high", "low", "volume"])
+            df["DT"] = pd.to_datetime(df["date"] + "T" + df["minute"])
+            df = df.set_index("DT")
+            return df
+
     def stat_reply(self, symbols: list):
         infoMessages = {}
 

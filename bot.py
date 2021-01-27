@@ -173,6 +173,44 @@ def intra(update, context):
     )
 
 
+def chart(update, context):
+    # TODO: Document usage of this command. https://iexcloud.io/docs/api/#historical-prices
+
+    message = update.message.text
+    chat_id = update.message.chat_id
+
+    symbol = s.find_symbols(message)[0]
+
+    df = s.chart_reply(symbol)
+    if df.empty:
+        update.message.reply_text(
+            text="Invalid symbol please see `/help` for usage details.",
+            parse_mode=telegram.ParseMode.MARKDOWN,
+        )
+
+    context.bot.send_chat_action(
+        chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO
+    )
+
+    price = s.price_reply([symbol])
+    buf = io.BytesIO()
+    mpf.plot(
+        df,
+        type="candle",
+        title=f"\n${symbol.upper()}",
+        volume=True,
+        style="yahoo",
+        savefig=dict(fname=buf, dpi=400),
+    )
+    buf.seek(0)
+
+    update.message.reply_photo(
+        photo=buf,
+        caption=f"\n1 Month chart for ${symbol.upper()} on {datetime.date.today().strftime('%d, %b %Y')}\n\n{price[symbol]}",
+        parse_mode=telegram.ParseMode.MARKDOWN,
+    )
+
+
 def stat(update, context):
     """
     https://iexcloud.io/docs/api/#key-stats
@@ -278,6 +316,7 @@ def main():
     dp.add_handler(CommandHandler("search", search))
     dp.add_handler(CommandHandler("intraday", intra))
     dp.add_handler(CommandHandler("intra", intra))
+    dp.add_handler(CommandHandler("chart", chart))
     dp.add_handler(CommandHandler("crypto", crypto))
     dp.add_handler(CommandHandler("random", rand_pick))
 
