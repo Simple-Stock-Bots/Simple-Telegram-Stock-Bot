@@ -26,6 +26,7 @@ Full documentation can be found [here.](https://simple-stock-bots.gitlab.io/site
 **Commands**
     - /dividend `$[symbol]` will return dividend information for the symbol.
     - /intra `$[symbol]` will return a plot of the stocks movement since the last market open. 
+    - /chart `$[chart]` will return a plot of the stocks movement for the past 1 month.
     - /news `$[symbol]` will return news about the symbol.
     - /info `$[symbol]` will return general information about the symbol.
     - /stat `$[symbol]` will return important statistics about the symbol. 
