@@ -152,6 +152,8 @@ def intra(update, context):
         chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO
     )
 
+    price = s.price_reply([symbol])
+
     buf = io.BytesIO()
     mpf.plot(
         df,
@@ -166,7 +168,7 @@ def intra(update, context):
 
     update.message.reply_photo(
         photo=buf,
-        caption=f"\nIntraday chart for ${symbol.upper()} on {datetime.date.today().strftime('%d, %b %Y')}",
+        caption=f"\nIntraday chart for ${symbol.upper()} on {datetime.date.today().strftime('%d, %b %Y')}\n\n{price[symbol]}",
         parse_mode=telegram.ParseMode.MARKDOWN,
     )
 
