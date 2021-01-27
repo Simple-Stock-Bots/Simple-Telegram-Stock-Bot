@@ -21,18 +21,21 @@ class Symbol:
     help_text = """
 Thanks for using this bot, consider supporting it by [buying me a beer.](https://www.buymeacoffee.com/Anson)
 
-Full documentation can be found [here.](https://simple-stock-bots.gitlab.io/site)
+Keep up with the latest news for the bot in its Telegram Channel: https://t.me/simplestockbotnews
+
+Full documentation on using and running your own stock bot can be found [here.](https://simple-stock-bots.gitlab.io/site)
 
 **Commands**
-    - /dividend `$[symbol]` will return dividend information for the symbol.
-    - /intra `$[symbol]` will return a plot of the stocks movement since the last market open. 
-    - /chart `$[chart]` will return a plot of the stocks movement for the past 1 month.
-    - /news `$[symbol]` will return news about the symbol.
-    - /info `$[symbol]` will return general information about the symbol.
-    - /stat `$[symbol]` will return important statistics about the symbol. 
+        - /dividend $[symbol] will return dividend information for the symbol. 📅
+        - /intra $[symbol] Plot of the stocks movement since the last market open.  📈
+        - /chart $[symbol] Plot of the stocks movement for the past 1 month. 📊
+        - /news $[symbol] News about the symbol. 📰
+        - /info $[symbol] General information about the symbol. ℹ️
+        - /stat $[symbol] Key statistics about the symbol. 🔢
+        - /help Get some help using the bot. 🆘
 
 **Inline Features**
-    You can type @SimpleStockBot `[search]` in any chat or direct message to search for the stock bots full list of stock symbols and return the price of the ticker. 
+    You can type @SimpleStockBot `[search]` in any chat or direct message to search for the stock bots full list of stock symbols and return the price of the ticker. Then once you select the ticker you want the bot will send a message as you in that chat with the latest stock price. 
 
 The bot also looks at every message in any chat it is in for stock symbols. Symbols start with a `$` followed by the stock symbol. For example: $tsla would return price information for Tesla Motors. 
 
