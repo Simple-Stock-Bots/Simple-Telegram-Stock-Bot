@@ -21,7 +21,7 @@ class Symbol:
 
     license = re.sub(
         r"\b\n",
-        "",
+        " ",
         r.get(
             "https://gitlab.com/simple-stock-bots/simple-telegram-stock-bot/-/raw/master/LICENSE"
         ).text,
