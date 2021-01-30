@@ -46,6 +46,14 @@ def help(update, context):
     )
 
 
+def license(update, context):
+    """Return bots license agreement"""
+
+    update.message.reply_text(
+        text=Symbol.license, parse_mode=telegram.ParseMode.MARKDOWN
+    )
+
+
 def symbol_detect(update, context):
     """
     Runs on any message that doesn't have a command and searches for symbols, then returns the prices of any symbols found.
@@ -307,6 +315,7 @@ def main():
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
+    dp.add_handler(CommandHandler("license", license))
     dp.add_handler(CommandHandler("dividend", dividend))
     dp.add_handler(CommandHandler("div", dividend))
     dp.add_handler(CommandHandler("news", news))
