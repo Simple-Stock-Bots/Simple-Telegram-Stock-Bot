@@ -17,6 +17,15 @@ class Symbol:
     SYMBOL_REGEX = "[$]([a-zA-Z]{1,4})"
 
     searched_symbols = {}
+    charts = {}
+
+    license = re.sub(
+        r"\b\n",
+        "",
+        r.get(
+            "https://gitlab.com/simple-stock-bots/simple-telegram-stock-bot/-/raw/master/LICENSE"
+        ).text,
+    )
 
     help_text = """
 Thanks for using this bot, consider supporting it by [buying me a beer.](https://www.buymeacoffee.com/Anson)
@@ -45,7 +54,7 @@ Market data is provided by [IEX Cloud](https://iexcloud.io)
     def __init__(self, IEX_TOKEN: str):
         self.IEX_TOKEN = IEX_TOKEN
         self.get_symbol_list()
-        self.charts = {}
+
         schedule.every().monday.do(self.get_symbol_list)
         schedule.every().day.do(self.clear_charts)
 
