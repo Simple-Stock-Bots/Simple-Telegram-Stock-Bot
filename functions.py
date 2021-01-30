@@ -275,23 +275,26 @@ Market data is provided by [IEX Cloud](https://iexcloud.io)
 
             if response.status_code == 200:
                 data = response.json()
-                try:
-                    infoMessages[
-                        symbol
-                    ] = f"""
-                    Company Name: {data['companyName']}
-                    Market Cap: {data['marketcap']:,}
-                    52 Week (high-low): {data['week52high']:,}-{data['week52low']:,}
-                    Number of Employees: {data['employees']:,}
-                    Next Earnings Date: {data['nextEarningsDate']}
-                    Price to Earnings: {data['peRatio']}
-                    Beta: {data['beta']:.3f}
-                """
-                except KeyError:
-                    infoMessages[
-                        symbol
-                    ] = f"Data for {data['companyName']} is not available. This could be due to them not announcing their earnings date."
+                [data.pop(k) for k in list(data) if data[k] == ""]
 
+                m = ""
+                if "companyName" in data:
+                    m += f"Company Name: {data['companyName']}\n"
+                if "marketcap" in data:
+                    m += f"Market Cap: {data['marketcap']:,}\n"
+                if "week52high" in data:
+                    m += f"52 Week (high-low): {data['week52high']:,} "
+                if "week52low" in data:
+                    m += f"- {data['week52low']:,}\n"
+                if "employees" in data:
+                    m += f"Number of Employees: {data['employees']:,}\n"
+                if "nextEarningsDate" in data:
+                    m += f"Next Earnings Date: {data['nextEarningsDate']}\n"
+                if "peRatio" in data:
+                    m += f"Price to Earnings: {data['peRatio']:.3f}\n"
+                if "beta" in data:
+                    m += f"Beta: {data['beta']:.3f}\n"
+                infoMessages[symbol] = m
             else:
                 infoMessages[
                     symbol
