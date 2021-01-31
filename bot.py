@@ -7,7 +7,7 @@ import random
 
 import mplfinance as mpf
 import telegram
-from telegram import InlineQueryResultArticle, InputTextMessageContent
+from telegram import InlineQueryResultArticle, InputTextMessageContent, LabeledPrice
 from telegram.ext import (
     CommandHandler,
     Filters,
@@ -20,6 +20,7 @@ from functions import Symbol
 
 TELEGRAM_TOKEN = os.environ["TELEGRAM"]
 IEX_TOKEN = os.environ["IEX"]
+STRIPE_TOKEN = os.environ["STRIPE"]
 
 s = Symbol(IEX_TOKEN)
 # Enable logging
@@ -51,6 +52,46 @@ def license(update, context):
 
     update.message.reply_text(
         text=Symbol.license, parse_mode=telegram.ParseMode.MARKDOWN
+    )
+
+
+def donate(update, context):
+    chat_id = update.message.chat_id
+
+    if update.message.text.strip() == "/donate":
+        update.message.reply_text(
+            text=s.donate_text, parse_mode=telegram.ParseMode.MARKDOWN
+        )
+        return
+    else:
+        amount = update.message.text.replace("/donate", "").replace("$", "").strip()
+    title = "Simple Stock Bot Donation"
+    description = f"Simple Stock Bot Donation of ${amount}"
+    payload = "Simple Telegram Stock Bot"
+    provider_token = STRIPE_TOKEN
+    start_parameter = str(chat_id)
+
+    print(start_parameter)
+    currency = "USD"
+
+    try:
+        price = int(float(amount) * 100)
+    except ValueError:
+        update.message.reply_text(f"{amount} is not a valid donation amount or number.")
+        return
+    print(price)
+
+    prices = [LabeledPrice(f"Donation:", price)]
+
+    context.bot.send_invoice(
+        chat_id,
+        title,
+        description,
+        payload,
+        provider_token,
+        start_parameter,
+        currency,
+        prices,
     )
 
 
@@ -328,6 +369,7 @@ def main():
     dp.add_handler(CommandHandler("chart", chart))
     dp.add_handler(CommandHandler("crypto", crypto))
     dp.add_handler(CommandHandler("random", rand_pick))
+    dp.add_handler(CommandHandler("donate", donate))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, symbol_detect))

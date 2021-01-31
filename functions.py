@@ -35,6 +35,7 @@ Keep up with the latest news for the bot in its Telegram Channel: https://t.me/s
 Full documentation on using and running your own stock bot can be found [here.](https://simple-stock-bots.gitlab.io/site)
 
 **Commands**
+        - /donate [amount in USD] to donate. 💵
         - /dividend $[symbol] will return dividend information for the symbol. 📅
         - /intra $[symbol] Plot of the stocks movement since the last market open.  📈
         - /chart $[symbol] Plot of the stocks movement for the past 1 month. 📊
@@ -49,6 +50,18 @@ Full documentation on using and running your own stock bot can be found [here.](
 The bot also looks at every message in any chat it is in for stock symbols. Symbols start with a `$` followed by the stock symbol. For example: $tsla would return price information for Tesla Motors. 
 
 Market data is provided by [IEX Cloud](https://iexcloud.io)
+    """
+
+    donate_text = """
+Simple Stock Bot is run entirely on donations[.](https://www.buymeacoffee.com/Anson) All donations go directly towards paying for servers, and market data is provided by [IEX Cloud](https://iexcloud.io/).
+
+The easiest way to donate is to run the `/donate [amount in USD]` command with US dollars you would like to donate.
+
+Example: `/donate 2` would donate 2 USD. 
+
+An alternative way to donate is through https://www.buymeacoffee.com/Anson, which accepts Paypal or Credit card. 
+
+If you have any questions get in touch: @MisterBiggs or [anson@ansonbiggs.com](http://mailto:anson@ansonbiggs.com/)
     """
 
     def __init__(self, IEX_TOKEN: str):
