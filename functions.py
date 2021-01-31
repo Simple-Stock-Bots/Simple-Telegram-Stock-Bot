@@ -35,7 +35,7 @@ Keep up with the latest news for the bot in its Telegram Channel: https://t.me/s
 Full documentation on using and running your own stock bot can be found [here.](https://simple-stock-bots.gitlab.io/site)
 
 **Commands**
-        - /donate [amount in USD] to donate. 💵
+        - /donate [amount in USD] to donate. 🎗️
         - /dividend $[symbol] will return dividend information for the symbol. 📅
         - /intra $[symbol] Plot of the stocks movement since the last market open.  📈
         - /chart $[symbol] Plot of the stocks movement for the past 1 month. 📊
@@ -62,6 +62,8 @@ Example: `/donate 2` would donate 2 USD.
 An alternative way to donate is through https://www.buymeacoffee.com/Anson, which accepts Paypal or Credit card. 
 
 If you have any questions get in touch: @MisterBiggs or [anson@ansonbiggs.com](http://mailto:anson@ansonbiggs.com/)
+
+*Donations can only be made in a chat directly with @simplestockbot
     """
 
     def __init__(self, IEX_TOKEN: str):

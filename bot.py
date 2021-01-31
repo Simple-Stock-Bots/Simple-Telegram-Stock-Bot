@@ -4,14 +4,19 @@ import io
 import logging
 import os
 import random
-
 import mplfinance as mpf
+
 import telegram
-from telegram import InlineQueryResultArticle, InputTextMessageContent, LabeledPrice
+from telegram import (
+    InlineQueryResultArticle,
+    InputTextMessageContent,
+    LabeledPrice,
+)
 from telegram.ext import (
     CommandHandler,
     Filters,
     InlineQueryHandler,
+    PreCheckoutQueryHandler,
     MessageHandler,
     Updater,
 )
@@ -67,7 +72,7 @@ def donate(update, context):
         amount = update.message.text.replace("/donate", "").replace("$", "").strip()
     title = "Simple Stock Bot Donation"
     description = f"Simple Stock Bot Donation of ${amount}"
-    payload = "Simple Telegram Stock Bot"
+    payload = "simple-stock-bot"
     provider_token = STRIPE_TOKEN
     start_parameter = str(chat_id)
 
@@ -93,6 +98,20 @@ def donate(update, context):
         currency,
         prices,
     )
+
+
+def precheckout_callback(update, context):
+    query = update.pre_checkout_query
+
+    if query.invoice_payload == "simple-stock-bot":
+        # answer False pre_checkout_query
+        query.answer(ok=True)
+    else:
+        query.answer(ok=False, error_message="Something went wrong...")
+
+
+def successful_payment_callback(update, context):
+    update.message.reply_text("Thank you for your donation!")
 
 
 def symbol_detect(update, context):
@@ -376,6 +395,14 @@ def main():
 
     # Inline Bot commands
     dp.add_handler(InlineQueryHandler(inline_query))
+
+    # Pre-checkout handler to final check
+    dp.add_handler(PreCheckoutQueryHandler(precheckout_callback))
+
+    # Payment success
+    dp.add_handler(
+        MessageHandler(Filters.successful_payment, successful_payment_callback)
+    )
 
     # log all errors
     dp.add_error_handler(error)
