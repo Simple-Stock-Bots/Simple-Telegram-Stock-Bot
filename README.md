@@ -20,6 +20,7 @@
     <br> 
 </p>
 
+Message the bot on Telegram [@SimpleStockBot](https://t.me/SimpleStockBot)
 ## 📝 Table of Contents
 
 - [About](#about)
