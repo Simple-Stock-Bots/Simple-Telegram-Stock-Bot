@@ -39,25 +39,19 @@ print("Bot Online")
 
 def start(update, context):
     """Send a message when the command /start is issued."""
-    update.message.reply_text(
-        text=Symbol.help_text, parse_mode=telegram.ParseMode.MARKDOWN
-    )
+    update.message.reply_text(text=s.help_text, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
 def help(update, context):
     """Send link to docs when the command /help is issued."""
 
-    update.message.reply_text(
-        text=Symbol.help_text, parse_mode=telegram.ParseMode.MARKDOWN
-    )
+    update.message.reply_text(text=s.help_text, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
 def license(update, context):
     """Return bots license agreement"""
 
-    update.message.reply_text(
-        text=Symbol.license, parse_mode=telegram.ParseMode.MARKDOWN
-    )
+    update.message.reply_text(text=s.license, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
 def donate(update, context):

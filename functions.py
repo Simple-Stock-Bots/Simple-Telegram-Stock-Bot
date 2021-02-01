@@ -63,7 +63,7 @@ An alternative way to donate is through https://www.buymeacoffee.com/Anson, whic
 
 If you have any questions get in touch: @MisterBiggs or [anson@ansonbiggs.com](http://mailto:anson@ansonbiggs.com/)
 
-*Donations can only be made in a chat directly with @simplestockbot
+_Donations can only be made in a chat directly with @simplestockbot_
     """
 
     def __init__(self, IEX_TOKEN: str):
@@ -356,3 +356,7 @@ If you have any questions get in touch: @MisterBiggs or [anson@ansonbiggs.com](h
 
         else:
             return False
+
+
+# s = Symbol("")
+# print(s.donate_text)
