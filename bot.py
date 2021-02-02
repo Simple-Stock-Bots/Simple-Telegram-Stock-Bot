@@ -20,8 +20,17 @@ from telegram.ext import (
 from functions import Symbol
 
 TELEGRAM_TOKEN = os.environ["TELEGRAM"]
-IEX_TOKEN = os.environ["IEX"]
-STRIPE_TOKEN = os.environ["STRIPE"]
+
+try:
+    IEX_TOKEN = os.environ["IEX"]
+except KeyError:
+    IEX_TOKEN = ""
+    print("Starting without an IEX Token will not allow you to get market data!")
+try:
+    STRIPE_TOKEN = os.environ["STRIPE"]
+except KeyError:
+    STRIPE_TOKEN = ""
+    print("Starting without a STRIPE Token will not allow you to accept Donations!")
 
 s = Symbol(IEX_TOKEN)
 # Enable logging
