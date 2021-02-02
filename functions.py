@@ -1,7 +1,5 @@
-import json
-import os
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import pandas as pd
 import requests as r
@@ -28,11 +26,11 @@ class Symbol:
     )
 
     help_text = """
-Thanks for using this bot, consider supporting it by [buying me a beer.](https://www.buymeacoffee.com/Anson)
+Thanks for using this bot, consider supporting it by[buying me a beer.](https://www.buymeacoffee.com/Anson)
 
-Keep up with the latest news for the bot in its Telegram Channel: https://t.me/simplestockbotnews
+Keep up with the latest news for the bot in itsTelegram Channel: https://t.me/simplestockbotnews
 
-Full documentation on using and running your own stock bot can be found [here.](https://simple-stock-bots.gitlab.io/site)
+Full documentation on using and running your own stock bot can be found[here.](https://simple-stock-bots.gitlab.io/site)
 
 **Commands**
         - /donate [amount in USD] to donate. 🎗️
@@ -45,23 +43,24 @@ Full documentation on using and running your own stock bot can be found [here.](
         - /help Get some help using the bot. 🆘
 
 **Inline Features**
-    You can type @SimpleStockBot `[search]` in any chat or direct message to search for the stock bots full list of stock symbols and return the price of the ticker. Then once you select the ticker you want the bot will send a message as you in that chat with the latest stock price. 
-
-The bot also looks at every message in any chat it is in for stock symbols. Symbols start with a `$` followed by the stock symbol. For example: $tsla would return price information for Tesla Motors. 
-
-Market data is provided by [IEX Cloud](https://iexcloud.io)
+    You can type @SimpleStockBot `[search]` in any chat or direct message to search for the stock bots
+    full list of stock symbols and return the price of the ticker. Then once you select the ticker
+    want the bot will send a message as you in that chat with the latest stock price.
+    The bot also looks at every message in any chat it is in for stock symbols.Symbols start with a
+    `$` followed by the stock symbol. For example:$tsla would return price information for Tesla Motors.
+    Market data is provided by [IEX Cloud](https://iexcloud.io)
     """
 
     donate_text = """
-Simple Stock Bot is run entirely on donations[.](https://www.buymeacoffee.com/Anson) All donations go directly towards paying for servers, and market data is provided by [IEX Cloud](https://iexcloud.io/).
+Simple Stock Bot is run entirely on donations[.](https://www.buymeacoffee.com/Anson)
+All donations go directly towards paying for servers, and market data is provided by
+[IEX Cloud](https://iexcloud.io/).
 
-The easiest way to donate is to run the `/donate [amount in USD]` command with US dollars you would like to donate.
+The easiest way to donate is to run the `/donate [amount in USD]` command with USdollars you would like to donate.
 
-Example: `/donate 2` would donate 2 USD. 
-
-An alternative way to donate is through https://www.buymeacoffee.com/Anson, which accepts Paypal or Credit card. 
-
-If you have any questions get in touch: @MisterBiggs or [anson@ansonbiggs.com](http://mailto:anson@ansonbiggs.com/)
+Example: `/donate 2` would donate 2 USD.
+An alternative way to donate is through https://www.buymeacoffee.com/Anson,which accepts Paypal or Credit card.
+If you have any questions get in touch: @MisterBiggs or[anson@ansonbiggs.com](http://mailto:anson@ansonbiggs.com/)
 
 _Donations can only be made in a chat directly with @simplestockbot_
     """
@@ -83,7 +82,9 @@ _Donations can only be made in a chat directly with @simplestockbot_
 
         Returns:
             pd.DataFrame -- [DataFrame with columns: Symbol | Issue_Name | Primary_Listing_Mkt
-            datetime -- The time when the list of symbols was fetched. The Symbol list is updated every open and close of every trading day.
+            datetime -- The time when the list of symbols was fetched.
+
+            The Symbol list is updated every open and close of every trading day.
         """
         raw_symbols = r.get(
             f"https://cloud.iexapis.com/stable/ref-data/symbols?token={self.IEX_TOKEN}"
@@ -100,10 +101,12 @@ _Donations can only be made in a chat directly with @simplestockbot_
         Performs a fuzzy search to find stock symbols closest to a search term.
 
         Arguments:
-            search {str} -- String used to search, could be a company name or something close to the companies stock ticker.
+            search {str} -- String used to search, could be a company name or something close
+                to the companies stock ticker.
 
         Returns:
-            List of Tuples -- A list tuples of every stock sorted in order of how well they match. Each tuple contains: (Symbol, Issue Name).
+            List of Tuples -- A list tuples of every stock sorted in order of how well they match.
+                Each tuple contains: (Symbol, Issue Name).
         """
         schedule.run_pending()
         search = search.lower()
@@ -133,7 +136,8 @@ _Donations can only be made in a chat directly with @simplestockbot_
 
     def find_symbols(self, text: str):
         """
-        Finds stock tickers starting with a dollar sign in a blob of text and returns them in a list. Only returns each match once. Example: Whats the price of $tsla? -> ['tsla']
+        Finds stock tickers starting with a dollar sign in a blob of text and returns them in a list.
+            Only returns each match once. Example: Whats the price of $tsla? -> ['tsla']
 
         Arguments:
             text {str} -- Blob of text that might contain tickers with the format: $TICKER
@@ -146,13 +150,16 @@ _Donations can only be made in a chat directly with @simplestockbot_
 
     def price_reply(self, symbols: list):
         """
-        Takes a list of symbols and replies with Markdown formatted text about the symbols price change for the day.
+        Takes a list of symbols and replies with Markdown formatted text about the symbols
+            price change for the day.
 
         Arguments:
             symbols {list} -- List of stock market symbols.
 
         Returns:
-            dict -- Dictionary with keys of symbols and values of markdown formatted text example: {'tsla': 'The current stock price of Tesla Motors is $**420$$, the stock price is currently **up 42%**}
+            dict -- Dictionary with keys of symbols and values of markdown formatted
+                text example: {'tsla': 'The current stock price of Tesla Motors is
+                $**420$$, the stock price is currently **up 42%**}
         """
         dataMessages = {}
         for symbol in symbols:
@@ -356,7 +363,3 @@ _Donations can only be made in a chat directly with @simplestockbot_
 
         else:
             return False
-
-
-# s = Symbol("")
-# print(s.donate_text)

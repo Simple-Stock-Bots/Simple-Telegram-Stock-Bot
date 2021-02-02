@@ -4,20 +4,16 @@ import io
 import logging
 import os
 import random
-import mplfinance as mpf
 
+import mplfinance as mpf
 import telegram
-from telegram import (
-    InlineQueryResultArticle,
-    InputTextMessageContent,
-    LabeledPrice,
-)
+from telegram import InlineQueryResultArticle, InputTextMessageContent, LabeledPrice
 from telegram.ext import (
     CommandHandler,
     Filters,
     InlineQueryHandler,
-    PreCheckoutQueryHandler,
     MessageHandler,
+    PreCheckoutQueryHandler,
     Updater,
 )
 
@@ -80,7 +76,7 @@ def donate(update, context):
         return
     print(price)
 
-    prices = [LabeledPrice(f"Donation:", price)]
+    prices = [LabeledPrice("Donation:", price)]
 
     context.bot.send_invoice(
         chat_id,
@@ -110,7 +106,8 @@ def successful_payment_callback(update, context):
 
 def symbol_detect(update, context):
     """
-    Runs on any message that doesn't have a command and searches for symbols, then returns the prices of any symbols found.
+    Runs on any message that doesn't have a command and searches for symbols,
+        then returns the prices of any symbols found.
     """
     message = update.message.text
     chat_id = update.message.chat_id
@@ -181,11 +178,6 @@ def info(update, context):
 
 def search(update, context):
     message = update.message.text
-    chat_id = update.message.chat_id
-
-    usage = """
-    To use this command 
-    """
 
     queries = s.search_symbols(message)[:6]
     if queries:
