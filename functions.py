@@ -26,11 +26,11 @@ class Symbol:
     )
 
     help_text = """
-Thanks for using this bot, consider supporting it by[buying me a beer.](https://www.buymeacoffee.com/Anson)
+Thanks for using this bot, consider supporting it by [buying me a beer.](https://www.buymeacoffee.com/Anson)
 
 Keep up with the latest news for the bot in itsTelegram Channel: https://t.me/simplestockbotnews
 
-Full documentation on using and running your own stock bot can be found[here.](https://simple-stock-bots.gitlab.io/site)
+Full documentation on using and running your own stock bot can be found [here.](https://simple-stock-bots.gitlab.io/site)
 
 **Commands**
         - /donate [amount in USD] to donate. 🎗️
