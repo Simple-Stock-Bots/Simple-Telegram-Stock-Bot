@@ -49,6 +49,8 @@ Full documentation on using and running your own stock bot can be found [here.](
     The bot also looks at every message in any chat it is in for stock symbols.Symbols start with a
     `$` followed by the stock symbol. For example:$tsla would return price information for Tesla Motors.
     Market data is provided by [IEX Cloud](https://iexcloud.io)
+
+    If you believe the bot is not behaving properly run `/status`.
     """
 
     donate_text = """
