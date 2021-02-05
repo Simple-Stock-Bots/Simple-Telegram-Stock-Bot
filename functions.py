@@ -192,7 +192,11 @@ _Donations can only be made in a chat directly with @simplestockbot_
             if response.status_code == 200:
                 IEXData = response.json()
 
-                if IEXData["isUSMarketOpen"]:  # Check if market is open.
+                if (
+                    IEXData["isUSMarketOpen"]
+                    or (IEXData["extendedChangePercent"] == None)
+                    or (IEXData["extendedPrice"] == None)
+                ):  # Check if market is open.
                     message = f"The current stock price of {IEXData['companyName']} is $**{IEXData['latestPrice']}**"
                     change = round(IEXData["changePercent"] * 100, 2)
                 else:
