@@ -70,7 +70,7 @@ _Donations can only be made in a chat directly with @simplestockbot_
         if IEX_TOKEN != "":
             self.get_symbol_list()
 
-            schedule.every().monday.do(self.get_symbol_list)
+            schedule.every().day.do(self.get_symbol_list)
             schedule.every().day.do(self.clear_charts)
 
     def clear_charts(self):
