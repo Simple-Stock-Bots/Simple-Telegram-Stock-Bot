@@ -96,6 +96,27 @@ _Donations can only be made in a chat directly with @simplestockbot_
         if return_df:
             return symbols, datetime.now()
 
+    def iex_status(self):
+        status = r.get("https://pjmps0c34hp7.statuspage.io/api/v2/status.json").json()
+
+        if status["status"]["indicator"] == "none":
+            return "IEX Cloud is currently not reporting any issues with its API."
+        else:
+            return f"{['status']['indicator']}: {['status']['description']}. Please check the status page for more information. https://status.iexapis.com"
+
+    def message_status(self):
+        usage = r.get(
+            f"https://cloud.iexapis.com/stable/account/metadata?token={self.IEX_TOKEN}"
+        ).json()
+
+        if (
+            usage["messagesUsed"] >= usage["messageLimit"] - 10000
+            and not usage["payAsYouGoEnabled"]
+        ):
+            return "Bot may be out of IEX Credits."
+        else:
+            return "Bot has available IEX Credits"
+
     def search_symbols(self, search: str):
         """
         Performs a fuzzy search to find stock symbols closest to a search term.

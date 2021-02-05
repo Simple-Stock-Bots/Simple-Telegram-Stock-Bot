@@ -4,6 +4,9 @@ import io
 import logging
 import os
 import random
+import html
+import json
+import traceback
 
 import mplfinance as mpf
 import telegram
@@ -57,6 +60,24 @@ def license(update, context):
     """Return bots license agreement"""
 
     update.message.reply_text(text=s.license, parse_mode=telegram.ParseMode.MARKDOWN)
+
+
+def status(update, context):
+    message = ""
+    try:
+        # Bot Status
+        bot_resp = datetime.datetime.utcnow() - update.message.date
+        message += f"It took {bot_resp.total_seconds()} seconds for the bot to get your message.\n"
+
+        # IEX Status
+        message += s.iex_status() + "\n"
+
+        # Message Status
+        message += s.message_status()
+    except Exception as ex:
+        message += f"*\n\nERROR ENCOUNTERED:*\n{ex}\n\n*The bot encountered an error while attempting to find errors. Please contact the bot admin.*"
+
+    update.message.reply_text(text=message, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
 def donate(update, context):
@@ -358,6 +379,24 @@ def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, error)
 
+    tb_list = traceback.format_exception(
+        None, context.error, context.error.__traceback__
+    )
+    tb_string = "".join(tb_list)
+
+    message = (
+        f"An exception was raised while handling an update\n"
+        f"<pre>update = {html.escape(json.dumps(update.to_dict(), indent=2, ensure_ascii=False))}"
+        "</pre>\n\n"
+        f"<pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n\n"
+        f"<pre>context.user_data = {html.escape(str(context.user_data))}</pre>\n\n"
+        f"<pre>{html.escape(tb_string)}</pre>"
+    )
+
+    # Finally, send the message
+    update.message.reply_text(text=message, parse_mode=telegram.ParseMode.HTML)
+    update.message.reply_text(text="Please inform the bot admin of this issue.")
+
 
 def main():
     """Start the context.bot."""
@@ -384,6 +423,7 @@ def main():
     dp.add_handler(CommandHandler("crypto", crypto))
     dp.add_handler(CommandHandler("random", rand_pick))
     dp.add_handler(CommandHandler("donate", donate))
+    dp.add_handler(CommandHandler("status", status))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, symbol_detect))
