@@ -168,15 +168,22 @@ _Donations can only be made in a chat directly with @simplestockbot_
             response = r.get(IEXurl)
             if response.status_code == 200:
                 IEXData = response.json()
-                message = f"The current stock price of {IEXData['companyName']} is $**{IEXData['latestPrice']}**"
+
+                if IEXData["isUSMarketOpen"]:  # Check if market is open.
+                    message = f"The current stock price of {IEXData['companyName']} is $**{IEXData['latestPrice']}**"
+                    change = round(IEXData["changePercent"] * 100, 2)
+                else:
+                    message = f"{IEXData['companyName']} closed at $**{IEXData['latestPrice']}**, after hours _(15 minute delayed)_ stock price is $**{IEXData['extendedPrice']}**"
+                    change = round(IEXData["extendedChangePercent"] * 100, 2)
+
                 # Determine wording of change text
-                change = round(IEXData["changePercent"] * 100, 2)
                 if change > 0:
                     message += f", the stock is currently **up {change}%**"
                 elif change < 0:
                     message += f", the stock is currently **down {change}%**"
                 else:
                     message += ", the stock hasn't shown any movement today."
+
             else:
                 message = f"The symbol: {symbol} was not found."
 
