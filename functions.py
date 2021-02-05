@@ -173,7 +173,7 @@ _Donations can only be made in a chat directly with @simplestockbot_
                     message = f"The current stock price of {IEXData['companyName']} is $**{IEXData['latestPrice']}**"
                     change = round(IEXData["changePercent"] * 100, 2)
                 else:
-                    message = f"{IEXData['companyName']} closed at $**{IEXData['latestPrice']}**, after hours _(15 minute delayed)_ stock price is $**{IEXData['extendedPrice']}**"
+                    message = f"{IEXData['companyName']} closed at $**{IEXData['latestPrice']}**, after hours _(15 minutes delayed)_ stock price is $**{IEXData['extendedPrice']}**"
                     change = round(IEXData["extendedChangePercent"] * 100, 2)
 
                 # Determine wording of change text
