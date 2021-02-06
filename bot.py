@@ -248,13 +248,13 @@ def intra(update, context):
         volume=True,
         style="yahoo",
         mav=20,
-        savefig=dict(fname=buf, dpi=400),
+        savefig=dict(fname=buf, dpi=400, bbox_inches="tight"),
     )
     buf.seek(0)
 
     update.message.reply_photo(
         photo=buf,
-        caption=f"\nIntraday chart for ${symbol.upper()} on {datetime.date.today().strftime('%d, %b %Y')}\n\n{price[symbol]}",
+        caption=f"\nIntraday chart for ${symbol.upper()} from {df.first_valid_index().strftime('%I:%M')} to {df.last_valid_index().strftime('%I:%M')} ET on {datetime.date.today().strftime('%d, %b %Y')}\n\n{price[symbol]}",
         parse_mode=telegram.ParseMode.MARKDOWN,
     )
 
@@ -286,13 +286,13 @@ def chart(update, context):
         title=f"\n${symbol.upper()}",
         volume=True,
         style="yahoo",
-        savefig=dict(fname=buf, dpi=400),
+        savefig=dict(fname=buf, dpi=400, bbox_inches="tight"),
     )
     buf.seek(0)
 
     update.message.reply_photo(
         photo=buf,
-        caption=f"\n1 Month chart for ${symbol.upper()} on {datetime.date.today().strftime('%d, %b %Y')}\n\n{price[symbol]}",
+        caption=f"\n1 Month chart for ${symbol.upper()} from {df.first_valid_index().strftime('%d, %b %Y')} to {df.last_valid_index().strftime('%d, %b %Y')}\n\n{price[symbol]}",
         parse_mode=telegram.ParseMode.MARKDOWN,
     )
 
