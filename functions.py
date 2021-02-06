@@ -104,7 +104,10 @@ _Donations can only be made in a chat directly with @simplestockbot_
         if status["status"]["indicator"] == "none":
             return "IEX Cloud is currently not reporting any issues with its API."
         else:
-            return f"{['status']['indicator']}: {['status']['description']}. Please check the status page for more information. https://status.iexapis.com"
+            return (
+                f"{['status']['indicator']}: {['status']['description']}."
+                + " Please check the status page for more information. https://status.iexapis.com"
+            )
 
     def message_status(self):
         usage = r.get(
@@ -194,13 +197,16 @@ _Donations can only be made in a chat directly with @simplestockbot_
 
                 if (
                     IEXData["isUSMarketOpen"]
-                    or (IEXData["extendedChangePercent"] == None)
-                    or (IEXData["extendedPrice"] == None)
+                    or (IEXData["extendedChangePercent"] is None)
+                    or (IEXData["extendedPrice"] is None)
                 ):  # Check if market is open.
                     message = f"The current stock price of {IEXData['companyName']} is $**{IEXData['latestPrice']}**"
                     change = round(IEXData["changePercent"] * 100, 2)
                 else:
-                    message = f"{IEXData['companyName']} closed at $**{IEXData['latestPrice']}**, after hours _(15 minutes delayed)_ stock price is $**{IEXData['extendedPrice']}**"
+                    message = (
+                        f"{IEXData['companyName']} closed at $**{IEXData['latestPrice']}**,"
+                        + " after hours _(15 minutes delayed)_ stock price is $**{IEXData['extendedPrice']}**"
+                    )
                     change = round(IEXData["extendedChangePercent"] * 100, 2)
 
                 # Determine wording of change text
@@ -286,9 +292,10 @@ _Donations can only be made in a chat directly with @simplestockbot_
 
             if response.status_code == 200:
                 data = response.json()
-                infoMessages[
-                    symbol
-                ] = f"Company Name: [{data['companyName']}]({data['website']})\nIndustry: {data['industry']}\nSector: {data['sector']}\nCEO: {data['CEO']}\nDescription: {data['description']}\n"
+                infoMessages[symbol] = (
+                    f"Company Name: [{data['companyName']}]({data['website']})\nIndustry:"
+                    + " {data['industry']}\nSector: {data['sector']}\nCEO: {data['CEO']}\nDescription: {data['description']}\n"
+                )
 
             else:
                 infoMessages[
@@ -321,8 +328,9 @@ _Donations can only be made in a chat directly with @simplestockbot_
         except KeyError:
             pass
 
-        IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/chart/1mm?token={self.IEX_TOKEN}&chartInterval=3&includeToday=false"
-        response = r.get(IEXurl)
+        response = r.get(
+            "https://cloud.iexapis.com/stable/stock/{symbol}/chart/1mm?token={self.IEX_TOKEN}&chartInterval=3&includeToday=false"
+        )
 
         if response.status_code == 200:
             df = pd.DataFrame(response.json())

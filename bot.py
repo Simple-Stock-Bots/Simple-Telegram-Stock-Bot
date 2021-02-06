@@ -10,7 +10,12 @@ import traceback
 
 import mplfinance as mpf
 import telegram
-from telegram import InlineQueryResultArticle, InputTextMessageContent, LabeledPrice
+from telegram import (
+    InlineQueryResultArticle,
+    InputTextMessageContent,
+    LabeledPrice,
+    Update,
+)
 from telegram.ext import (
     CommandHandler,
     Filters,
@@ -18,6 +23,7 @@ from telegram.ext import (
     MessageHandler,
     PreCheckoutQueryHandler,
     Updater,
+    CallbackContext,
 )
 
 from functions import Symbol
@@ -45,24 +51,24 @@ logger = logging.getLogger(__name__)
 print("Bot Online")
 
 
-def start(update, context):
+def start(update: Update, context: CallbackContext):
     """Send a message when the command /start is issued."""
     update.message.reply_text(text=s.help_text, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
-def help(update, context):
+def help(update: Update, context: CallbackContext):
     """Send link to docs when the command /help is issued."""
 
     update.message.reply_text(text=s.help_text, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
-def license(update, context):
+def license(update: Update, context: CallbackContext):
     """Return bots license agreement"""
 
     update.message.reply_text(text=s.license, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
-def status(update, context):
+def status(update: Update, context: CallbackContext):
     message = ""
     try:
         # Bot Status
@@ -77,12 +83,15 @@ def status(update, context):
         # Message Status
         message += s.message_status()
     except Exception as ex:
-        message += f"*\n\nERROR ENCOUNTERED:*\n{ex}\n\n*The bot encountered an error while attempting to find errors. Please contact the bot admin.*"
+        message += (
+            f"*\n\nERROR ENCOUNTERED:*\n{ex}\n\n"
+            + "*The bot encountered an error while attempting to find errors. Please contact the bot admin.*"
+        )
 
     update.message.reply_text(text=message, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
-def donate(update, context):
+def donate(update: Update, context: CallbackContext):
     chat_id = update.message.chat_id
 
     if update.message.text.strip() == "/donate":
@@ -122,7 +131,7 @@ def donate(update, context):
     )
 
 
-def precheckout_callback(update, context):
+def precheckout_callback(update: Update, context: CallbackContext):
     query = update.pre_checkout_query
 
     if query.invoice_payload == "simple-stock-bot":
@@ -132,11 +141,11 @@ def precheckout_callback(update, context):
         query.answer(ok=False, error_message="Something went wrong...")
 
 
-def successful_payment_callback(update, context):
+def successful_payment_callback(update: Update, context: CallbackContext):
     update.message.reply_text("Thank you for your donation!")
 
 
-def symbol_detect(update, context):
+def symbol_detect(update: Update, context: CallbackContext):
     """
     Runs on any message that doesn't have a command and searches for symbols,
         then returns the prices of any symbols found.
@@ -156,7 +165,7 @@ def symbol_detect(update, context):
             )
 
 
-def dividend(update, context):
+def dividend(update: Update, context: CallbackContext):
     """
     waits for /dividend or /div command and then finds dividend info on that symbol.
     """
@@ -174,7 +183,7 @@ def dividend(update, context):
             )
 
 
-def news(update, context):
+def news(update: Update, context: CallbackContext):
     """
     waits for /news command and then finds news info on that symbol.
     """
@@ -191,7 +200,7 @@ def news(update, context):
             )
 
 
-def info(update, context):
+def info(update: Update, context: CallbackContext):
     """
     waits for /info command and then finds info on that symbol.
     """
@@ -208,7 +217,7 @@ def info(update, context):
             )
 
 
-def search(update, context):
+def search(update: Update, context: CallbackContext):
     message = update.message.text.replace("/search ", "")
 
     queries = s.search_symbols(message)[:6]
@@ -219,7 +228,7 @@ def search(update, context):
         update.message.reply_text(text=reply, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
-def intra(update, context):
+def intra(update: Update, context: CallbackContext):
     # TODO: Document usage of this command. https://iexcloud.io/docs/api/#historical-prices
 
     message = update.message.text
@@ -238,8 +247,6 @@ def intra(update, context):
         chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO
     )
 
-    price = s.price_reply([symbol])
-
     buf = io.BytesIO()
     mpf.plot(
         df,
@@ -254,12 +261,14 @@ def intra(update, context):
 
     update.message.reply_photo(
         photo=buf,
-        caption=f"\nIntraday chart for ${symbol.upper()} from {df.first_valid_index().strftime('%I:%M')} to {df.last_valid_index().strftime('%I:%M')} ET on {datetime.date.today().strftime('%d, %b %Y')}\n\n{price[symbol]}",
+        caption=f"\nIntraday chart for ${symbol.upper()} from {df.first_valid_index().strftime('%I:%M')} to"
+        + " {df.last_valid_index().strftime('%I:%M')} ET on"
+        + " {datetime.date.today().strftime('%d, %b %Y')}\n\n{s.price_reply([symbol])[symbol]}",
         parse_mode=telegram.ParseMode.MARKDOWN,
     )
 
 
-def chart(update, context):
+def chart(update: Update, context: CallbackContext):
     # TODO: Document usage of this command. https://iexcloud.io/docs/api/#historical-prices
 
     message = update.message.text
@@ -278,7 +287,6 @@ def chart(update, context):
         chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO
     )
 
-    price = s.price_reply([symbol])
     buf = io.BytesIO()
     mpf.plot(
         df,
@@ -292,12 +300,13 @@ def chart(update, context):
 
     update.message.reply_photo(
         photo=buf,
-        caption=f"\n1 Month chart for ${symbol.upper()} from {df.first_valid_index().strftime('%d, %b %Y')} to {df.last_valid_index().strftime('%d, %b %Y')}\n\n{price[symbol]}",
+        caption=f"\n1 Month chart for ${symbol.upper()} from {df.first_valid_index().strftime('%d, %b %Y')}"
+        + " to {df.last_valid_index().strftime('%d, %b %Y')}\n\n{s.price_reply([symbol])[symbol]}",
         parse_mode=telegram.ParseMode.MARKDOWN,
     )
 
 
-def stat(update, context):
+def stat(update: Update, context: CallbackContext):
     """
     https://iexcloud.io/docs/api/#key-stats
     """
@@ -314,7 +323,7 @@ def stat(update, context):
             )
 
 
-def crypto(update, context):
+def crypto(update: Update, context: CallbackContext):
     """
     https://iexcloud.io/docs/api/#cryptocurrency-quote
     """
@@ -334,7 +343,7 @@ def crypto(update, context):
         )
 
 
-def inline_query(update, context):
+def inline_query(update: Update, context: CallbackContext):
     """
     Handles inline query.
     Does a fuzzy search on input and returns stocks that are close.
@@ -364,7 +373,7 @@ def inline_query(update, context):
             return
 
 
-def rand_pick(update, context):
+def rand_pick(update: Update, context: CallbackContext):
 
     choice = random.choice(list(s.symbol_list["description"]))
     hold = (
@@ -377,7 +386,7 @@ def rand_pick(update, context):
     )
 
 
-def error(update, context):
+def error(update: Update, context: CallbackContext):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, error)
 
