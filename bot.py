@@ -66,7 +66,9 @@ def status(update, context):
     message = ""
     try:
         # Bot Status
-        bot_resp = datetime.datetime.utcnow() - update.message.date
+        bot_resp = (
+            datetime.datetime.now(update.message.date.tzinfo) - update.message.date
+        )
         message += f"It took {bot_resp.total_seconds()} seconds for the bot to get your message.\n"
 
         # IEX Status
@@ -401,7 +403,7 @@ def error(update, context):
 def main():
     """Start the context.bot."""
     # Create the EventHandler and pass it your bot's token.
-    updater = Updater(TELEGRAM_TOKEN, use_context=True)
+    updater = Updater(TELEGRAM_TOKEN)
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
@@ -418,8 +420,8 @@ def main():
     dp.add_handler(CommandHandler("stats", stat))
     dp.add_handler(CommandHandler("search", search))
     dp.add_handler(CommandHandler("intraday", intra))
-    dp.add_handler(CommandHandler("intra", intra))
-    dp.add_handler(CommandHandler("chart", chart))
+    dp.add_handler(CommandHandler("intra", intra, run_async=True))
+    dp.add_handler(CommandHandler("chart", chart, run_async=True))
     dp.add_handler(CommandHandler("crypto", crypto))
     dp.add_handler(CommandHandler("random", rand_pick))
     dp.add_handler(CommandHandler("donate", donate))
