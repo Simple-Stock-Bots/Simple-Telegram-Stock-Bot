@@ -209,7 +209,7 @@ def info(update, context):
 
 
 def search(update, context):
-    message = update.message.text
+    message = update.message.text.replace("/search ", "")
 
     queries = s.search_symbols(message)[:6]
     if queries:
