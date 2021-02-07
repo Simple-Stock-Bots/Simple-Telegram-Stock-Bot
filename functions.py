@@ -210,7 +210,7 @@ _Donations can only be made in a chat directly with @simplestockbot_
                 else:
                     message = (
                         f"{IEXData['companyName']} closed at $**{IEXData['latestPrice']}**,"
-                        + f" after hours _(15 minutes delayed)_ stock price is $**{IEXData['extendedPrice']}**"
+                        + f" after hours _(15 minutes delayed)_ the stock price is $**{IEXData['extendedPrice']}**"
                     )
                     change = round(IEXData["extendedChangePercent"] * 100, 2)
 
