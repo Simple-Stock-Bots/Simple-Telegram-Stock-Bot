@@ -262,8 +262,8 @@ def intra(update: Update, context: CallbackContext):
     update.message.reply_photo(
         photo=buf,
         caption=f"\nIntraday chart for ${symbol.upper()} from {df.first_valid_index().strftime('%I:%M')} to"
-        + " {df.last_valid_index().strftime('%I:%M')} ET on"
-        + " {datetime.date.today().strftime('%d, %b %Y')}\n\n{s.price_reply([symbol])[symbol]}",
+        + f" {df.last_valid_index().strftime('%I:%M')} ET on"
+        + f" {datetime.date.today().strftime('%d, %b %Y')}\n\n{s.price_reply([symbol])[symbol]}",
         parse_mode=telegram.ParseMode.MARKDOWN,
     )
 
@@ -301,7 +301,7 @@ def chart(update: Update, context: CallbackContext):
     update.message.reply_photo(
         photo=buf,
         caption=f"\n1 Month chart for ${symbol.upper()} from {df.first_valid_index().strftime('%d, %b %Y')}"
-        + " to {df.last_valid_index().strftime('%d, %b %Y')}\n\n{s.price_reply([symbol])[symbol]}",
+        + f" to {df.last_valid_index().strftime('%d, %b %Y')}\n\n{s.price_reply([symbol])[symbol]}",
         parse_mode=telegram.ParseMode.MARKDOWN,
     )
 

@@ -106,7 +106,7 @@ _Donations can only be made in a chat directly with @simplestockbot_
         else:
             return (
                 f"{['status']['indicator']}: {['status']['description']}."
-                + " Please check the status page for more information. https://status.iexapis.com"
+                + f" Please check the status page for more information. https://status.iexapis.com"
             )
 
     def message_status(self):
@@ -210,7 +210,7 @@ _Donations can only be made in a chat directly with @simplestockbot_
                 else:
                     message = (
                         f"{IEXData['companyName']} closed at $**{IEXData['latestPrice']}**,"
-                        + " after hours _(15 minutes delayed)_ stock price is $**{IEXData['extendedPrice']}**"
+                        + f" after hours _(15 minutes delayed)_ stock price is $**{IEXData['extendedPrice']}**"
                     )
                     change = round(IEXData["extendedChangePercent"] * 100, 2)
 
@@ -299,7 +299,7 @@ _Donations can only be made in a chat directly with @simplestockbot_
                 data = response.json()
                 infoMessages[symbol] = (
                     f"Company Name: [{data['companyName']}]({data['website']})\nIndustry:"
-                    + " {data['industry']}\nSector: {data['sector']}\nCEO: {data['CEO']}\nDescription: {data['description']}\n"
+                    + f" {data['industry']}\nSector: {data['sector']}\nCEO: {data['CEO']}\nDescription: {data['description']}\n"
                 )
 
             else:
