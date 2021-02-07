@@ -195,6 +195,11 @@ _Donations can only be made in a chat directly with @simplestockbot_
             if response.status_code == 200:
                 IEXData = response.json()
 
+                try:  # Some symbols dont return if the market is open
+                    IEXData["isUSMarketOpen"]
+                except KeyError:
+                    IEXData["isUSMarketOpen"] = True
+
                 if (
                     IEXData["isUSMarketOpen"]
                     or (IEXData["extendedChangePercent"] is None)
