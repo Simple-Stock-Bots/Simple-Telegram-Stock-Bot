@@ -1,5 +1,6 @@
 import re
 from datetime import datetime
+from typing import Optional
 
 import pandas as pd
 import requests as r
@@ -67,7 +68,14 @@ If you have any questions get in touch: @MisterBiggs or[anson@ansonbiggs.com](ht
 _Donations can only be made in a chat directly with @simplestockbot_
     """
 
-    def __init__(self, IEX_TOKEN: str):
+    def __init__(self, IEX_TOKEN: str) -> None:
+        """Creates a Symbol Object
+
+        Parameters
+        ----------
+        IEX_TOKEN : str
+            IEX Token
+        """
         self.IEX_TOKEN = IEX_TOKEN
         if IEX_TOKEN != "":
             self.get_symbol_list()
@@ -75,19 +83,12 @@ _Donations can only be made in a chat directly with @simplestockbot_
             schedule.every().day.do(self.get_symbol_list)
             schedule.every().day.do(self.clear_charts)
 
-    def clear_charts(self):
+    def clear_charts(self) -> None:
+        """Clears cache of chart data."""
         self.charts = {}
 
-    def get_symbol_list(self, return_df=False):
-        """
-        Fetches a list of stock market symbols from FINRA
+    def get_symbol_list(self, return_df=False) -> Optional[pd.DataFrame]:
 
-        Returns:
-            pd.DataFrame -- [DataFrame with columns: Symbol | Issue_Name | Primary_Listing_Mkt
-            datetime -- The time when the list of symbols was fetched.
-
-            The Symbol list is updated every open and close of every trading day.
-        """
         raw_symbols = r.get(
             f"https://cloud.iexapis.com/stable/ref-data/symbols?token={self.IEX_TOKEN}"
         ).json()
@@ -98,7 +99,14 @@ _Donations can only be made in a chat directly with @simplestockbot_
         if return_df:
             return symbols, datetime.now()
 
-    def iex_status(self):
+    def iex_status(self) -> str:
+        """Checks IEX Status dashboard for any current API issues.
+
+        Returns
+        -------
+        str
+            Human readable text on status of IEX API
+        """
         status = r.get("https://pjmps0c34hp7.statuspage.io/api/v2/status.json").json()[
             "status"
         ]
@@ -111,7 +119,14 @@ _Donations can only be made in a chat directly with @simplestockbot_
                 + " Please check the status page for more information. https://status.iexapis.com"
             )
 
-    def message_status(self):
+    def message_status(self) -> str:
+        """Checks to see if the bot has available IEX Credits
+
+        Returns
+        -------
+        str
+            Human readable text on status of IEX Credits.
+        """
         usage = r.get(
             f"https://cloud.iexapis.com/stable/account/metadata?token={self.IEX_TOKEN}"
         ).json()
@@ -124,18 +139,20 @@ _Donations can only be made in a chat directly with @simplestockbot_
         else:
             return "Bot has available IEX Credits"
 
-    def search_symbols(self, search: str):
-        """
-        Performs a fuzzy search to find stock symbols closest to a search term.
+    def search_symbols(self, search: str) -> list[list[str, str]]:
+        """Performs a fuzzy search to find stock symbols closest to a search term.
 
-        Arguments:
-            search {str} -- String used to search, could be a company name or something close
-                to the companies stock ticker.
+        Parameters
+        ----------
+        search : str
+            String used to search, could be a company name or something close to the companies stock ticker.
 
-        Returns:
-            List of Tuples -- A list tuples of every stock sorted in order of how well they match.
-                Each tuple contains: (Symbol, Issue Name).
+        Returns
+        -------
+        list[tuple[str, str]]
+            A list tuples of every stock sorted in order of how well they match. Each tuple contains: (Symbol, Issue Name).
         """
+
         schedule.run_pending()
         search = search.lower()
         try:  # https://stackoverflow.com/a/3845776/8774114
@@ -162,32 +179,35 @@ _Donations can only be made in a chat directly with @simplestockbot_
         self.searched_symbols[search] = symbol_list
         return symbol_list
 
-    def find_symbols(self, text: str):
-        """
-        Finds stock tickers starting with a dollar sign in a blob of text and returns them in a list.
-            Only returns each match once. Example: Whats the price of $tsla? -> ['tsla']
+    def find_symbols(self, text: str) -> list[str]:
+        """Finds stock tickers starting with a dollar sign in a blob of text and returns them in a list.
+        Only returns each match once. Example: Whats the price of $tsla?
 
-        Arguments:
-            text {str} -- Blob of text that might contain tickers with the format: $TICKER
+        Parameters
+        ----------
+        text : str
+            Blob of text.
 
-        Returns:
-            list -- List of every found match without the dollar sign.
+        Returns
+        -------
+        list[str]
+            List of stock symbols as strings without dollar sign.
         """
 
         return list(set(re.findall(self.SYMBOL_REGEX, text)))
 
-    def price_reply(self, symbols: list):
-        """
-        Takes a list of symbols and replies with Markdown formatted text about the symbols
-            price change for the day.
+    def price_reply(self, symbols: list) -> dict[str, str]:
+        """Returns current market price or after hours if its available for a given stock symbol.
 
-        Arguments:
-            symbols {list} -- List of stock market symbols.
+        Parameters
+        ----------
+        symbols : list
+            List of stock symbols.
 
-        Returns:
-            dict -- Dictionary with keys of symbols and values of markdown formatted
-                text example: {'tsla': 'The current stock price of Tesla Motors is
-                $**420$$, the stock price is currently **up 42%**}
+        Returns
+        -------
+        dict[str, str]
+            Each symbol passed in is a key with its value being a human readable markdown formatted string of the symbols price and movement.
         """
         dataMessages = {}
         for symbol in symbols:
@@ -231,7 +251,19 @@ _Donations can only be made in a chat directly with @simplestockbot_
 
         return dataMessages
 
-    def dividend_reply(self, symbols: list):
+    def dividend_reply(self, symbols: list) -> dict[str, str]:
+        """Returns the most recent, or next dividend date for a stock symbol.
+
+        Parameters
+        ----------
+        symbols : list
+            List of stock symbols.
+
+        Returns
+        -------
+        dict[str, str]
+            Each symbol passed in is a key with its value being a human readable formatted string of the symbols div dates.
+        """
         divMessages = {}
 
         for symbol in symbols:
@@ -265,7 +297,19 @@ _Donations can only be made in a chat directly with @simplestockbot_
 
         return divMessages
 
-    def news_reply(self, symbols: list):
+    def news_reply(self, symbols: list) -> dict[str, str]:
+        """Gets recent english news on stock symbols.
+
+        Parameters
+        ----------
+        symbols : list
+            List of stock symbols.
+
+        Returns
+        -------
+        dict[str, str]
+            Each symbol passed in is a key with its value being a human readable markdown formatted string of the symbols news.
+        """
         newsMessages = {}
 
         for symbol in symbols:
@@ -290,7 +334,19 @@ _Donations can only be made in a chat directly with @simplestockbot_
 
         return newsMessages
 
-    def info_reply(self, symbols: list):
+    def info_reply(self, symbols: list[str]) -> dict[str, str]:
+        """Gets information on stock symbols.
+
+        Parameters
+        ----------
+        symbols : list[str]
+            List of stock symbols.
+
+        Returns
+        -------
+        dict[str, str]
+            Each symbol passed in is a key with its value being a human readable formatted string of the symbols information.
+        """
         infoMessages = {}
 
         for symbol in symbols:
@@ -311,7 +367,19 @@ _Donations can only be made in a chat directly with @simplestockbot_
 
         return infoMessages
 
-    def intra_reply(self, symbol: str):
+    def intra_reply(self, symbol: str) -> pd.DataFrame:
+        """Returns price data for a symbol since the last market open.
+
+        Parameters
+        ----------
+        symbol : str
+            Stock symbol.
+
+        Returns
+        -------
+        pd.DataFrame
+            Returns a timeseries dataframe with high, low, and volume data if its available. Otherwise returns empty pd.DataFrame.
+        """
         if symbol.upper() not in list(self.symbol_list["symbol"]):
             return pd.DataFrame()
 
@@ -326,7 +394,20 @@ _Donations can only be made in a chat directly with @simplestockbot_
 
         return pd.DataFrame()
 
-    def chart_reply(self, symbol: str):
+    def chart_reply(self, symbol: str) -> pd.DataFrame:
+        """Returns price data for a symbol of the past month up until the previous trading days close.
+        Also caches multiple requests made in the same day.
+
+        Parameters
+        ----------
+        symbol : str
+            Stock symbol.
+
+        Returns
+        -------
+        pd.DataFrame
+            Returns a timeseries dataframe with high, low, and volume data if its available. Otherwise returns empty pd.DataFrame.
+        """
         schedule.run_pending()
 
         if symbol.upper() not in list(self.symbol_list["symbol"]):
@@ -351,7 +432,19 @@ _Donations can only be made in a chat directly with @simplestockbot_
 
         return pd.DataFrame()
 
-    def stat_reply(self, symbols: list):
+    def stat_reply(self, symbols: list[str]) -> dict[str, str]:
+        """Gets key statistics for each symbol in the list
+
+        Parameters
+        ----------
+        symbols : list[str]
+            List of stock symbols
+
+        Returns
+        -------
+        dict[str, str]
+            Each symbol passed in is a key with its value being a human readable formatted string of the symbols statistics.
+        """
         infoMessages = {}
 
         for symbol in symbols:
@@ -387,11 +480,18 @@ _Donations can only be made in a chat directly with @simplestockbot_
 
         return infoMessages
 
-    def crypto_reply(self, pair):
-        """Get quote for a cryptocurrency pair.
+    def crypto_reply(self, pair: str) -> str:
+        """Returns the current price of a cryptocurrency
 
-        Args:
-            pair (string): Cryptocurrency
+        Parameters
+        ----------
+        pair : str
+            symbol for the cryptocurrency, sometimes with a price pair like ETHUSD
+
+        Returns
+        -------
+        str
+            Returns a human readable markdown description of the price, or an empty string if no price was found.
         """
 
         pair = pair.split(" ")[-1].replace("/", "").upper()
@@ -415,4 +515,4 @@ _Donations can only be made in a chat directly with @simplestockbot_
             return quote
 
         else:
-            return False
+            return ""
