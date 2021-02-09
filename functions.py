@@ -106,7 +106,7 @@ _Donations can only be made in a chat directly with @simplestockbot_
         else:
             return (
                 f"{['status']['indicator']}: {['status']['description']}."
-                + f" Please check the status page for more information. https://status.iexapis.com"
+                + " Please check the status page for more information. https://status.iexapis.com"
             )
 
     def message_status(self):
@@ -322,6 +322,8 @@ _Donations can only be made in a chat directly with @simplestockbot_
             df = df.set_index("DT")
             return df
 
+        return pd.DataFrame()
+
     def chart_reply(self, symbol: str):
         schedule.run_pending()
 
@@ -344,6 +346,8 @@ _Donations can only be made in a chat directly with @simplestockbot_
             df = df.set_index("DT")
             self.charts[symbol.upper()] = df
             return df
+
+        return pd.DataFrame()
 
     def stat_reply(self, symbols: list):
         infoMessages = {}
