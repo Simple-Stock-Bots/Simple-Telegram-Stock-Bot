@@ -99,13 +99,15 @@ _Donations can only be made in a chat directly with @simplestockbot_
             return symbols, datetime.now()
 
     def iex_status(self):
-        status = r.get("https://pjmps0c34hp7.statuspage.io/api/v2/status.json").json()
+        status = r.get("https://pjmps0c34hp7.statuspage.io/api/v2/status.json").json()[
+            "status"
+        ]
 
-        if status["status"]["indicator"] == "none":
+        if status["indicator"] == "none":
             return "IEX Cloud is currently not reporting any issues with its API."
         else:
             return (
-                f"{['status']['indicator']}: {['status']['description']}."
+                f"{status['indicator']}: {status['description']}."
                 + " Please check the status page for more information. https://status.iexapis.com"
             )
 
@@ -336,7 +338,7 @@ _Donations can only be made in a chat directly with @simplestockbot_
             pass
 
         response = r.get(
-            "https://cloud.iexapis.com/stable/stock/{symbol}/chart/1mm?token={self.IEX_TOKEN}&chartInterval=3&includeToday=false"
+            f"https://cloud.iexapis.com/stable/stock/{symbol}/chart/1mm?token={self.IEX_TOKEN}&chartInterval=3&includeToday=false"
         )
 
         if response.status_code == 200:

@@ -242,6 +242,7 @@ def intra(update: Update, context: CallbackContext):
             text="Invalid symbol please see `/help` for usage details.",
             parse_mode=telegram.ParseMode.MARKDOWN,
         )
+        return
 
     context.bot.send_chat_action(
         chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO
@@ -282,6 +283,7 @@ def chart(update: Update, context: CallbackContext):
             text="Invalid symbol please see `/help` for usage details.",
             parse_mode=telegram.ParseMode.MARKDOWN,
         )
+        return
 
     context.bot.send_chat_action(
         chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO
@@ -430,7 +432,7 @@ def main():
     dp.add_handler(CommandHandler("search", search))
     dp.add_handler(CommandHandler("intraday", intra))
     dp.add_handler(CommandHandler("intra", intra, run_async=True))
-    dp.add_handler(CommandHandler("chart", chart, run_async=True))
+    dp.add_handler(CommandHandler("chart", chart))
     dp.add_handler(CommandHandler("crypto", crypto))
     dp.add_handler(CommandHandler("random", rand_pick))
     dp.add_handler(CommandHandler("donate", donate))
