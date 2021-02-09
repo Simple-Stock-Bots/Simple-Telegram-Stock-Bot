@@ -171,6 +171,13 @@ def dividend(update: Update, context: CallbackContext):
     """
     message = update.message.text
     chat_id = update.message.chat_id
+
+    if message.strip() == "/dividend":
+        update.message.reply_text(
+            "This command gives info on the next dividend date for a symbol.\nExample: /dividend $tsla"
+        )
+        return
+
     symbols = s.find_symbols(message)
 
     if symbols:
@@ -189,6 +196,13 @@ def news(update: Update, context: CallbackContext):
     """
     message = update.message.text
     chat_id = update.message.chat_id
+
+    if message.strip() == "/news":
+        update.message.reply_text(
+            "This command gives the most recent english news for a symbol.\nExample: /news $tsla"
+        )
+        return
+
     symbols = s.find_symbols(message)
 
     if symbols:
@@ -206,6 +220,13 @@ def info(update: Update, context: CallbackContext):
     """
     message = update.message.text
     chat_id = update.message.chat_id
+
+    if message.strip() == "/info":
+        update.message.reply_text(
+            "This command gives information on a symbol.\nExample: /info $tsla"
+        )
+        return
+
     symbols = s.find_symbols(message)
 
     if symbols:
@@ -219,7 +240,15 @@ def info(update: Update, context: CallbackContext):
 
 def search(update: Update, context: CallbackContext):
     message = update.message.text.replace("/search ", "")
+    chat_id = update.message.chat_id
 
+    if message.strip() == "/search":
+        update.message.reply_text(
+            "This command searches for symbols supported by the bot.\nExample: /search Tesla Motors or /search $tsla"
+        )
+        return
+
+    context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
     queries = s.search_symbols(message)[:6]
     if queries:
         reply = "*Search Results:*\n`$ticker: Company Name`\n"
@@ -233,6 +262,12 @@ def intra(update: Update, context: CallbackContext):
 
     message = update.message.text
     chat_id = update.message.chat_id
+
+    if message.strip() == "/intra":
+        update.message.reply_text(
+            "This command returns a chart of the stocks movement since the most recent market open.\nExample: /intra $tsla"
+        )
+        return
 
     symbol = s.find_symbols(message)[0]
 
@@ -275,6 +310,12 @@ def chart(update: Update, context: CallbackContext):
     message = update.message.text
     chat_id = update.message.chat_id
 
+    if message.strip() == "/chart":
+        update.message.reply_text(
+            "This command returns a chart of the stocks movement for the past month.\nExample: /chart $tsla"
+        )
+        return
+
     symbol = s.find_symbols(message)[0]
 
     df = s.chart_reply(symbol)
@@ -314,6 +355,13 @@ def stat(update: Update, context: CallbackContext):
     """
     message = update.message.text
     chat_id = update.message.chat_id
+
+    if message.strip() == "/stat":
+        update.message.reply_text(
+            "This command returns key statistics for a symbol.\nExample: /stat $tsla"
+        )
+        return
+
     symbols = s.find_symbols(message)
 
     if symbols:
@@ -333,6 +381,12 @@ def crypto(update: Update, context: CallbackContext):
         chat_id=update.message.chat_id, action=telegram.ChatAction.TYPING
     )
     message = update.message.text
+
+    if message.strip() == "/crypto":
+        update.message.reply_text(
+            "This command returns the current price in USD for a cryptocurrency.\nExample: /crypto eth"
+        )
+        return
 
     reply = s.crypto_reply(message)
 
