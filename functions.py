@@ -266,10 +266,26 @@ _Donations can only be made in a chat directly with @simplestockbot_
         """
         divMessages = {}
 
-        for symbol in symbols:
-            IEXurl = f"https://cloud.iexapis.com/stable/data-points/{symbol}/NEXTDIVIDENDDATE?token={self.IEX_TOKEN}"
-            response = r.get(IEXurl)
-            if response.status_code == 200:
+        IEXurl = f"https://cloud.iexapis.com/stable/stock/msft/dividends/next?token={self.IEX_TOKEN}"
+        response = r.get(IEXurl)
+        if response.status_code == 200:
+            IEXData = response.json()[0]
+            keys = (
+                "amount",
+                "currency",
+                "declaredDate",
+                "exDate",
+                "frequency",
+                "paymentDate",
+                "flag",
+            )
+
+            if set(keys).issubset(IEXData):
+
+                if IEXData["currency"] == "USD":
+                    price = f"${IEXData['amount']}"
+                else:
+                    price = f"{IEXData['amount']} {IEXData['currency']}"
 
                 # extract date from json
                 date = response.json()
@@ -277,25 +293,26 @@ _Donations can only be made in a chat directly with @simplestockbot_
                 pattern = "%Y-%m-%d"
                 divDate = datetime.strptime(date, pattern)
 
-                daysDelta = (divDate - datetime.now()).days
-                datePretty = divDate.strftime("%A, %B %w")
-                if daysDelta < 0:
-                    divMessages[
-                        symbol
-                    ] = f"{symbol.upper()} dividend was on {datePretty} and a new date hasn't been announced yet."
-                elif daysDelta > 0:
-                    divMessages[
-                        symbol
-                    ] = f"{symbol.upper()} dividend is on {datePretty} which is in {daysDelta} Days."
-                else:
-                    divMessages[symbol] = f"{symbol.upper()} is today."
+                declared = datetime.strptime(IEXData["declaredDate"], pattern).strftime(
+                    "%A, %B %w"
+                )
+                ex = datetime.strptime(IEXData["exDate"], pattern).strftime("%A, %B %w")
+                payment = datetime.strptime(IEXData["paymentDate"], pattern).strftime(
+                    "%A, %B %w"
+                )
 
-            else:
-                divMessages[
-                    symbol
-                ] = f"{symbol} either doesn't exist or pays no dividend."
+                daysDelta = (
+                    datetime.strptime(IEXData["paymentDate"], pattern) - datetime.now()
+                ).days
+                print(self.symbol_list)
+                return (
+                    f"The next dividend for ${self.symbol_list[self.symbol_list['symbol']==symbol.upper()]['description'].item()}"
+                    + f" is on {payment} which is in {daysDelta} days."
+                    + f" The dividend is for {price} per share."
+                    + f"\nThe dividend was declared on {declared} and the ex-dividend date is {ex}"
+                )
 
-        return divMessages
+        return f"{symbol} either doesn't exist or pays no dividend."
 
     def news_reply(self, symbols: list) -> dict[str, str]:
         """Gets recent english news on stock symbols.
@@ -307,7 +324,7 @@ _Donations can only be made in a chat directly with @simplestockbot_
 
         Returns
         -------
-        dict[str, str]
+        Dict[str, str]
             Each symbol passed in is a key with its value being a human readable markdown formatted string of the symbols news.
         """
         newsMessages = {}
