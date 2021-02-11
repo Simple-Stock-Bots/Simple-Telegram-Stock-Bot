@@ -182,11 +182,9 @@ def dividend(update: Update, context: CallbackContext):
 
     if symbols:
         context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-
-        for reply in s.dividend_reply(symbols).items():
-
+        for symbol in symbols:
             update.message.reply_text(
-                text=reply[1], parse_mode=telegram.ParseMode.MARKDOWN
+                text=s.dividend_reply(symbol), parse_mode=telegram.ParseMode.MARKDOWN
             )
 
 
