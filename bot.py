@@ -26,7 +26,9 @@ from telegram.ext import (
     CallbackContext,
 )
 
-from functions import Symbol
+from IEX_Symbol import IEX_Symbol
+from cg_Crypto import cg_Crypto
+from T_info import T_info
 
 TELEGRAM_TOKEN = os.environ["TELEGRAM"]
 
@@ -41,7 +43,10 @@ except KeyError:
     STRIPE_TOKEN = ""
     print("Starting without a STRIPE Token will not allow you to accept Donations!")
 
-s = Symbol(IEX_TOKEN)
+s = IEX_Symbol(IEX_TOKEN)
+c = cg_Crypto()
+t = T_info()
+
 # Enable logging
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
@@ -53,19 +58,19 @@ print("Bot Online")
 
 def start(update: Update, context: CallbackContext):
     """Send a message when the command /start is issued."""
-    update.message.reply_text(text=s.help_text, parse_mode=telegram.ParseMode.MARKDOWN)
+    update.message.reply_text(text=t.help_text, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
 def help(update: Update, context: CallbackContext):
     """Send link to docs when the command /help is issued."""
 
-    update.message.reply_text(text=s.help_text, parse_mode=telegram.ParseMode.MARKDOWN)
+    update.message.reply_text(text=t.help_text, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
 def license(update: Update, context: CallbackContext):
     """Return bots license agreement"""
 
-    update.message.reply_text(text=s.license, parse_mode=telegram.ParseMode.MARKDOWN)
+    update.message.reply_text(text=t.license, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
 def status(update: Update, context: CallbackContext):
@@ -96,7 +101,7 @@ def donate(update: Update, context: CallbackContext):
 
     if update.message.text.strip() == "/donate":
         update.message.reply_text(
-            text=s.donate_text, parse_mode=telegram.ParseMode.MARKDOWN
+            text=t.donate_text, parse_mode=telegram.ParseMode.MARKDOWN
         )
         return
     else:
