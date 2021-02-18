@@ -26,8 +26,7 @@ from telegram.ext import (
     CallbackContext,
 )
 
-from IEX_Symbol import IEX_Symbol
-from cg_Crypto import cg_Crypto
+from symbol_router import Router
 from T_info import T_info
 
 TELEGRAM_TOKEN = os.environ["TELEGRAM"]
@@ -43,8 +42,7 @@ except KeyError:
     STRIPE_TOKEN = ""
     print("Starting without a STRIPE Token will not allow you to accept Donations!")
 
-s = IEX_Symbol(IEX_TOKEN)
-c = cg_Crypto()
+s = Router(IEX=IEX_TOKEN)
 t = T_info()
 
 # Enable logging

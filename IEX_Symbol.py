@@ -151,7 +151,7 @@ class IEX_Symbol:
 
         return list(set(re.findall(self.SYMBOL_REGEX, text)))
 
-    def price_reply(self, symbols: list) -> Dict[str, str]:
+    def price_reply(self, symbol: str) -> str:
         """Returns current market price or after hours if its available for a given stock symbol.
 
         Parameters
@@ -165,61 +165,60 @@ class IEX_Symbol:
             Each symbol passed in is a key with its value being a human readable
             markdown formatted string of the symbols price and movement.
         """
-        dataMessages = {}
-        for symbol in symbols:
-            IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/quote?token={self.IEX_TOKEN}"
 
-            response = r.get(IEXurl)
-            if response.status_code == 200:
-                IEXData = response.json()
-                keys = (
-                    "isUSMarketOpen",
-                    "extendedChangePercent",
-                    "extendedPrice",
-                    "companyName",
-                    "latestPrice",
-                    "changePercent",
+        IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/quote?token={self.IEX_TOKEN}"
+
+        response = r.get(IEXurl)
+        if response.status_code == 200:
+            IEXData = response.json()
+            keys = (
+                "isUSMarketOpen",
+                "extendedChangePercent",
+                "extendedPrice",
+                "companyName",
+                "latestPrice",
+                "changePercent",
+            )
+
+            if set(keys).issubset(IEXData):
+
+                try:  # Some symbols dont return if the market is open
+                    IEXData["isUSMarketOpen"]
+                except KeyError:
+                    IEXData["isUSMarketOpen"] = True
+
+                if (
+                    IEXData["isUSMarketOpen"]
+                    or (IEXData["extendedChangePercent"] is None)
+                    or (IEXData["extendedPrice"] is None)
+                ):  # Check if market is open.
+                    message = f"The current stock price of {IEXData['companyName']} is $**{IEXData['latestPrice']}**"
+                    change = round(IEXData["changePercent"] * 100, 2)
+                else:
+                    message = (
+                        f"{IEXData['companyName']} closed at $**{IEXData['latestPrice']}**,"
+                        + f" after hours _(15 minutes delayed)_ the stock price is $**{IEXData['extendedPrice']}**"
+                    )
+                    change = round(IEXData["extendedChangePercent"] * 100, 2)
+
+                # Determine wording of change text
+                if change > 0:
+                    message += f", the stock is currently **up {change}%**"
+                elif change < 0:
+                    message += f", the stock is currently **down {change}%**"
+                else:
+                    message += ", the stock hasn't shown any movement today."
+            else:
+                message = (
+                    f"The symbol: {symbol} encountered and error. This could be due to "
                 )
 
-                if set(keys).issubset(IEXData):
+        else:
+            message = f"The symbol: {symbol} was not found."
 
-                    try:  # Some symbols dont return if the market is open
-                        IEXData["isUSMarketOpen"]
-                    except KeyError:
-                        IEXData["isUSMarketOpen"] = True
+        return message
 
-                    if (
-                        IEXData["isUSMarketOpen"]
-                        or (IEXData["extendedChangePercent"] is None)
-                        or (IEXData["extendedPrice"] is None)
-                    ):  # Check if market is open.
-                        message = f"The current stock price of {IEXData['companyName']} is $**{IEXData['latestPrice']}**"
-                        change = round(IEXData["changePercent"] * 100, 2)
-                    else:
-                        message = (
-                            f"{IEXData['companyName']} closed at $**{IEXData['latestPrice']}**,"
-                            + f" after hours _(15 minutes delayed)_ the stock price is $**{IEXData['extendedPrice']}**"
-                        )
-                        change = round(IEXData["extendedChangePercent"] * 100, 2)
-
-                    # Determine wording of change text
-                    if change > 0:
-                        message += f", the stock is currently **up {change}%**"
-                    elif change < 0:
-                        message += f", the stock is currently **down {change}%**"
-                    else:
-                        message += ", the stock hasn't shown any movement today."
-                else:
-                    message = f"The symbol: {symbol} encountered and error. This could be due to "
-
-            else:
-                message = f"The symbol: {symbol} was not found."
-
-            dataMessages[symbol] = message
-
-        return dataMessages
-
-    def dividend_reply(self, symbol: str) -> Dict[str, str]:
+    def dividend_reply(self, symbol: str) -> str:
         """Returns the most recent, or next dividend date for a stock symbol.
 
         Parameters
@@ -278,7 +277,7 @@ class IEX_Symbol:
 
         return f"{symbol} either doesn't exist or pays no dividend."
 
-    def news_reply(self, symbols: list) -> Dict[str, str]:
+    def news_reply(self, symbol: str) -> str:
         """Gets recent english news on stock symbols.
 
         Parameters
@@ -291,31 +290,27 @@ class IEX_Symbol:
         Dict[str, str]
             Each symbol passed in is a key with its value being a human readable markdown formatted string of the symbols news.
         """
-        newsMessages = {}
 
-        for symbol in symbols:
-            IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/news/last/5?token={self.IEX_TOKEN}"
-            response = r.get(IEXurl)
-            if response.status_code == 200:
-                data = response.json()
-                if len(data):
-                    newsMessages[symbol] = f"News for **{symbol.upper()}**:\n\n"
-                    for news in data:
-                        if news["lang"] == "en" and not news["hasPaywall"]:
-                            message = f"*{news['source']}*: [{news['headline']}]({news['url']})\n"
-                            newsMessages[symbol] = newsMessages[symbol] + message
-                else:
-                    newsMessages[
-                        symbol
-                    ] = f"No news found for: {symbol}\nEither today is boring or the symbol does not exist."
+        IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/news/last/5?token={self.IEX_TOKEN}"
+        response = r.get(IEXurl)
+        if response.status_code == 200:
+            data = response.json()
+            if len(data):
+                message = f"News for **{symbol.upper()}**:\n\n"
+                for news in data:
+                    if news["lang"] == "en" and not news["hasPaywall"]:
+                        message = (
+                            f"*{news['source']}*: [{news['headline']}]({news['url']})\n"
+                        )
+                        message += message
             else:
-                newsMessages[
-                    symbol
-                ] = f"No news found for: {symbol}\nEither today is boring or the symbol does not exist."
+                return f"No news found for: {symbol}\nEither today is boring or the symbol does not exist."
+        else:
+            return f"No news found for: {symbol}\nEither today is boring or the symbol does not exist."
 
-        return newsMessages
+        return message
 
-    def info_reply(self, symbols: List[str]) -> Dict[str, str]:
+    def info_reply(self, symbol: str) -> str:
         """Gets information on stock symbols.
 
         Parameters
@@ -328,25 +323,21 @@ class IEX_Symbol:
         Dict[str, str]
             Each symbol passed in is a key with its value being a human readable formatted string of the symbols information.
         """
-        infoMessages = {}
 
-        for symbol in symbols:
-            IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/company?token={self.IEX_TOKEN}"
-            response = r.get(IEXurl)
+        IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/company?token={self.IEX_TOKEN}"
+        response = r.get(IEXurl)
 
-            if response.status_code == 200:
-                data = response.json()
-                infoMessages[symbol] = (
-                    f"Company Name: [{data['companyName']}]({data['website']})\nIndustry:"
-                    + f" {data['industry']}\nSector: {data['sector']}\nCEO: {data['CEO']}\nDescription: {data['description']}\n"
-                )
+        if response.status_code == 200:
+            data = response.json()
+            message = (
+                f"Company Name: [{data['companyName']}]({data['website']})\nIndustry:"
+                + f" {data['industry']}\nSector: {data['sector']}\nCEO: {data['CEO']}\nDescription: {data['description']}\n"
+            )
 
-            else:
-                infoMessages[
-                    symbol
-                ] = f"No information found for: {symbol}\nEither today is boring or the symbol does not exist."
+        else:
+            message = f"No information found for: {symbol}\nEither today is boring or the symbol does not exist."
 
-        return infoMessages
+        return message
 
     def intra_reply(self, symbol: str) -> pd.DataFrame:
         """Returns price data for a symbol since the last market open.
@@ -413,7 +404,7 @@ class IEX_Symbol:
 
         return pd.DataFrame()
 
-    def stat_reply(self, symbols: List[str]) -> Dict[str, str]:
+    def stat_reply(self, symbol: str) -> str:
         """Gets key statistics for each symbol in the list
 
         Parameters
@@ -453,47 +444,6 @@ class IEX_Symbol:
                     m += f"Price to Earnings: {data['peRatio']:.3f}\n"
                 if "beta" in data:
                     m += f"Beta: {data['beta']:.3f}\n"
-                infoMessages[symbol] = m
+                return m
             else:
-                infoMessages[
-                    symbol
-                ] = f"No information found for: {symbol}\nEither today is boring or the symbol does not exist."
-
-        return infoMessages
-
-    def crypto_reply(self, pair: str) -> str:
-        """Returns the current price of a cryptocurrency
-
-        Parameters
-        ----------
-        pair : str
-            symbol for the cryptocurrency, sometimes with a price pair like ETHUSD
-
-        Returns
-        -------
-        str
-            Returns a human readable markdown description of the price, or an empty string if no price was found.
-        """
-
-        pair = pair.split(" ")[-1].replace("/", "").upper()
-        pair += "USD" if len(pair) == 3 else pair
-
-        IEXurl = f"https://cloud.iexapis.com/stable/crypto/{pair}/quote?token={self.IEX_TOKEN}"
-
-        response = r.get(IEXurl)
-
-        if response.status_code == 200:
-            data = response.json()
-
-            quote = f"Symbol: {data['symbol']}\n"
-            quote += f"Price: ${data['latestPrice']}\n"
-
-            new, old = data["latestPrice"], data["previousClose"]
-            if old is not None:
-                change = (float(new) - float(old)) / float(old)
-                quote += f"Change: {change}\n"
-
-            return quote
-
-        else:
-            return ""
+                return f"No information found for: {symbol}\nEither today is boring or the symbol does not exist."
