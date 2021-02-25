@@ -282,7 +282,7 @@ _Donations can only be made in a chat directly with @simplestockbot_
 
         IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/dividends/next?token={self.IEX_TOKEN}"
         response = r.get(IEXurl)
-        if response.status_code == 200:
+        if response.status_code == 200 and response.json():
             IEXData = response.json()[0]
             keys = (
                 "amount",
