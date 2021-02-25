@@ -262,8 +262,10 @@ _Donations can only be made in a chat directly with @simplestockbot_
             else:
                 message = f"The symbol: {symbol} was not found."
 
-            dataMessages[symbol] = message
+            if symbol.upper() == "GME":
+                message += "\n\n🙌💎Power to the Players💎🙌"
 
+            dataMessages[symbol] = message
         return dataMessages
 
     def dividend_reply(self, symbol: str) -> Dict[str, str]:
