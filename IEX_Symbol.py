@@ -1,9 +1,8 @@
 """Class with functions for running the bot with IEX Cloud.
 """
 
-import re
 from datetime import datetime
-from typing import Optional, List, Tuple, Dict
+from typing import Optional, List, Tuple
 
 import pandas as pd
 import requests as r
@@ -133,23 +132,6 @@ class IEX_Symbol:
         symbol_list = list(zip(list(symbols["symbol"]), list(symbols["description"])))
         self.searched_symbols[search] = symbol_list
         return symbol_list
-
-    def find_symbols(self, text: str) -> List[str]:
-        """Finds stock tickers starting with a dollar sign in a blob of text and returns them in a list.
-        Only returns each match once. Example: Whats the price of $tsla?
-
-        Parameters
-        ----------
-        text : str
-            Blob of text.
-
-        Returns
-        -------
-        List[str]
-            List of stock symbols as strings without dollar sign.
-        """
-
-        return list(set(re.findall(self.SYMBOL_REGEX, text)))
 
     def price_reply(self, symbol: str) -> str:
         """Returns current market price or after hours if its available for a given stock symbol.
@@ -417,33 +399,31 @@ class IEX_Symbol:
         Dict[str, str]
             Each symbol passed in is a key with its value being a human readable formatted string of the symbols statistics.
         """
-        infoMessages = {}
 
-        for symbol in symbols:
-            IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/stats?token={self.IEX_TOKEN}"
-            response = r.get(IEXurl)
+        IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/stats?token={self.IEX_TOKEN}"
+        response = r.get(IEXurl)
 
-            if response.status_code == 200:
-                data = response.json()
-                [data.pop(k) for k in list(data) if data[k] == ""]
+        if response.status_code == 200:
+            data = response.json()
+            [data.pop(k) for k in list(data) if data[k] == ""]
 
-                m = ""
-                if "companyName" in data:
-                    m += f"Company Name: {data['companyName']}\n"
-                if "marketcap" in data:
-                    m += f"Market Cap: {data['marketcap']:,}\n"
-                if "week52high" in data:
-                    m += f"52 Week (high-low): {data['week52high']:,} "
-                if "week52low" in data:
-                    m += f"- {data['week52low']:,}\n"
-                if "employees" in data:
-                    m += f"Number of Employees: {data['employees']:,}\n"
-                if "nextEarningsDate" in data:
-                    m += f"Next Earnings Date: {data['nextEarningsDate']}\n"
-                if "peRatio" in data:
-                    m += f"Price to Earnings: {data['peRatio']:.3f}\n"
-                if "beta" in data:
-                    m += f"Beta: {data['beta']:.3f}\n"
-                return m
-            else:
-                return f"No information found for: {symbol}\nEither today is boring or the symbol does not exist."
+            m = ""
+            if "companyName" in data:
+                m += f"Company Name: {data['companyName']}\n"
+            if "marketcap" in data:
+                m += f"Market Cap: {data['marketcap']:,}\n"
+            if "week52high" in data:
+                m += f"52 Week (high-low): {data['week52high']:,} "
+            if "week52low" in data:
+                m += f"- {data['week52low']:,}\n"
+            if "employees" in data:
+                m += f"Number of Employees: {data['employees']:,}\n"
+            if "nextEarningsDate" in data:
+                m += f"Next Earnings Date: {data['nextEarningsDate']}\n"
+            if "peRatio" in data:
+                m += f"Price to Earnings: {data['peRatio']:.3f}\n"
+            if "beta" in data:
+                m += f"Beta: {data['beta']:.3f}\n"
+            return m
+        else:
+            return f"No information found for: {symbol}\nEither today is boring or the symbol does not exist."

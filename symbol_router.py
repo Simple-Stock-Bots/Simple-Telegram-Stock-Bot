@@ -1,8 +1,7 @@
-"""Function that routes symbols to the correct API provider. 
+"""Function that routes symbols to the correct API provider.
 """
 
 import re
-import requests as r
 import pandas as pd
 
 from typing import List, Dict
@@ -12,10 +11,10 @@ from cg_Crypto import cg_Crypto
 
 
 class Router:
-    STOCK_REGEX = "[$]([a-zA-Z]{1,4})"
-    CRYPTO_REGEX = "[$$]([a-zA-Z]{1,9})"
+    STOCK_REGEX = "(?:^|[^\\$])\\$([a-zA-Z]{1,4})"
+    CRYPTO_REGEX = "[$]{2}([a-zA-Z]{1,9})"
 
-    def __init__(self, IEX_TOKEN=""):
+    def __init__(self, IEX_TOKEN):
         self.symbol = IEX_Symbol(IEX_TOKEN)
         self.crypto = cg_Crypto()
 
@@ -35,8 +34,11 @@ class Router:
             List of stock symbols as strings without dollar sign.
         """
         symbols = {}
-        symbols["stocks"] = list(set(re.findall(self.SYMBOL_REGEX, text)))
-        symbols["crypto"] = list(set(re.findall(self.SYMBOL_REGEX, text)))
+        symbols["stocks"] = list(set(re.findall(self.STOCK_REGEX, text)))
+        symbols["crypto"] = [
+            self.crypto.symbol_id(c) for c in set(re.findall(self.CRYPTO_REGEX, text))
+        ]
+
         return symbols
 
     def status(self) -> str:
@@ -47,6 +49,22 @@ class Router:
         str
             Human readable text on status of IEX API
         """
+
+    def search_symbols(self, search: str) -> List[str]:
+        """Performs a fuzzy search to find stock symbols closest to a search term.
+
+        Parameters
+        ----------
+        search : str
+            String used to search, could be a company name or something close to the companies stock ticker.
+
+        Returns
+        -------
+        List[tuple[str, str]]
+            A list tuples of every stock sorted in order of how well they match. Each tuple contains: (Symbol, Issue Name).
+        """
+        # TODO add support for crypto
+        return self.symbol.find_symbols(str)
 
     def price_reply(self, symbols: dict) -> List[str]:
         """Returns current market price or after hours if its available for a given stock symbol.
@@ -94,8 +112,7 @@ class Router:
                 replies.append(self.symbol.price_reply(s))
 
         if symbols["crypto"]:
-            for s in symbols["crypto"]:
-                replies.append(self.crypto.price_reply(s))
+            replies.append("Cryptocurrencies do no have Dividends.")
 
     def news_reply(self, symbols: dict) -> List[str]:
         """Gets recent english news on stock symbols.
@@ -167,7 +184,7 @@ class Router:
         else:
             raise f"Unknown type: {type}"
 
-    def chart_reply(self, symbol: str, type: str) -> pd.DataFrame:
+    def chart_reply(self, symbols: str) -> pd.DataFrame:
         """Returns price data for a symbol of the past month up until the previous trading days close.
         Also caches multiple requests made in the same day.
 
@@ -181,12 +198,10 @@ class Router:
         pd.DataFrame
             Returns a timeseries dataframe with high, low, and volume data if its available. Otherwise returns empty pd.DataFrame.
         """
-        if type == "stocks":
-            return self.symbol.intra_reply(symbol)
-        elif type == "crypto":
-            return self.crypto.intra_reply(symbol)
-        else:
-            raise f"Unknown type: {type}"
+        if symbols["stocks"]:
+            return self.symbol.intra_reply(symbol := symbols["stocks"][0]), symbol
+        if symbols["crypto"]:
+            return self.symbol.intra_reply(symbol := symbols["crypto"][0]), symbol
 
     def stat_reply(self, symbols: List[str]) -> Dict[str, str]:
         """Gets key statistics for each symbol in the list

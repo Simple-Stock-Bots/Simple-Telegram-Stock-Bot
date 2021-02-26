@@ -1,14 +1,14 @@
-"""Class with functions for running the bot with CoinGecko
+"""Class with functions for running the bot with IEX Cloud.
 """
 
-import re
 from datetime import datetime
-from typing import Optional, List, Tuple, Dict
+from typing import Optional, List, Tuple
 
 import pandas as pd
 import requests as r
 import schedule
 from fuzzywuzzy import fuzz
+from markdownify import markdownify
 
 
 class cg_Crypto:
@@ -16,12 +16,11 @@ class cg_Crypto:
     Functions for finding crypto info
     """
 
-    SYMBOL_REGEX = "[$]([a-zA-Z]{1,4})"
+    vs_currency = "usd"  # simple/supported_vs_currencies for list of options
 
     searched_symbols = {}
-    charts = {}
 
-    def __init__(self, IEX_TOKEN: str) -> None:
+    def __init__(self) -> None:
         """Creates a Symbol Object
 
         Parameters
@@ -29,22 +28,20 @@ class cg_Crypto:
         IEX_TOKEN : str
             IEX Token
         """
-        self.IEX_TOKEN = IEX_TOKEN
-        if IEX_TOKEN != "":
-            self.get_symbol_list()
+        self.get_symbol_list()
+        schedule.every().day.do(self.get_symbol_list)
 
-            schedule.every().day.do(self.get_symbol_list)
-            schedule.every().day.do(self.clear_charts)
-
-    def clear_charts(self) -> None:
-        """Clears cache of chart data."""
-        self.charts = {}
+    def symbol_id(self, symbol) -> str:
+        try:
+            return self.symbol_list[self.symbol_list["symbol"] == symbol]["id"].values[
+                0
+            ]
+        except KeyError:
+            return ""
 
     def get_symbol_list(self, return_df=False) -> Optional[pd.DataFrame]:
 
-        raw_symbols = r.get(
-            f"https://cloud.iexapis.com/stable/ref-data/symbols?token={self.IEX_TOKEN}"
-        ).json()
+        raw_symbols = r.get("https://api.coingecko.com/api/v3/coins/list").json()
         symbols = pd.DataFrame(data=raw_symbols)
 
         symbols["description"] = symbols["symbol"] + ": " + symbols["name"]
@@ -52,62 +49,34 @@ class cg_Crypto:
         if return_df:
             return symbols, datetime.now()
 
-    def iex_status(self) -> str:
-        """Checks IEX Status dashboard for any current API issues.
+    def cg_status(self) -> str:
+        """Checks CoinGecko /ping endpoint for API issues.
 
         Returns
         -------
         str
-            Human readable text on status of IEX API
+            Human readable text on status of CoinGecko API
         """
-        status = r.get("https://pjmps0c34hp7.statuspage.io/api/v2/status.json").json()[
-            "status"
-        ]
+        status = r.get("https://api.coingecko.com/api/v3/ping")
 
-        if status["indicator"] == "none":
-            return "IEX Cloud is currently not reporting any issues with its API."
+        if status.status_code == 200:
+            return "CoinGecko API responded that it was OK in {status.elapsed.total_seconds()} Seconds."
         else:
-            return (
-                f"{status['indicator']}: {status['description']}."
-                + " Please check the status page for more information. https://status.iexapis.com"
-            )
-
-    def message_status(self) -> str:
-        """Checks to see if the bot has available IEX Credits
-
-        Returns
-        -------
-        str
-            Human readable text on status of IEX Credits.
-        """
-        usage = r.get(
-            f"https://cloud.iexapis.com/stable/account/metadata?token={self.IEX_TOKEN}"
-        ).json()
-        try:
-            if (
-                usage["messagesUsed"] >= usage["messageLimit"] - 10000
-                and not usage["payAsYouGoEnabled"]
-            ):
-                return "Bot may be out of IEX Credits."
-            else:
-                return "Bot has available IEX Credits."
-        except KeyError:
-            return "**IEX API could not be reached.**"
+            return "CoinGecko API returned an error in {status.elapsed.total_seconds()} Seconds."
 
     def search_symbols(self, search: str) -> List[Tuple[str, str]]:
-        """Performs a fuzzy search to find stock symbols closest to a search term.
+        """Performs a fuzzy search to find coin symbols closest to a search term.
 
         Parameters
         ----------
         search : str
-            String used to search, could be a company name or something close to the companies stock ticker.
+            String used to search, could be a company name or something close to the companies coin ticker.
 
         Returns
         -------
         List[tuple[str, str]]
-            A list tuples of every stock sorted in order of how well they match. Each tuple contains: (Symbol, Issue Name).
+            A list tuples of every coin sorted in order of how well they match. Each tuple contains: (Symbol, Issue Name).
         """
-
         schedule.run_pending()
         search = search.lower()
         try:  # https://stackoverflow.com/a/3845776/8774114
@@ -134,30 +103,13 @@ class cg_Crypto:
         self.searched_symbols[search] = symbol_list
         return symbol_list
 
-    def find_symbols(self, text: str) -> List[str]:
-        """Finds stock tickers starting with a dollar sign in a blob of text and returns them in a list.
-        Only returns each match once. Example: Whats the price of $tsla?
-
-        Parameters
-        ----------
-        text : str
-            Blob of text.
-
-        Returns
-        -------
-        List[str]
-            List of stock symbols as strings without dollar sign.
-        """
-
-        return list(set(re.findall(self.SYMBOL_REGEX, text)))
-
-    def price_reply(self, symbols: list) -> Dict[str, str]:
-        """Returns current market price or after hours if its available for a given stock symbol.
+    def price_reply(self, symbol: str) -> str:
+        """Returns current market price or after hours if its available for a given coin symbol.
 
         Parameters
         ----------
         symbols : list
-            List of stock symbols.
+            List of coin symbols.
 
         Returns
         -------
@@ -165,188 +117,34 @@ class cg_Crypto:
             Each symbol passed in is a key with its value being a human readable
             markdown formatted string of the symbols price and movement.
         """
-        dataMessages = {}
-        for symbol in symbols:
-            IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/quote?token={self.IEX_TOKEN}"
 
-            response = r.get(IEXurl)
-            if response.status_code == 200:
-                IEXData = response.json()
-                keys = (
-                    "isUSMarketOpen",
-                    "extendedChangePercent",
-                    "extendedPrice",
-                    "companyName",
-                    "latestPrice",
-                    "changePercent",
-                )
-
-                if set(keys).issubset(IEXData):
-
-                    try:  # Some symbols dont return if the market is open
-                        IEXData["isUSMarketOpen"]
-                    except KeyError:
-                        IEXData["isUSMarketOpen"] = True
-
-                    if (
-                        IEXData["isUSMarketOpen"]
-                        or (IEXData["extendedChangePercent"] is None)
-                        or (IEXData["extendedPrice"] is None)
-                    ):  # Check if market is open.
-                        message = f"The current stock price of {IEXData['companyName']} is $**{IEXData['latestPrice']}**"
-                        change = round(IEXData["changePercent"] * 100, 2)
-                    else:
-                        message = (
-                            f"{IEXData['companyName']} closed at $**{IEXData['latestPrice']}**,"
-                            + f" after hours _(15 minutes delayed)_ the stock price is $**{IEXData['extendedPrice']}**"
-                        )
-                        change = round(IEXData["extendedChangePercent"] * 100, 2)
-
-                    # Determine wording of change text
-                    if change > 0:
-                        message += f", the stock is currently **up {change}%**"
-                    elif change < 0:
-                        message += f", the stock is currently **down {change}%**"
-                    else:
-                        message += ", the stock hasn't shown any movement today."
-                else:
-                    message = f"The symbol: {symbol} encountered and error. This could be due to "
-
-            else:
-                message = f"The symbol: {symbol} was not found."
-
-            dataMessages[symbol] = message
-
-        return dataMessages
-
-    def dividend_reply(self, symbol: str) -> Dict[str, str]:
-        """Returns the most recent, or next dividend date for a stock symbol.
-
-        Parameters
-        ----------
-        symbols : list
-            List of stock symbols.
-
-        Returns
-        -------
-        Dict[str, str]
-            Each symbol passed in is a key with its value being a human readable formatted string of the symbols div dates.
-        """
-
-        IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/dividends/next?token={self.IEX_TOKEN}"
-        response = r.get(IEXurl)
+        response = r.get(
+            f"https://api.coingecko.com/api/v3/coins/{symbol}?localization=false"
+        )
         if response.status_code == 200:
-            IEXData = response.json()[0]
-            keys = (
-                "amount",
-                "currency",
-                "declaredDate",
-                "exDate",
-                "frequency",
-                "paymentDate",
-                "flag",
-            )
+            data = response.json()
 
-            if set(keys).issubset(IEXData):
+            try:
+                name = data["name"]
+                price = data["market_data"]["current_price"][self.vs_currency]
+                change = data["market_data"]["price_change_percentage_24h"]
+            except KeyError:
+                return f"{symbol} returned an error."
 
-                if IEXData["currency"] == "USD":
-                    price = f"${IEXData['amount']}"
-                else:
-                    price = f"{IEXData['amount']} {IEXData['currency']}"
+            message = f"The current coin price of {name} is $**{price}**"
 
-                # Pattern IEX uses for dividend date.
-                pattern = "%Y-%m-%d"
-
-                declared = datetime.strptime(IEXData["declaredDate"], pattern).strftime(
-                    "%A, %B %w"
-                )
-                ex = datetime.strptime(IEXData["exDate"], pattern).strftime("%A, %B %w")
-                payment = datetime.strptime(IEXData["paymentDate"], pattern).strftime(
-                    "%A, %B %w"
-                )
-
-                daysDelta = (
-                    datetime.strptime(IEXData["paymentDate"], pattern) - datetime.now()
-                ).days
-
-                return (
-                    f"The next dividend for ${self.symbol_list[self.symbol_list['symbol']==symbol.upper()]['description'].item()}"
-                    + f" is on {payment} which is in {daysDelta} days."
-                    + f" The dividend is for {price} per share."
-                    + f"\nThe dividend was declared on {declared} and the ex-dividend date is {ex}"
-                )
-
-        return f"{symbol} either doesn't exist or pays no dividend."
-
-    def news_reply(self, symbols: list) -> Dict[str, str]:
-        """Gets recent english news on stock symbols.
-
-        Parameters
-        ----------
-        symbols : list
-            List of stock symbols.
-
-        Returns
-        -------
-        Dict[str, str]
-            Each symbol passed in is a key with its value being a human readable markdown formatted string of the symbols news.
-        """
-        newsMessages = {}
-
-        for symbol in symbols:
-            IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/news/last/5?token={self.IEX_TOKEN}"
-            response = r.get(IEXurl)
-            if response.status_code == 200:
-                data = response.json()
-                if len(data):
-                    newsMessages[symbol] = f"News for **{symbol.upper()}**:\n\n"
-                    for news in data:
-                        if news["lang"] == "en" and not news["hasPaywall"]:
-                            message = f"*{news['source']}*: [{news['headline']}]({news['url']})\n"
-                            newsMessages[symbol] = newsMessages[symbol] + message
-                else:
-                    newsMessages[
-                        symbol
-                    ] = f"No news found for: {symbol}\nEither today is boring or the symbol does not exist."
+            # Determine wording of change text
+            if change > 0:
+                message += f", the coin is currently **up {change}%**"
+            elif change < 0:
+                message += f", the coin is currently **down {change}%**"
             else:
-                newsMessages[
-                    symbol
-                ] = f"No news found for: {symbol}\nEither today is boring or the symbol does not exist."
+                message += ", the coin hasn't shown any movement today."
 
-        return newsMessages
+        else:
+            message = f"The symbol: {symbol} was not found."
 
-    def info_reply(self, symbols: List[str]) -> Dict[str, str]:
-        """Gets information on stock symbols.
-
-        Parameters
-        ----------
-        symbols : List[str]
-            List of stock symbols.
-
-        Returns
-        -------
-        Dict[str, str]
-            Each symbol passed in is a key with its value being a human readable formatted string of the symbols information.
-        """
-        infoMessages = {}
-
-        for symbol in symbols:
-            IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/company?token={self.IEX_TOKEN}"
-            response = r.get(IEXurl)
-
-            if response.status_code == 200:
-                data = response.json()
-                infoMessages[symbol] = (
-                    f"Company Name: [{data['companyName']}]({data['website']})\nIndustry:"
-                    + f" {data['industry']}\nSector: {data['sector']}\nCEO: {data['CEO']}\nDescription: {data['description']}\n"
-                )
-
-            else:
-                infoMessages[
-                    symbol
-                ] = f"No information found for: {symbol}\nEither today is boring or the symbol does not exist."
-
-        return infoMessages
+        return message
 
     def intra_reply(self, symbol: str) -> pd.DataFrame:
         """Returns price data for a symbol since the last market open.
@@ -361,16 +159,15 @@ class cg_Crypto:
         pd.DataFrame
             Returns a timeseries dataframe with high, low, and volume data if its available. Otherwise returns empty pd.DataFrame.
         """
-        if symbol.upper() not in list(self.symbol_list["symbol"]):
-            return pd.DataFrame()
-
-        IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/intraday-prices?token={self.IEX_TOKEN}"
-        response = r.get(IEXurl)
+        response = r.get(
+            "https://api.coingecko.com/api/v3/coins/{symbol}/ohlc?vs_currency=usd&days=1"
+        )
         if response.status_code == 200:
-            df = pd.DataFrame(response.json())
-            df.dropna(inplace=True, subset=["date", "minute", "high", "low", "volume"])
-            df["DT"] = pd.to_datetime(df["date"] + "T" + df["minute"])
-            df = df.set_index("DT")
+            df = pd.DataFrame(
+                response.json(), columns=["Date", "Open", "High", "Low", "Close"]
+            ).dropna()
+            df["Date"] = pd.to_datetime(df["Date"], unit="ms")
+            df = df.set_index("Date")
             return df
 
         return pd.DataFrame()
@@ -389,111 +186,71 @@ class cg_Crypto:
         pd.DataFrame
             Returns a timeseries dataframe with high, low, and volume data if its available. Otherwise returns empty pd.DataFrame.
         """
-        schedule.run_pending()
-
-        if symbol.upper() not in list(self.symbol_list["symbol"]):
-            return pd.DataFrame()
-
-        try:  # https://stackoverflow.com/a/3845776/8774114
-            return self.charts[symbol.upper()]
-        except KeyError:
-            pass
-
         response = r.get(
-            f"https://cloud.iexapis.com/stable/stock/{symbol}/chart/1mm?token={self.IEX_TOKEN}&chartInterval=3&includeToday=false"
+            "https://api.coingecko.com/api/v3/coins/{symbol}/ohlc?vs_currency=usd&days=30"
         )
-
         if response.status_code == 200:
-            df = pd.DataFrame(response.json())
-            df.dropna(inplace=True, subset=["date", "minute", "high", "low", "volume"])
-            df["DT"] = pd.to_datetime(df["date"] + "T" + df["minute"])
-            df = df.set_index("DT")
-            self.charts[symbol.upper()] = df
+            df = pd.DataFrame(
+                response.json(), columns=["Date", "Open", "High", "Low", "Close"]
+            ).dropna()
+            df["Date"] = pd.to_datetime(df["Date"], unit="ms")
+            df = df.set_index("Date")
             return df
 
         return pd.DataFrame()
 
-    def stat_reply(self, symbols: List[str]) -> Dict[str, str]:
+    def stat_reply(self, symbol: str) -> str:
         """Gets key statistics for each symbol in the list
 
         Parameters
         ----------
         symbols : List[str]
-            List of stock symbols
+            List of coin symbols
 
         Returns
         -------
         Dict[str, str]
             Each symbol passed in is a key with its value being a human readable formatted string of the symbols statistics.
         """
-        infoMessages = {}
-
-        for symbol in symbols:
-            IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/stats?token={self.IEX_TOKEN}"
-            response = r.get(IEXurl)
-
-            if response.status_code == 200:
-                data = response.json()
-                [data.pop(k) for k in list(data) if data[k] == ""]
-
-                m = ""
-                if "companyName" in data:
-                    m += f"Company Name: {data['companyName']}\n"
-                if "marketcap" in data:
-                    m += f"Market Cap: {data['marketcap']:,}\n"
-                if "week52high" in data:
-                    m += f"52 Week (high-low): {data['week52high']:,} "
-                if "week52low" in data:
-                    m += f"- {data['week52low']:,}\n"
-                if "employees" in data:
-                    m += f"Number of Employees: {data['employees']:,}\n"
-                if "nextEarningsDate" in data:
-                    m += f"Next Earnings Date: {data['nextEarningsDate']}\n"
-                if "peRatio" in data:
-                    m += f"Price to Earnings: {data['peRatio']:.3f}\n"
-                if "beta" in data:
-                    m += f"Beta: {data['beta']:.3f}\n"
-                infoMessages[symbol] = m
-            else:
-                infoMessages[
-                    symbol
-                ] = f"No information found for: {symbol}\nEither today is boring or the symbol does not exist."
-
-        return infoMessages
-
-    def crypto_reply(self, pair: str) -> str:
-        """Returns the current price of a cryptocurrency
-
-        Parameters
-        ----------
-        pair : str
-            symbol for the cryptocurrency, sometimes with a price pair like ETHUSD
-
-        Returns
-        -------
-        str
-            Returns a human readable markdown description of the price, or an empty string if no price was found.
-        """
-
-        pair = pair.split(" ")[-1].replace("/", "").upper()
-        pair += "USD" if len(pair) == 3 else pair
-
-        IEXurl = f"https://cloud.iexapis.com/stable/crypto/{pair}/quote?token={self.IEX_TOKEN}"
-
-        response = r.get(IEXurl)
-
+        response = r.get(
+            f"https://api.coingecko.com/api/v3/coins/{symbol}?localization=false"
+        )
         if response.status_code == 200:
             data = response.json()
 
-            quote = f"Symbol: {data['symbol']}\n"
-            quote += f"Price: ${data['latestPrice']}\n"
+            message = f"""
+                [{data['name']}]({data['links']['homepage'][0]}) Statistics:
+                Maket Cap Ranking: {data.get('market_cap_rank',"Not Available")}
+                CoinGecko Scores:
+                    Overall: {data.get('coingecko_score','Not Available')}
+                    Development: {data.get('developer_score','Not Available')}
+                    Community: {data.get('community_score','Not Available')}
+                    Public Interest: {data.get('public_interest_score','Not Available')}
+                    """
+            return message
 
-            new, old = data["latestPrice"], data["previousClose"]
-            if old is not None:
-                change = (float(new) - float(old)) / float(old)
-                quote += f"Change: {change}\n"
+    def info_reply(self, symbol: str) -> str:
+        """Gets information on stock symbols.
 
-            return quote
+        Parameters
+        ----------
+        symbols : List[str]
+            List of stock symbols.
 
-        else:
-            return ""
+        Returns
+        -------
+        Dict[str, str]
+            Each symbol passed in is a key with its value being a human readable formatted string of the symbols information.
+        """
+
+        response = r.get(
+            f"https://api.coingecko.com/api/v3/coins/{symbol}?localization=false"
+        )
+        if response.status_code == 200:
+            data = response.json()
+            try:
+                return markdownify(data["description"])
+            except KeyError:
+                return f"{symbol} does not have a description available."
+
+        return f"No information found for: {symbol}\nEither today is boring or the symbol does not exist."
