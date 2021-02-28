@@ -2,13 +2,16 @@
 """
 
 import re
-import requests as r
 import pandas as pd
+import random
+import datetime
 
-from typing import List, Tuple, TypeVar
+from typing import List, Tuple
 
 from IEX_Symbol import IEX_Symbol
 from cg_Crypto import cg_Crypto
+
+from Symbol import Symbol, Stock, Coin
 
 
 class Router:
@@ -19,7 +22,7 @@ class Router:
         self.stock = IEX_Symbol()
         self.crypto = cg_Crypto()
 
-    def find_symbols(self, text: str) -> List[any]:
+    def find_symbols(self, text: str) -> List[Symbol]:
         """Finds stock tickers starting with a dollar sign, and cryptocurrencies with two dollar signs
         in a blob of text and returns them in a list.
         Only returns each match once. Example: Whats the price of $tsla?
@@ -177,7 +180,7 @@ class Router:
 
         return replies
 
-    def intra_reply(self, symbol: str) -> pd.DataFrame:
+    def intra_reply(self, symbol: Symbol) -> pd.DataFrame:
         """Returns price data for a symbol since the last market open.
 
         Parameters
@@ -199,7 +202,7 @@ class Router:
             print(f"{symbol} is not a Stock or Coin")
             return pd.DataFrame()
 
-    def chart_reply(self, symbol: str) -> pd.DataFrame:
+    def chart_reply(self, symbol: Symbol) -> pd.DataFrame:
         """Returns price data for a symbol of the past month up until the previous trading days close.
         Also caches multiple requests made in the same day.
 
@@ -221,7 +224,7 @@ class Router:
             print(f"{symbol} is not a Stock or Coin")
             return pd.DataFrame()
 
-    def stat_reply(self, symbols: List[str]) -> List[str]:
+    def stat_reply(self, symbols: List[Symbol]) -> List[str]:
         """Gets key statistics for each symbol in the list
 
         Parameters
@@ -246,47 +249,14 @@ class Router:
 
         return replies
 
+    def random_pick(self) -> str:
 
-Sym = TypeVar("Sym", Stock, Coin)
+        choice = random.choice(
+            list(self.stock.symbol_list["description"])
+            + list(self.crypto.symbol_list["description"])
+        )
+        hold = (
+            datetime.date.today() + datetime.timedelta(random.randint(1, 365))
+        ).strftime("%b %d, %Y")
 
-
-class Symbol:
-    """
-    symbol: What the user calls it. ie tsla or btc
-    id: What the api expects. ie tsla or bitcoin
-    name: Human readable. ie Tesla or Bitcoin
-    """
-
-    currency = "usd"
-    pass
-
-    def __init__(self, symbol) -> None:
-        self.symbol = symbol
-        self.id = symbol
-
-    def __repr__(self) -> str:
-        return f"<{self.__class__.__name__} instance of {self.id} at {id(self)}>"
-
-    def __str__(self) -> str:
-        return self.id
-
-
-class Stock(Symbol):
-    def __init__(self, symbol: str) -> None:
-        self.symbol = symbol
-        self.id = symbol
-
-
-class Coin(Symbol):
-    def __init__(self, symbol: str) -> None:
-        self.symbol = symbol
-        self.get_data()
-
-    def get_data(self) -> None:
-        self.id = cg_Crypto().symbol_id(self.symbol)
-        data = r.get("https://api.coingecko.com/api/v3/coins/" + self.id).json()
-        self.data = data
-
-        self.name = data["name"]
-        self.description = data["description"]
-        self.price = data["market_data"]["current_price"][self.currency]
+        return f"{choice}\nBuy and hold until: {hold}"
