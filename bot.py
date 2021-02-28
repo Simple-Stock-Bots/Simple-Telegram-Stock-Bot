@@ -32,17 +32,12 @@ from T_info import T_info
 TELEGRAM_TOKEN = os.environ["TELEGRAM"]
 
 try:
-    IEX_TOKEN = os.environ["IEX"]
-except KeyError:
-    IEX_TOKEN = ""
-    print("Starting without an IEX Token will not allow you to get market data!")
-try:
     STRIPE_TOKEN = os.environ["STRIPE"]
 except KeyError:
     STRIPE_TOKEN = ""
     print("Starting without a STRIPE Token will not allow you to accept Donations!")
 
-s = Router(IEX=IEX_TOKEN)
+s = Router()
 t = T_info()
 
 # Enable logging
@@ -160,11 +155,11 @@ def symbol_detect(update: Update, context: CallbackContext):
     if symbols:
         # Let user know bot is working
         context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-
-        for reply in s.price_reply(symbols).items():
-
+        print(symbols)
+        for reply in s.price_reply(symbols):
+            print(reply)
             update.message.reply_text(
-                text=reply[1], parse_mode=telegram.ParseMode.MARKDOWN
+                text=reply, parse_mode=telegram.ParseMode.MARKDOWN
             )
 
 
@@ -270,7 +265,7 @@ def intra(update: Update, context: CallbackContext):
         )
         return
 
-    symbol = s.find_symbols(message)[0]
+    symbol = s.find_symbols(message)
 
     df = s.intra_reply(symbol)
     if df.empty:
@@ -289,7 +284,7 @@ def intra(update: Update, context: CallbackContext):
         df,
         type="renko",
         title=f"\n${symbol.upper()}",
-        volume=True,
+        volume="volume" in df.keys(),
         style="yahoo",
         mav=20,
         savefig=dict(fname=buf, dpi=400, bbox_inches="tight"),
@@ -317,9 +312,9 @@ def chart(update: Update, context: CallbackContext):
         )
         return
 
-    symbol = s.find_symbols(message)[0]
+    symbols = s.find_symbols(message)
 
-    df = s.chart_reply(symbol)
+    df, symbol = s.chart_reply(symbols)
     if df.empty:
         update.message.reply_text(
             text="Invalid symbol please see `/help` for usage details.",
@@ -330,13 +325,13 @@ def chart(update: Update, context: CallbackContext):
     context.bot.send_chat_action(
         chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO
     )
-
+    print(symbol)
     buf = io.BytesIO()
     mpf.plot(
         df,
         type="candle",
         title=f"\n${symbol.upper()}",
-        volume=True,
+        volume="volume" in df.keys(),
         style="yahoo",
         savefig=dict(fname=buf, dpi=400, bbox_inches="tight"),
     )
@@ -345,7 +340,7 @@ def chart(update: Update, context: CallbackContext):
     update.message.reply_photo(
         photo=buf,
         caption=f"\n1 Month chart for ${symbol.upper()} from {df.first_valid_index().strftime('%d, %b %Y')}"
-        + f" to {df.last_valid_index().strftime('%d, %b %Y')}\n\n{s.price_reply([symbol])[symbol]}",
+        + f" to {df.last_valid_index().strftime('%d, %b %Y')}\n\n{s.price_reply(symbols)[0]}",
         parse_mode=telegram.ParseMode.MARKDOWN,
     )
 
@@ -451,19 +446,22 @@ def error(update: Update, context: CallbackContext):
         None, context.error, context.error.__traceback__
     )
     tb_string = "".join(tb_list)
+    print(tb_string)
+    if update:
+        message = (
+            f"An exception was raised while handling an update\n"
+            f"<pre>update = {html.escape(json.dumps(update.to_dict(), indent=2, ensure_ascii=False))}"
+            "</pre>\n\n"
+            f"<pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n\n"
+            f"<pre>context.user_data = {html.escape(str(context.user_data))}</pre>\n\n"
+            f"<pre>{html.escape(tb_string)}</pre>"
+        )
 
-    message = (
-        f"An exception was raised while handling an update\n"
-        f"<pre>update = {html.escape(json.dumps(update.to_dict(), indent=2, ensure_ascii=False))}"
-        "</pre>\n\n"
-        f"<pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n\n"
-        f"<pre>context.user_data = {html.escape(str(context.user_data))}</pre>\n\n"
-        f"<pre>{html.escape(tb_string)}</pre>"
-    )
-
-    # Finally, send the message
-    update.message.reply_text(text=message, parse_mode=telegram.ParseMode.HTML)
-    update.message.reply_text(text="Please inform the bot admin of this issue.")
+        # Finally, send the message
+        update.message.reply_text(text=message, parse_mode=telegram.ParseMode.HTML)
+        update.message.reply_text(text="Please inform the bot admin of this issue.")
+    print("-" * 50)
+    print(tb_string)
 
 
 def main():

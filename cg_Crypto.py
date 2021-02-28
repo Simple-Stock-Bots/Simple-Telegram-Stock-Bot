@@ -119,7 +119,7 @@ class cg_Crypto:
         """
 
         response = r.get(
-            f"https://api.coingecko.com/api/v3/coins/{symbol}?localization=false"
+            f"https://api.coingecko.com/api/v3/coins/{symbol.id}?localization=false"
         )
         if response.status_code == 200:
             data = response.json()
@@ -189,6 +189,7 @@ class cg_Crypto:
         response = r.get(
             "https://api.coingecko.com/api/v3/coins/{symbol}/ohlc?vs_currency=usd&days=30"
         )
+        print(response.status_code)
         if response.status_code == 200:
             df = pd.DataFrame(
                 response.json(), columns=["Date", "Open", "High", "Low", "Close"]

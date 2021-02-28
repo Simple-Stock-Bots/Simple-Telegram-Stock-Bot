@@ -8,6 +8,7 @@ import pandas as pd
 import requests as r
 import schedule
 from fuzzywuzzy import fuzz
+import os
 
 
 class IEX_Symbol:
@@ -20,7 +21,7 @@ class IEX_Symbol:
     searched_symbols = {}
     charts = {}
 
-    def __init__(self, IEX_TOKEN: str) -> None:
+    def __init__(self) -> None:
         """Creates a Symbol Object
 
         Parameters
@@ -28,8 +29,15 @@ class IEX_Symbol:
         IEX_TOKEN : str
             IEX Token
         """
-        self.IEX_TOKEN = IEX_TOKEN
-        if IEX_TOKEN != "":
+        try:
+            self.IEX_TOKEN = os.environ["IEX"]
+        except KeyError:
+            self.IEX_TOKEN = ""
+            print(
+                "Starting without an IEX Token will not allow you to get market data!"
+            )
+
+        if self.IEX_TOKEN != "":
             self.get_symbol_list()
 
             schedule.every().day.do(self.get_symbol_list)
@@ -148,7 +156,7 @@ class IEX_Symbol:
             markdown formatted string of the symbols price and movement.
         """
 
-        IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/quote?token={self.IEX_TOKEN}"
+        IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol.id}/quote?token={self.IEX_TOKEN}"
 
         response = r.get(IEXurl)
         if response.status_code == 200:
