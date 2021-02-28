@@ -67,26 +67,8 @@ def license(update: Update, context: CallbackContext):
 
 
 def status(update: Update, context: CallbackContext):
-    message = ""
-    try:
-        # Bot Status
-        bot_resp = (
-            datetime.datetime.now(update.message.date.tzinfo) - update.message.date
-        )
-        message += f"It took {bot_resp.total_seconds()} seconds for the bot to get your message.\n"
 
-        # IEX Status
-        message += s.iex_status() + "\n"
-
-        # Message Status
-        message += s.message_status()
-    except Exception as ex:
-        message += (
-            f"*\n\nERROR ENCOUNTERED:*\n{ex}\n\n"
-            + "*The bot encountered an error while attempting to find errors. Please contact the bot admin.*"
-        )
-
-    update.message.reply_text(text=message, parse_mode=telegram.ParseMode.MARKDOWN)
+    update.message.reply_text(text=s.status(), parse_mode=telegram.ParseMode.MARKDOWN)
 
 
 def donate(update: Update, context: CallbackContext):

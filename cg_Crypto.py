@@ -9,6 +9,7 @@ import requests as r
 import schedule
 from fuzzywuzzy import fuzz
 from markdownify import markdownify
+from symbol_router import Coin
 
 
 class cg_Crypto:
@@ -39,7 +40,9 @@ class cg_Crypto:
         except KeyError:
             return ""
 
-    def get_symbol_list(self, return_df=False) -> Optional[pd.DataFrame]:
+    def get_symbol_list(
+        self, return_df=False
+    ) -> Optional[Tuple[pd.DataFrame, datetime]]:
 
         raw_symbols = r.get("https://api.coingecko.com/api/v3/coins/list").json()
         symbols = pd.DataFrame(data=raw_symbols)
@@ -103,7 +106,7 @@ class cg_Crypto:
         self.searched_symbols[search] = symbol_list
         return symbol_list
 
-    def price_reply(self, symbol: str) -> str:
+    def price_reply(self, symbol: Coin) -> str:
         """Returns current market price or after hours if its available for a given coin symbol.
 
         Parameters
@@ -146,7 +149,7 @@ class cg_Crypto:
 
         return message
 
-    def intra_reply(self, symbol: str) -> pd.DataFrame:
+    def intra_reply(self, symbol: Coin) -> pd.DataFrame:
         """Returns price data for a symbol since the last market open.
 
         Parameters
@@ -172,7 +175,7 @@ class cg_Crypto:
 
         return pd.DataFrame()
 
-    def chart_reply(self, symbol: str) -> pd.DataFrame:
+    def chart_reply(self, symbol: Coin) -> pd.DataFrame:
         """Returns price data for a symbol of the past month up until the previous trading days close.
         Also caches multiple requests made in the same day.
 
@@ -200,7 +203,7 @@ class cg_Crypto:
 
         return pd.DataFrame()
 
-    def stat_reply(self, symbol: str) -> str:
+    def stat_reply(self, symbol: Coin) -> str:
         """Gets key statistics for each symbol in the list
 
         Parameters
@@ -219,7 +222,7 @@ class cg_Crypto:
         if response.status_code == 200:
             data = response.json()
 
-            message = f"""
+            return f"""
                 [{data['name']}]({data['links']['homepage'][0]}) Statistics:
                 Maket Cap Ranking: {data.get('market_cap_rank',"Not Available")}
                 CoinGecko Scores:
@@ -228,9 +231,10 @@ class cg_Crypto:
                     Community: {data.get('community_score','Not Available')}
                     Public Interest: {data.get('public_interest_score','Not Available')}
                     """
-            return message
+        else:
+            return f"{symbol.symbol} returned an error."
 
-    def info_reply(self, symbol: str) -> str:
+    def info_reply(self, symbol: Coin) -> str:
         """Gets information on stock symbols.
 
         Parameters

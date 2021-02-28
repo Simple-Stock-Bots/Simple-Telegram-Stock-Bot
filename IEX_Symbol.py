@@ -10,6 +10,8 @@ import schedule
 from fuzzywuzzy import fuzz
 import os
 
+from symbol_router import Stock
+
 
 class IEX_Symbol:
     """
@@ -47,7 +49,9 @@ class IEX_Symbol:
         """Clears cache of chart data."""
         self.charts = {}
 
-    def get_symbol_list(self, return_df=False) -> Optional[pd.DataFrame]:
+    def get_symbol_list(
+        self, return_df=False
+    ) -> Optional[Tuple[pd.DataFrame, datetime]]:
 
         raw_symbols = r.get(
             f"https://cloud.iexapis.com/stable/ref-data/symbols?token={self.IEX_TOKEN}"
@@ -141,7 +145,7 @@ class IEX_Symbol:
         self.searched_symbols[search] = symbol_list
         return symbol_list
 
-    def price_reply(self, symbol: str) -> str:
+    def price_reply(self, symbol: Stock) -> str:
         """Returns current market price or after hours if its available for a given stock symbol.
 
         Parameters
@@ -208,7 +212,7 @@ class IEX_Symbol:
 
         return message
 
-    def dividend_reply(self, symbol: str) -> str:
+    def dividend_reply(self, symbol: Stock) -> str:
         """Returns the most recent, or next dividend date for a stock symbol.
 
         Parameters
@@ -259,7 +263,8 @@ class IEX_Symbol:
                 ).days
 
                 return (
-                    f"The next dividend for ${self.symbol_list[self.symbol_list['symbol']==symbol.upper()]['description'].item()}"
+                    "The next dividend for"
+                    + f"${self.symbol_list[self.symbol_list['symbol']==symbol.id.upper()]['description'].item()}"
                     + f" is on {payment} which is in {daysDelta} days."
                     + f" The dividend is for {price} per share."
                     + f"\nThe dividend was declared on {declared} and the ex-dividend date is {ex}"
@@ -267,7 +272,7 @@ class IEX_Symbol:
 
         return f"{symbol} either doesn't exist or pays no dividend."
 
-    def news_reply(self, symbol: str) -> str:
+    def news_reply(self, symbol: Stock) -> str:
         """Gets recent english news on stock symbols.
 
         Parameters
@@ -286,7 +291,7 @@ class IEX_Symbol:
         if response.status_code == 200:
             data = response.json()
             if len(data):
-                message = f"News for **{symbol.upper()}**:\n\n"
+                message = f"News for **{symbol.id.upper()}**:\n\n"
                 for news in data:
                     if news["lang"] == "en" and not news["hasPaywall"]:
                         message = (
@@ -300,7 +305,7 @@ class IEX_Symbol:
 
         return message
 
-    def info_reply(self, symbol: str) -> str:
+    def info_reply(self, symbol: Stock) -> str:
         """Gets information on stock symbols.
 
         Parameters
@@ -329,7 +334,7 @@ class IEX_Symbol:
 
         return message
 
-    def intra_reply(self, symbol: str) -> pd.DataFrame:
+    def intra_reply(self, symbol: Stock) -> pd.DataFrame:
         """Returns price data for a symbol since the last market open.
 
         Parameters
@@ -342,7 +347,7 @@ class IEX_Symbol:
         pd.DataFrame
             Returns a timeseries dataframe with high, low, and volume data if its available. Otherwise returns empty pd.DataFrame.
         """
-        if symbol.upper() not in list(self.symbol_list["symbol"]):
+        if symbol.id.upper() not in list(self.symbol_list["symbol"]):
             return pd.DataFrame()
 
         IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/intraday-prices?token={self.IEX_TOKEN}"
@@ -356,7 +361,7 @@ class IEX_Symbol:
 
         return pd.DataFrame()
 
-    def chart_reply(self, symbol: str) -> pd.DataFrame:
+    def chart_reply(self, symbol: Stock) -> pd.DataFrame:
         """Returns price data for a symbol of the past month up until the previous trading days close.
         Also caches multiple requests made in the same day.
 
@@ -372,11 +377,11 @@ class IEX_Symbol:
         """
         schedule.run_pending()
 
-        if symbol.upper() not in list(self.symbol_list["symbol"]):
+        if symbol.id.upper() not in list(self.symbol_list["symbol"]):
             return pd.DataFrame()
 
         try:  # https://stackoverflow.com/a/3845776/8774114
-            return self.charts[symbol.upper()]
+            return self.charts[symbol.id.upper()]
         except KeyError:
             pass
 
@@ -389,12 +394,12 @@ class IEX_Symbol:
             df.dropna(inplace=True, subset=["date", "minute", "high", "low", "volume"])
             df["DT"] = pd.to_datetime(df["date"] + "T" + df["minute"])
             df = df.set_index("DT")
-            self.charts[symbol.upper()] = df
+            self.charts[symbol.id.upper()] = df
             return df
 
         return pd.DataFrame()
 
-    def stat_reply(self, symbol: str) -> str:
+    def stat_reply(self, symbol: Stock) -> str:
         """Gets key statistics for each symbol in the list
 
         Parameters

@@ -5,7 +5,7 @@ import re
 import requests as r
 import pandas as pd
 
-from typing import List, Dict
+from typing import List, Tuple, TypeVar
 
 from IEX_Symbol import IEX_Symbol
 from cg_Crypto import cg_Crypto
@@ -19,7 +19,7 @@ class Router:
         self.stock = IEX_Symbol()
         self.crypto = cg_Crypto()
 
-    def find_symbols(self, text: str) -> Dict[str, str]:
+    def find_symbols(self, text: str) -> List[any]:
         """Finds stock tickers starting with a dollar sign, and cryptocurrencies with two dollar signs
         in a blob of text and returns them in a list.
         Only returns each match once. Example: Whats the price of $tsla?
@@ -60,7 +60,7 @@ class Router:
             Human readable text on status of IEX API
         """
 
-    def search_symbols(self, search: str) -> List[str]:
+    def search_symbols(self, search: str) -> List[Tuple[str, str]]:
         """Performs a fuzzy search to find stock symbols closest to a search term.
 
         Parameters
@@ -74,9 +74,9 @@ class Router:
             A list tuples of every stock sorted in order of how well they match. Each tuple contains: (Symbol, Issue Name).
         """
         # TODO add support for crypto
-        return self.stock.find_symbols(search)
+        return self.stock.search_symbols(search)
 
-    def price_reply(self, symbols: dict) -> List[str]:
+    def price_reply(self, symbols: list) -> List[str]:
         """Returns current market price or after hours if its available for a given stock symbol.
 
         Parameters
@@ -99,10 +99,10 @@ class Router:
                 replies.append(self.crypto.price_reply(symbol))
             else:
                 print(f"{symbol} is not a Stock or Coin")
-        print(replies)
+
         return replies
 
-    def dividend_reply(self, symbols: dict) -> Dict[str, str]:
+    def dividend_reply(self, symbols: list) -> List[str]:
         """Returns the most recent, or next dividend date for a stock symbol.
 
         Parameters
@@ -116,15 +116,17 @@ class Router:
             Each symbol passed in is a key with its value being a human readable formatted string of the symbols div dates.
         """
         replies = []
+        for symbol in symbols:
+            if isinstance(symbol, Stock):
+                replies.append(self.stock.dividend_reply(symbol))
+            elif isinstance(symbol, Coin):
+                replies.append("Cryptocurrencies do no have Dividends.")
+            else:
+                print(f"{symbol} is not a Stock or Coin")
 
-        if symbols["stocks"]:
-            for s in symbols["stocks"]:
-                replies.append(self.stock.price_reply(s))
+        return replies
 
-        if symbols["crypto"]:
-            replies.append("Cryptocurrencies do no have Dividends.")
-
-    def news_reply(self, symbols: dict) -> List[str]:
+    def news_reply(self, symbols: list) -> List[str]:
         """Gets recent english news on stock symbols.
 
         Parameters
@@ -139,17 +141,18 @@ class Router:
         """
         replies = []
 
-        if symbols["stocks"]:
-            for s in symbols["stocks"]:
-                replies.append(self.stock.price_reply(s))
-
-        if symbols["crypto"]:
-            for s in symbols["crypto"]:
-                replies.append(self.crypto.price_reply(s))
+        for symbol in symbols:
+            if isinstance(symbol, Stock):
+                replies.append(self.stock.news_reply(symbol))
+            elif isinstance(symbol, Coin):
+                # replies.append(self.crypto.news_reply(symbol))
+                replies.append("News is not yet supported for cryptocurrencies.")
+            else:
+                print(f"{symbol} is not a Stock or Coin")
 
         return replies
 
-    def info_reply(self, symbols: dict) -> List[str]:
+    def info_reply(self, symbols: list) -> List[str]:
         """Gets information on stock symbols.
 
         Parameters
@@ -164,17 +167,17 @@ class Router:
         """
         replies = []
 
-        if symbols["stocks"]:
-            for s in symbols["stocks"]:
-                replies.append(self.stock.price_reply(s))
-
-        if symbols["crypto"]:
-            for s in symbols["crypto"]:
-                replies.append(self.crypto.price_reply(s))
+        for symbol in symbols:
+            if isinstance(symbol, Stock):
+                replies.append(self.stock.info_reply(symbol))
+            elif isinstance(symbol, Coin):
+                replies.append(self.crypto.info_reply(symbol))
+            else:
+                print(f"{symbol} is not a Stock or Coin")
 
         return replies
 
-    def intra_reply(self, symbol: str, type: str) -> pd.DataFrame:
+    def intra_reply(self, symbol: str) -> pd.DataFrame:
         """Returns price data for a symbol since the last market open.
 
         Parameters
@@ -187,14 +190,16 @@ class Router:
         pd.DataFrame
             Returns a timeseries dataframe with high, low, and volume data if its available. Otherwise returns empty pd.DataFrame.
         """
-        if type == "stocks":
+
+        if isinstance(symbol, Stock):
             return self.stock.intra_reply(symbol)
-        elif type == "crypto":
+        elif isinstance(symbol, Coin):
             return self.crypto.intra_reply(symbol)
         else:
-            raise f"Unknown type: {type}"
+            print(f"{symbol} is not a Stock or Coin")
+            return pd.DataFrame()
 
-    def chart_reply(self, symbols: str) -> pd.DataFrame:
+    def chart_reply(self, symbol: str) -> pd.DataFrame:
         """Returns price data for a symbol of the past month up until the previous trading days close.
         Also caches multiple requests made in the same day.
 
@@ -208,12 +213,15 @@ class Router:
         pd.DataFrame
             Returns a timeseries dataframe with high, low, and volume data if its available. Otherwise returns empty pd.DataFrame.
         """
-        if symbols["stocks"]:
-            return self.stock.intra_reply(symbol := symbols["stocks"][0]), symbol
-        if symbols["crypto"]:
-            return self.stock.intra_reply(symbol := symbols["crypto"][0]), symbol
+        if isinstance(symbol, Stock):
+            return self.stock.chart_reply(symbol)
+        elif isinstance(symbol, Coin):
+            return self.crypto.chart_reply(symbol)
+        else:
+            print(f"{symbol} is not a Stock or Coin")
+            return pd.DataFrame()
 
-    def stat_reply(self, symbols: List[str]) -> Dict[str, str]:
+    def stat_reply(self, symbols: List[str]) -> List[str]:
         """Gets key statistics for each symbol in the list
 
         Parameters
@@ -228,31 +236,49 @@ class Router:
         """
         replies = []
 
-        if symbols["stocks"]:
-            for s in symbols["stocks"]:
-                replies.append(self.stock.price_reply(s))
+        for symbol in symbols:
+            if isinstance(symbol, Stock):
+                replies.append(self.stock.stat_reply(symbol))
+            elif isinstance(symbol, Coin):
+                replies.append(self.crypto.stat_reply(symbol))
+            else:
+                print(f"{symbol} is not a Stock or Coin")
 
-        if symbols["crypto"]:
-            for s in symbols["crypto"]:
-                replies.append(self.crypto.price_reply(s))
+        return replies
+
+
+Sym = TypeVar("Sym", Stock, Coin)
 
 
 class Symbol:
+    """
+    symbol: What the user calls it. ie tsla or btc
+    id: What the api expects. ie tsla or bitcoin
+    name: Human readable. ie Tesla or Bitcoin
+    """
+
     currency = "usd"
     pass
 
+    def __init__(self, symbol) -> None:
+        self.symbol = symbol
+        self.id = symbol
+
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__} instance of {self.id} at {id(self)}"
+        return f"<{self.__class__.__name__} instance of {self.id} at {id(self)}>"
+
+    def __str__(self) -> str:
+        return self.id
 
 
 class Stock(Symbol):
-    def __init__(self, symbol) -> None:
+    def __init__(self, symbol: str) -> None:
         self.symbol = symbol
         self.id = symbol
 
 
 class Coin(Symbol):
-    def __init__(self, symbol) -> None:
+    def __init__(self, symbol: str) -> None:
         self.symbol = symbol
         self.get_data()
 
