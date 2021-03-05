@@ -228,7 +228,7 @@ _Donations can only be made in a chat directly with @simplestockbot_
                     "changePercent",
                 )
 
-                if set(keys).issubset(IEXData):
+                if set(keys).issubset(IEXData) and all([IEXData[k] for k in keys]):
 
                     try:  # Some symbols dont return if the market is open
                         IEXData["isUSMarketOpen"]
@@ -257,7 +257,7 @@ _Donations can only be made in a chat directly with @simplestockbot_
                     else:
                         message += ", the stock hasn't shown any movement today."
                 else:
-                    message = f"The symbol: {symbol} encountered and error. This could be due to "
+                    message = f"The symbol: {symbol} encountered and error. This could be due to the symbol not being fully supported by IEX Cloud."
 
             else:
                 message = f"The symbol: {symbol} was not found."
