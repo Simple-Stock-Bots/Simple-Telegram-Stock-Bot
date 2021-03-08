@@ -227,8 +227,8 @@ _Donations can only be made in a chat directly with @simplestockbot_
                     "latestPrice",
                     "changePercent",
                 )
-
-                if set(keys).issubset(IEXData) and all([IEXData[k] for k in keys]):
+                [print(k, IEXData[k]) for k in keys]
+                if set(keys).issubset(IEXData):
 
                     try:  # Some symbols dont return if the market is open
                         IEXData["isUSMarketOpen"]
@@ -240,8 +240,12 @@ _Donations can only be made in a chat directly with @simplestockbot_
                         or (IEXData["extendedChangePercent"] is None)
                         or (IEXData["extendedPrice"] is None)
                     ):  # Check if market is open.
+
                         message = f"The current stock price of {IEXData['companyName']} is $**{IEXData['latestPrice']}**"
-                        change = round(IEXData["changePercent"] * 100, 2)
+                        try:
+                            change = round(IEXData["changePercent"] * 100, 2)
+                        except (KeyError, TypeError):
+                            change = 0
                     else:
                         message = (
                             f"{IEXData['companyName']} closed at $**{IEXData['latestPrice']}**,"
@@ -264,6 +268,8 @@ _Donations can only be made in a chat directly with @simplestockbot_
 
             if symbol.upper() == "GME":
                 message += "\n\n🙌💎Power to the Players💎🙌"
+            if IEXData["latestPrice"] is None:
+                message = f"{symbol} has not reported price info to IEX Cloud."
 
             dataMessages[symbol] = message
         return dataMessages
