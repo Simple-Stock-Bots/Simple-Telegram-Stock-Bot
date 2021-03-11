@@ -227,7 +227,6 @@ _Donations can only be made in a chat directly with @simplestockbot_
                     "latestPrice",
                     "changePercent",
                 )
-                [print(k, IEXData[k]) for k in keys]
                 if set(keys).issubset(IEXData):
 
                     try:  # Some symbols dont return if the market is open
