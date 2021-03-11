@@ -459,8 +459,9 @@ def error(update: Update, context: CallbackContext):
     )
 
     # Finally, send the message
-    update.message.reply_text(text=message, parse_mode=telegram.ParseMode.HTML)
-    update.message.reply_text(text="Please inform the bot admin of this issue.")
+    print(message)
+    # update.message.reply_text(text=message, parse_mode=telegram.ParseMode.HTML)
+    # update.message.reply_text(text="Please inform the bot admin of this issue.")
 
 
 def main():
