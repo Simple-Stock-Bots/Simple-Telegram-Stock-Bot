@@ -422,25 +422,9 @@ def error(update: Update, context: CallbackContext):
             f"<pre>{html.escape(tb_string)}</pre>"
         )
 
-<<<<<<< HEAD
-    message = (
-        f"An exception was raised while handling an update\n"
-        f"<pre>update = {html.escape(json.dumps(update.to_dict(), indent=2, ensure_ascii=False))}"
-        "</pre>\n\n"
-        f"<pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n\n"
-        f"<pre>context.user_data = {html.escape(str(context.user_data))}</pre>\n\n"
-        f"<pre>{html.escape(tb_string)}</pre>"
-    )
-
-    # Finally, send the message
-    print(message)
-    # update.message.reply_text(text=message, parse_mode=telegram.ParseMode.HTML)
-    # update.message.reply_text(text="Please inform the bot admin of this issue.")
-=======
         # Finally, send the message
         update.message.reply_text(text=message, parse_mode=telegram.ParseMode.HTML)
         update.message.reply_text(text="Please inform the bot admin of this issue.")
->>>>>>> crypto
 
 
 def main():
