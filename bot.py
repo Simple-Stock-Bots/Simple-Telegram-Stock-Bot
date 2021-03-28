@@ -64,7 +64,14 @@ def license(update: Update, context: CallbackContext):
 
 
 def status(update: Update, context: CallbackContext):
-    update.message.reply_text(text=s.status(), parse_mode=telegram.ParseMode.MARKDOWN)
+    bot_resp = datetime.datetime.now(update.message.date.tzinfo) - update.message.date
+
+    update.message.reply_text(
+        text=s.status(
+            f"It took {bot_resp.total_seconds()} seconds for the bot to get your message."
+        ),
+        parse_mode=telegram.ParseMode.MARKDOWN,
+    )
 
 
 def donate(update: Update, context: CallbackContext):

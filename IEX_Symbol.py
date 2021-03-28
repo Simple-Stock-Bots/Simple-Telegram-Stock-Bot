@@ -63,7 +63,7 @@ class IEX_Symbol:
         if return_df:
             return symbols, datetime.now()
 
-    def iex_status(self) -> str:
+    def status(self) -> str:
         """Checks IEX Status dashboard for any current API issues.
 
         Returns
@@ -71,9 +71,12 @@ class IEX_Symbol:
         str
             Human readable text on status of IEX API
         """
-        status = r.get("https://pjmps0c34hp7.statuspage.io/api/v2/status.json").json()[
-            "status"
-        ]
+        resp = r.get("https://pjmps0c34hp7.statuspage.io/api/v2/status.json")
+
+        if resp.status_code == 200:
+            status = resp.json()["status"]
+        else:
+            return "IEX Cloud did not respond. Please check their status page for more information. https://status.iexapis.com"
 
         if status["indicator"] == "none":
             return "IEX Cloud is currently not reporting any issues with its API."
@@ -82,28 +85,6 @@ class IEX_Symbol:
                 f"{status['indicator']}: {status['description']}."
                 + " Please check the status page for more information. https://status.iexapis.com"
             )
-
-    def message_status(self) -> str:
-        """Checks to see if the bot has available IEX Credits
-
-        Returns
-        -------
-        str
-            Human readable text on status of IEX Credits.
-        """
-        usage = r.get(
-            f"https://cloud.iexapis.com/stable/account/metadata?token={self.IEX_TOKEN}"
-        ).json()
-        try:
-            if (
-                usage["messagesUsed"] >= usage["messageLimit"] - 10000
-                and not usage["payAsYouGoEnabled"]
-            ):
-                return "Bot may be out of IEX Credits."
-            else:
-                return "Bot has available IEX Credits."
-        except KeyError:
-            return "**IEX API could not be reached.**"
 
     def search_symbols(self, search: str) -> List[Tuple[str, str]]:
         """Performs a fuzzy search to find stock symbols closest to a search term.

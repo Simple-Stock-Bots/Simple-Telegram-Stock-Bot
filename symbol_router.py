@@ -54,13 +54,24 @@ class Router:
         print(symbols)
         return symbols
 
-    def status(self) -> str:
+    def status(self, bot_resp) -> str:
         """Checks for any issues with APIs.
 
         Returns
         -------
         str
-            Human readable text on status of IEX API
+            Human readable text on status of the bot and relevant APIs
+        """
+
+        return f"""
+        Bot Status:
+        {bot_resp}
+
+        Stock Market Data:
+        {self.stock.status()}
+
+        Cryptocurrency Data:
+        {self.crypto.status()}
         """
 
     def search_symbols(self, search: str) -> List[Tuple[str, str]]:

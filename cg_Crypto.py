@@ -52,7 +52,7 @@ class cg_Crypto:
         if return_df:
             return symbols, datetime.now()
 
-    def cg_status(self) -> str:
+    def status(self) -> str:
         """Checks CoinGecko /ping endpoint for API issues.
 
         Returns
@@ -63,9 +63,9 @@ class cg_Crypto:
         status = r.get("https://api.coingecko.com/api/v3/ping")
 
         if status.status_code == 200:
-            return "CoinGecko API responded that it was OK in {status.elapsed.total_seconds()} Seconds."
+            return f"CoinGecko API responded that it was OK in {status.elapsed.total_seconds()} Seconds."
         else:
-            return "CoinGecko API returned an error in {status.elapsed.total_seconds()} Seconds."
+            return f"CoinGecko API returned an error in {status.elapsed.total_seconds()} Seconds."
 
     def search_symbols(self, search: str) -> List[Tuple[str, str]]:
         """Performs a fuzzy search to find coin symbols closest to a search term.
