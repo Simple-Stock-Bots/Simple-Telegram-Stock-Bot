@@ -1,5 +1,4 @@
 import requests as r
-from cg_Crypto import cg_Crypto
 
 
 class Symbol:
@@ -28,10 +27,11 @@ class Stock(Symbol):
     def __init__(self, symbol: str) -> None:
         self.symbol = symbol
         self.id = symbol
+        self.name = "$" + symbol.upper()
 
 
-# This is so every Coin instance doesnt have to download entire list of coin symbols and id's
-cg = cg_Crypto()
+# Used by Coin to change symbols for ids
+coins = r.get("https://api.coingecko.com/api/v3/coins/list").json()
 
 
 class Coin(Symbol):
@@ -40,7 +40,9 @@ class Coin(Symbol):
         self.get_data()
 
     def get_data(self) -> None:
-        self.id = cg.symbol_id(self.symbol)
+        self.id = list(filter(lambda coin: coin["symbol"] == self.symbol, coins))[0][
+            "id"
+        ]
         data = r.get("https://api.coingecko.com/api/v3/coins/" + self.id).json()
         self.data = data
 

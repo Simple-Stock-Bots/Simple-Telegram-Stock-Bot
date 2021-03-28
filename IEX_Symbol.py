@@ -10,7 +10,7 @@ import schedule
 from fuzzywuzzy import fuzz
 import os
 
-from symbol_router import Stock
+from Symbol import Stock
 
 
 class IEX_Symbol:

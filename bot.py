@@ -260,7 +260,7 @@ def intra(update: Update, context: CallbackContext):
     mpf.plot(
         df,
         type="renko",
-        title=f"\n${symbol.name}",
+        title=f"\n{symbol.name}",
         volume="volume" in df.keys(),
         style="yahoo",
         mav=20,
@@ -270,7 +270,7 @@ def intra(update: Update, context: CallbackContext):
 
     update.message.reply_photo(
         photo=buf,
-        caption=f"\nIntraday chart for ${symbol.name} from {df.first_valid_index().strftime('%I:%M')} to"
+        caption=f"\nIntraday chart for {symbol.name} from {df.first_valid_index().strftime('%I:%M')} to"
         + f" {df.last_valid_index().strftime('%I:%M')} ET on"
         + f" {datetime.date.today().strftime('%d, %b %Y')}\n\n{s.price_reply([symbol])[0]}",
         parse_mode=telegram.ParseMode.MARKDOWN,
@@ -298,7 +298,6 @@ def chart(update: Update, context: CallbackContext):
             parse_mode=telegram.ParseMode.MARKDOWN,
         )
         return
-
     context.bot.send_chat_action(
         chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO
     )
@@ -307,7 +306,7 @@ def chart(update: Update, context: CallbackContext):
     mpf.plot(
         df,
         type="candle",
-        title=f"\n${symbol.name}",
+        title=f"\n{symbol.name}",
         volume="volume" in df.keys(),
         style="yahoo",
         savefig=dict(fname=buf, dpi=400, bbox_inches="tight"),
@@ -316,7 +315,7 @@ def chart(update: Update, context: CallbackContext):
 
     update.message.reply_photo(
         photo=buf,
-        caption=f"\n1 Month chart for ${symbol.name} from {df.first_valid_index().strftime('%d, %b %Y')}"
+        caption=f"\n1 Month chart for {symbol.name} from {df.first_valid_index().strftime('%d, %b %Y')}"
         + f" to {df.last_valid_index().strftime('%d, %b %Y')}\n\n{s.price_reply([symbol])[0]}",
         parse_mode=telegram.ParseMode.MARKDOWN,
     )
@@ -406,8 +405,6 @@ def error(update: Update, context: CallbackContext):
         # Finally, send the message
         update.message.reply_text(text=message, parse_mode=telegram.ParseMode.HTML)
         update.message.reply_text(text="Please inform the bot admin of this issue.")
-    print("-" * 50)
-    print(tb_string)
 
 
 def main():

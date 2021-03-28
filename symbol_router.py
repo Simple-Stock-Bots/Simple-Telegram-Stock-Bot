@@ -51,7 +51,7 @@ class Router:
                 symbols.append(Coin(coin.lower()))
             else:
                 print(f"{coin} is not in list of coins")
-
+        print(symbols)
         return symbols
 
     def status(self) -> str:

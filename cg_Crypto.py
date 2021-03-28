@@ -9,7 +9,7 @@ import requests as r
 import schedule
 from fuzzywuzzy import fuzz
 from markdownify import markdownify
-from symbol_router import Coin
+from Symbol import Coin
 
 
 class cg_Crypto:
@@ -163,7 +163,7 @@ class cg_Crypto:
             Returns a timeseries dataframe with high, low, and volume data if its available. Otherwise returns empty pd.DataFrame.
         """
         response = r.get(
-            "https://api.coingecko.com/api/v3/coins/{symbol}/ohlc?vs_currency=usd&days=1"
+            f"https://api.coingecko.com/api/v3/coins/{symbol.id}/ohlc?vs_currency=usd&days=1"
         )
         if response.status_code == 200:
             df = pd.DataFrame(
@@ -190,9 +190,9 @@ class cg_Crypto:
             Returns a timeseries dataframe with high, low, and volume data if its available. Otherwise returns empty pd.DataFrame.
         """
         response = r.get(
-            "https://api.coingecko.com/api/v3/coins/{symbol}/ohlc?vs_currency=usd&days=30"
+            f"https://api.coingecko.com/api/v3/coins/{symbol.id}/ohlc?vs_currency=usd&days=30"
         )
-        print(response.status_code)
+
         if response.status_code == 200:
             df = pd.DataFrame(
                 response.json(), columns=["Date", "Open", "High", "Low", "Close"]
@@ -217,7 +217,7 @@ class cg_Crypto:
             Each symbol passed in is a key with its value being a human readable formatted string of the symbols statistics.
         """
         response = r.get(
-            f"https://api.coingecko.com/api/v3/coins/{symbol}?localization=false"
+            f"https://api.coingecko.com/api/v3/coins/{symbol.id}?localization=false"
         )
         if response.status_code == 200:
             data = response.json()
@@ -249,12 +249,12 @@ class cg_Crypto:
         """
 
         response = r.get(
-            f"https://api.coingecko.com/api/v3/coins/{symbol}?localization=false"
+            f"https://api.coingecko.com/api/v3/coins/{symbol.id}?localization=false"
         )
         if response.status_code == 200:
             data = response.json()
             try:
-                return markdownify(data["description"])
+                return markdownify(data["description"]["en"])
             except KeyError:
                 return f"{symbol} does not have a description available."
 
