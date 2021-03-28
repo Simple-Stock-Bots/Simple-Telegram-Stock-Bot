@@ -56,3 +56,15 @@ If you have any questions get in touch: @MisterBiggs or [anson@ansonbiggs.com](h
 
 _Donations can only be made in a chat directly with @simplestockbot_
     """
+
+
+commands = """
+donate - Donate to the bot 🎗️
+help - Get some help using the bot. 🆘
+info - $[symbol] General information about the symbol. ℹ️
+news - $[symbol] News about the symbol. 📰
+stat - $[symbol] Key statistics about the symbol. 🔢
+dividend - $[symbol] Dividend info 📅
+intra - $[symbol] Plot since the last market open. 📈
+chart - $[chart] Plot of the past month. 📊
+"""  # Not used by the bot but for updaing commands with BotFather
