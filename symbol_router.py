@@ -15,8 +15,8 @@ from Symbol import Symbol, Stock, Coin
 
 
 class Router:
-    STOCK_REGEX = "(?:^|[^\\$])\\$([a-zA-Z]{1,4})"
-    CRYPTO_REGEX = "[$]{2}([a-zA-Z]{1,9})"
+    STOCK_REGEX = "(?:^|[^\\$])\\$([a-zA-Z]{1,6})"
+    CRYPTO_REGEX = "[$]{2}([a-zA-Z]{1,20})"
 
     def __init__(self):
         self.stock = IEX_Symbol()
