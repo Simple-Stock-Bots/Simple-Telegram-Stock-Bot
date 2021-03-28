@@ -3,7 +3,6 @@ import datetime
 import io
 import logging
 import os
-import random
 import html
 import json
 import traceback
@@ -26,22 +25,20 @@ from telegram.ext import (
     CallbackContext,
 )
 
-from functions import Symbol
+from symbol_router import Router
+from T_info import T_info
 
 TELEGRAM_TOKEN = os.environ["TELEGRAM"]
 
-try:
-    IEX_TOKEN = os.environ["IEX"]
-except KeyError:
-    IEX_TOKEN = ""
-    print("Starting without an IEX Token will not allow you to get market data!")
 try:
     STRIPE_TOKEN = os.environ["STRIPE"]
 except KeyError:
     STRIPE_TOKEN = ""
     print("Starting without a STRIPE Token will not allow you to accept Donations!")
 
-s = Symbol(IEX_TOKEN)
+s = Router()
+t = T_info()
+
 # Enable logging
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
@@ -53,42 +50,28 @@ print("Bot Online")
 
 def start(update: Update, context: CallbackContext):
     """Send a message when the command /start is issued."""
-    update.message.reply_text(text=s.help_text, parse_mode=telegram.ParseMode.MARKDOWN)
+    update.message.reply_text(text=t.help_text, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
 def help(update: Update, context: CallbackContext):
     """Send link to docs when the command /help is issued."""
-
-    update.message.reply_text(text=s.help_text, parse_mode=telegram.ParseMode.MARKDOWN)
+    update.message.reply_text(text=t.help_text, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
 def license(update: Update, context: CallbackContext):
     """Return bots license agreement"""
-
-    update.message.reply_text(text=s.license, parse_mode=telegram.ParseMode.MARKDOWN)
+    update.message.reply_text(text=t.license, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
 def status(update: Update, context: CallbackContext):
-    message = ""
-    try:
-        # Bot Status
-        bot_resp = (
-            datetime.datetime.now(update.message.date.tzinfo) - update.message.date
-        )
-        message += f"It took {bot_resp.total_seconds()} seconds for the bot to get your message.\n"
+    bot_resp = datetime.datetime.now(update.message.date.tzinfo) - update.message.date
 
-        # IEX Status
-        message += s.iex_status() + "\n"
-
-        # Message Status
-        message += s.message_status()
-    except Exception as ex:
-        message += (
-            f"*\n\nERROR ENCOUNTERED:*\n{ex}\n\n"
-            + "*The bot encountered an error while attempting to find errors. Please contact the bot admin.*"
-        )
-
-    update.message.reply_text(text=message, parse_mode=telegram.ParseMode.MARKDOWN)
+    update.message.reply_text(
+        text=s.status(
+            f"It took {bot_resp.total_seconds()} seconds for the bot to get your message."
+        ),
+        parse_mode=telegram.ParseMode.MARKDOWN,
+    )
 
 
 def donate(update: Update, context: CallbackContext):
@@ -96,7 +79,7 @@ def donate(update: Update, context: CallbackContext):
 
     if update.message.text.strip() == "/donate":
         update.message.reply_text(
-            text=s.donate_text, parse_mode=telegram.ParseMode.MARKDOWN
+            text=t.donate_text, parse_mode=telegram.ParseMode.MARKDOWN
         )
         return
     else:
@@ -157,11 +140,10 @@ def symbol_detect(update: Update, context: CallbackContext):
     if symbols:
         # Let user know bot is working
         context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-
-        for reply in s.price_reply(symbols).items():
-
+        print(symbols)
+        for reply in s.price_reply(symbols):
             update.message.reply_text(
-                text=reply[1], parse_mode=telegram.ParseMode.MARKDOWN
+                text=reply, parse_mode=telegram.ParseMode.MARKDOWN
             )
 
 
@@ -182,9 +164,9 @@ def dividend(update: Update, context: CallbackContext):
 
     if symbols:
         context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-        for symbol in symbols:
+        for reply in s.dividend_reply(symbols):
             update.message.reply_text(
-                text=s.dividend_reply(symbol), parse_mode=telegram.ParseMode.MARKDOWN
+                text=reply, parse_mode=telegram.ParseMode.MARKDOWN
             )
 
 
@@ -206,9 +188,9 @@ def news(update: Update, context: CallbackContext):
     if symbols:
         context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
-        for reply in s.news_reply(symbols).items():
+        for reply in s.news_reply(symbols):
             update.message.reply_text(
-                text=reply[1], parse_mode=telegram.ParseMode.MARKDOWN
+                text=reply, parse_mode=telegram.ParseMode.MARKDOWN
             )
 
 
@@ -230,9 +212,9 @@ def info(update: Update, context: CallbackContext):
     if symbols:
         context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
-        for reply in s.info_reply(symbols).items():
+        for reply in s.info_reply(symbols):
             update.message.reply_text(
-                text=reply[1], parse_mode=telegram.ParseMode.MARKDOWN
+                text=reply, parse_mode=telegram.ParseMode.MARKDOWN
             )
 
 
@@ -267,7 +249,14 @@ def intra(update: Update, context: CallbackContext):
         )
         return
 
-    symbol = s.find_symbols(message)[0]
+    symbols = s.find_symbols(message)
+    symbol = symbols[0]
+
+    if len(symbols):
+        symbol = symbols[0]
+    else:
+        update.message.reply_text("No symbols or coins found.")
+        return
 
     df = s.intra_reply(symbol)
     if df.empty:
@@ -285,8 +274,8 @@ def intra(update: Update, context: CallbackContext):
     mpf.plot(
         df,
         type="renko",
-        title=f"\n${symbol.upper()}",
-        volume=True,
+        title=f"\n{symbol.name}",
+        volume="volume" in df.keys(),
         style="yahoo",
         mav=20,
         savefig=dict(fname=buf, dpi=400, bbox_inches="tight"),
@@ -295,9 +284,9 @@ def intra(update: Update, context: CallbackContext):
 
     update.message.reply_photo(
         photo=buf,
-        caption=f"\nIntraday chart for ${symbol.upper()} from {df.first_valid_index().strftime('%I:%M')} to"
+        caption=f"\nIntraday chart for {symbol.name} from {df.first_valid_index().strftime('%I:%M')} to"
         + f" {df.last_valid_index().strftime('%I:%M')} ET on"
-        + f" {datetime.date.today().strftime('%d, %b %Y')}\n\n{s.price_reply([symbol])[symbol]}",
+        + f" {datetime.date.today().strftime('%d, %b %Y')}\n\n{s.price_reply([symbol])[0]}",
         parse_mode=telegram.ParseMode.MARKDOWN,
     )
 
@@ -314,7 +303,13 @@ def chart(update: Update, context: CallbackContext):
         )
         return
 
-    symbol = s.find_symbols(message)[0]
+    symbols = s.find_symbols(message)
+
+    if len(symbols):
+        symbol = symbols[0]
+    else:
+        update.message.reply_text("No symbols or coins found.")
+        return
 
     df = s.chart_reply(symbol)
     if df.empty:
@@ -323,17 +318,16 @@ def chart(update: Update, context: CallbackContext):
             parse_mode=telegram.ParseMode.MARKDOWN,
         )
         return
-
     context.bot.send_chat_action(
         chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO
     )
-
+    print(symbol)
     buf = io.BytesIO()
     mpf.plot(
         df,
         type="candle",
-        title=f"\n${symbol.upper()}",
-        volume=True,
+        title=f"\n{symbol.name}",
+        volume="volume" in df.keys(),
         style="yahoo",
         savefig=dict(fname=buf, dpi=400, bbox_inches="tight"),
     )
@@ -341,8 +335,8 @@ def chart(update: Update, context: CallbackContext):
 
     update.message.reply_photo(
         photo=buf,
-        caption=f"\n1 Month chart for ${symbol.upper()} from {df.first_valid_index().strftime('%d, %b %Y')}"
-        + f" to {df.last_valid_index().strftime('%d, %b %Y')}\n\n{s.price_reply([symbol])[symbol]}",
+        caption=f"\n1 Month chart for {symbol.name} from {df.first_valid_index().strftime('%d, %b %Y')}"
+        + f" to {df.last_valid_index().strftime('%d, %b %Y')}\n\n{s.price_reply([symbol])[0]}",
         parse_mode=telegram.ParseMode.MARKDOWN,
     )
 
@@ -365,36 +359,10 @@ def stat(update: Update, context: CallbackContext):
     if symbols:
         context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
-        for reply in s.stat_reply(symbols).items():
+        for reply in s.stat_reply(symbols):
             update.message.reply_text(
-                text=reply[1], parse_mode=telegram.ParseMode.MARKDOWN
+                text=reply, parse_mode=telegram.ParseMode.MARKDOWN
             )
-
-
-def crypto(update: Update, context: CallbackContext):
-    """
-    https://iexcloud.io/docs/api/#cryptocurrency-quote
-    """
-    context.bot.send_chat_action(
-        chat_id=update.message.chat_id, action=telegram.ChatAction.TYPING
-    )
-    message = update.message.text
-
-    if message.strip() == "/crypto":
-        update.message.reply_text(
-            "This command returns the current price in USD for a cryptocurrency.\nExample: /crypto eth"
-        )
-        return
-
-    reply = s.crypto_reply(message)
-
-    if reply:
-        update.message.reply_text(text=reply, parse_mode=telegram.ParseMode.MARKDOWN)
-    else:
-        update.message.reply_text(
-            text=f"Pair: {message} returned an error.",
-            parse_mode=telegram.ParseMode.MARKDOWN,
-        )
 
 
 def inline_query(update: Update, context: CallbackContext):
@@ -408,7 +376,7 @@ def inline_query(update: Update, context: CallbackContext):
     results = []
     for match in matches:
         try:
-            price = s.price_reply([match[0]])[match[0]]
+            price = s.price_reply([match[0]])[0]
             results.append(
                 InlineQueryResultArticle(
                     match[0],
@@ -429,13 +397,8 @@ def inline_query(update: Update, context: CallbackContext):
 
 def rand_pick(update: Update, context: CallbackContext):
 
-    choice = random.choice(list(s.symbol_list["description"]))
-    hold = (
-        datetime.date.today() + datetime.timedelta(random.randint(1, 365))
-    ).strftime("%b %d, %Y")
-
     update.message.reply_text(
-        text=f"{choice}\nBuy and hold until: {hold}",
+        text=s.random_pick(),
         parse_mode=telegram.ParseMode.MARKDOWN,
     )
 
@@ -448,7 +411,18 @@ def error(update: Update, context: CallbackContext):
         None, context.error, context.error.__traceback__
     )
     tb_string = "".join(tb_list)
+    print(tb_string)
+    if update:
+        message = (
+            f"An exception was raised while handling an update\n"
+            f"<pre>update = {html.escape(json.dumps(update.to_dict(), indent=2, ensure_ascii=False))}"
+            "</pre>\n\n"
+            f"<pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n\n"
+            f"<pre>context.user_data = {html.escape(str(context.user_data))}</pre>\n\n"
+            f"<pre>{html.escape(tb_string)}</pre>"
+        )
 
+<<<<<<< HEAD
     message = (
         f"An exception was raised while handling an update\n"
         f"<pre>update = {html.escape(json.dumps(update.to_dict(), indent=2, ensure_ascii=False))}"
@@ -462,6 +436,11 @@ def error(update: Update, context: CallbackContext):
     print(message)
     # update.message.reply_text(text=message, parse_mode=telegram.ParseMode.HTML)
     # update.message.reply_text(text="Please inform the bot admin of this issue.")
+=======
+        # Finally, send the message
+        update.message.reply_text(text=message, parse_mode=telegram.ParseMode.HTML)
+        update.message.reply_text(text="Please inform the bot admin of this issue.")
+>>>>>>> crypto
 
 
 def main():
@@ -485,8 +464,7 @@ def main():
     dp.add_handler(CommandHandler("search", search))
     dp.add_handler(CommandHandler("intraday", intra))
     dp.add_handler(CommandHandler("intra", intra, run_async=True))
-    dp.add_handler(CommandHandler("chart", chart))
-    dp.add_handler(CommandHandler("crypto", crypto))
+    dp.add_handler(CommandHandler("chart", chart, run_async=True))
     dp.add_handler(CommandHandler("random", rand_pick))
     dp.add_handler(CommandHandler("donate", donate))
     dp.add_handler(CommandHandler("status", status))
@@ -511,9 +489,6 @@ def main():
     # Start the Bot
     updater.start_polling()
 
-    # Run the bot until you press Ctrl-C or the process receives SIGINT,
-    # SIGTERM or SIGABRT. This should be used most of the time, since
-    # start_polling() is non-blocking and will stop the bot gracefully.
     updater.idle()
 
 
