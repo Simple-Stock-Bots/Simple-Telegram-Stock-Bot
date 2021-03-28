@@ -154,7 +154,7 @@ def dividend(update: Update, context: CallbackContext):
     message = update.message.text
     chat_id = update.message.chat_id
 
-    if message.strip() == "/dividend":
+    if message.strip().split("@")[0] == "/dividend":
         update.message.reply_text(
             "This command gives info on the next dividend date for a symbol.\nExample: /dividend $tsla"
         )
@@ -177,7 +177,7 @@ def news(update: Update, context: CallbackContext):
     message = update.message.text
     chat_id = update.message.chat_id
 
-    if message.strip() == "/news":
+    if message.strip().split("@")[0] == "/news":
         update.message.reply_text(
             "This command gives the most recent english news for a symbol.\nExample: /news $tsla"
         )
@@ -201,7 +201,7 @@ def info(update: Update, context: CallbackContext):
     message = update.message.text
     chat_id = update.message.chat_id
 
-    if message.strip() == "/info":
+    if message.strip().split("@")[0] == "/info":
         update.message.reply_text(
             "This command gives information on a symbol.\nExample: /info $tsla"
         )
@@ -222,7 +222,7 @@ def search(update: Update, context: CallbackContext):
     message = update.message.text.replace("/search ", "")
     chat_id = update.message.chat_id
 
-    if message.strip() == "/search":
+    if message.strip().split("@")[0] == "/search":
         update.message.reply_text(
             "This command searches for symbols supported by the bot.\nExample: /search Tesla Motors or /search $tsla"
         )
@@ -243,7 +243,7 @@ def intra(update: Update, context: CallbackContext):
     message = update.message.text
     chat_id = update.message.chat_id
 
-    if message.strip() == "/intra":
+    if message.strip().split("@")[0] == "/intra":
         update.message.reply_text(
             "This command returns a chart of the stocks movement since the most recent market open.\nExample: /intra $tsla"
         )
@@ -297,7 +297,7 @@ def chart(update: Update, context: CallbackContext):
     message = update.message.text
     chat_id = update.message.chat_id
 
-    if message.strip() == "/chart":
+    if message.strip().split("@")[0] == "/chart":
         update.message.reply_text(
             "This command returns a chart of the stocks movement for the past month.\nExample: /chart $tsla"
         )
@@ -348,7 +348,7 @@ def stat(update: Update, context: CallbackContext):
     message = update.message.text
     chat_id = update.message.chat_id
 
-    if message.strip() == "/stat":
+    if message.strip().split("@")[0] == "/stat":
         update.message.reply_text(
             "This command returns key statistics for a symbol.\nExample: /stat $tsla"
         )
