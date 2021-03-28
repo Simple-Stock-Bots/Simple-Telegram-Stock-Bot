@@ -134,7 +134,7 @@ class cg_Crypto:
             except KeyError:
                 return f"{symbol} returned an error."
 
-            message = f"The current coin price of {name} is $**{price:,}**"
+            message = f"The current price of {name} is $**{price:,}**"
 
             # Determine wording of change text
             if change > 0:
