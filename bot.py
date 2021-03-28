@@ -244,6 +244,13 @@ def intra(update: Update, context: CallbackContext):
 
     symbols = s.find_symbols(message)
     symbol = symbols[0]
+
+    if len(symbols):
+        symbol = symbols[0]
+    else:
+        update.message.reply_text("No symbols or coins found.")
+        return
+
     df = s.intra_reply(symbol)
     if df.empty:
         update.message.reply_text(
@@ -290,7 +297,13 @@ def chart(update: Update, context: CallbackContext):
         return
 
     symbols = s.find_symbols(message)
-    symbol = symbols[0]
+
+    if len(symbols):
+        symbol = symbols[0]
+    else:
+        update.message.reply_text("No symbols or coins found.")
+        return
+
     df = s.chart_reply(symbol)
     if df.empty:
         update.message.reply_text(
