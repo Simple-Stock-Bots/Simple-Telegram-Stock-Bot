@@ -134,18 +134,18 @@ class cg_Crypto:
             except KeyError:
                 return f"{symbol} returned an error."
 
-            message = f"The current coin price of {name} is $**{price}**"
+            message = f"The current coin price of {name} is $**{price:,}**"
 
             # Determine wording of change text
             if change > 0:
-                message += f", the coin is currently **up {change}%**"
+                message += f", the coin is currently **up {change:.3f}%** for today"
             elif change < 0:
-                message += f", the coin is currently **down {change}%**"
+                message += f", the coin is currently **down {change:.3f}%** for today"
             else:
                 message += ", the coin hasn't shown any movement today."
 
         else:
-            message = f"The symbol: {symbol} was not found."
+            message = f"The Coin: {symbol.name} was not found."
 
         return message
 
