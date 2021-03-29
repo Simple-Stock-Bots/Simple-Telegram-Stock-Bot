@@ -5,6 +5,7 @@ import re
 import pandas as pd
 import random
 import datetime
+from fuzzywuzzy import fuzz
 
 from typing import List, Tuple
 
@@ -17,6 +18,7 @@ from Symbol import Symbol, Stock, Coin
 class Router:
     STOCK_REGEX = "(?:^|[^\\$])\\$([a-zA-Z]{1,6})"
     CRYPTO_REGEX = "[$]{2}([a-zA-Z]{1,20})"
+    searched_symbols = {}
 
     def __init__(self):
         self.stock = IEX_Symbol()
@@ -87,10 +89,31 @@ class Router:
         List[tuple[str, str]]
             A list tuples of every stock sorted in order of how well they match. Each tuple contains: (Symbol, Issue Name).
         """
-        # TODO add support for crypto
-        return self.stock.search_symbols(search)
 
-    def price_reply(self, symbols: list) -> List[str]:
+        df = pd.concat([self.stock.symbol_list, self.crypto.symbol_list])
+
+        search = search.lower()
+
+        df["Match"] = df.apply(
+            lambda x: fuzz.ratio(search, f"{x['symbol']}".lower()),
+            axis=1,
+        )
+
+        df.sort_values(by="Match", ascending=False, inplace=True)
+        if df["Match"].head().sum() < 300:
+            df["Match"] = df.apply(
+                lambda x: fuzz.partial_ratio(search, x["name"].lower()),
+                axis=1,
+            )
+
+            df.sort_values(by="Match", ascending=False, inplace=True)
+
+        symbols = df.head(10)
+        symbol_list = list(zip(list(symbols["symbol"]), list(symbols["description"])))
+        self.searched_symbols[search] = symbol_list
+        return symbol_list
+
+    def price_reply(self, symbols: list[Symbol]) -> List[str]:
         """Returns current market price or after hours if its available for a given stock symbol.
 
         Parameters
@@ -107,6 +130,7 @@ class Router:
         replies = []
 
         for symbol in symbols:
+            print(symbol)
             if isinstance(symbol, Stock):
                 replies.append(self.stock.price_reply(symbol))
             elif isinstance(symbol, Coin):

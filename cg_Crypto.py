@@ -47,7 +47,9 @@ class cg_Crypto:
         raw_symbols = r.get("https://api.coingecko.com/api/v3/coins/list").json()
         symbols = pd.DataFrame(data=raw_symbols)
 
-        symbols["description"] = symbols["symbol"] + ": " + symbols["name"]
+        symbols["description"] = "$$" + symbols["symbol"] + ": " + symbols["name"]
+        symbols = symbols[["id", "symbol", "name", "description"]]
+
         self.symbol_list = symbols
         if return_df:
             return symbols, datetime.now()
@@ -131,6 +133,8 @@ class cg_Crypto:
                 name = data["name"]
                 price = data["market_data"]["current_price"][self.vs_currency]
                 change = data["market_data"]["price_change_percentage_24h"]
+                if change is None:
+                    change = 0
             except KeyError:
                 return f"{symbol} returned an error."
 

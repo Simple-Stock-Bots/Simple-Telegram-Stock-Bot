@@ -58,7 +58,10 @@ class IEX_Symbol:
         ).json()
         symbols = pd.DataFrame(data=raw_symbols)
 
-        symbols["description"] = symbols["symbol"] + ": " + symbols["name"]
+        symbols["description"] = "$" + symbols["symbol"] + ": " + symbols["name"]
+        symbols["id"] = symbols["symbol"]
+
+        symbols = symbols[["id", "symbol", "name", "description"]]
         self.symbol_list = symbols
         if return_df:
             return symbols, datetime.now()

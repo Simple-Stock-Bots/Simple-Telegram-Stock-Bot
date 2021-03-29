@@ -229,9 +229,9 @@ def search(update: Update, context: CallbackContext):
         return
 
     context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-    queries = s.search_symbols(message)[:6]
+    queries = s.search_symbols(message)[:10]
     if queries:
-        reply = "*Search Results:*\n`$ticker: Company Name`\n"
+        reply = "*Search Results:*\n`$ticker: Company Name`\n`" + ("-" * 21) + "`\n"
         for query in queries:
             reply += "`" + query[1] + "`\n"
         update.message.reply_text(text=reply, parse_mode=telegram.ParseMode.MARKDOWN)
@@ -373,10 +373,13 @@ def inline_query(update: Update, context: CallbackContext):
 
     matches = s.search_symbols(update.inline_query.query)
 
+    symbols = " ".join([match[1].split(":")[0] for match in matches])
+    prices = s.price_reply(s.find_symbols(symbols))
+
     results = []
-    for match in matches:
+    for match, price in zip(matches, prices):
+        print(match)
         try:
-            price = s.price_reply([match[0]])[0]
             results.append(
                 InlineQueryResultArticle(
                     match[0],
@@ -390,7 +393,7 @@ def inline_query(update: Update, context: CallbackContext):
             logging.warning(str(match))
             pass
 
-        if len(results) == 5:
+        if len(results) == 10:
             update.inline_query.answer(results)
             return
 
@@ -423,8 +426,8 @@ def error(update: Update, context: CallbackContext):
         )
 
         # Finally, send the message
-        update.message.reply_text(text=message, parse_mode=telegram.ParseMode.HTML)
-        update.message.reply_text(text="Please inform the bot admin of this issue.")
+        # update.message.reply_text(text=message, parse_mode=telegram.ParseMode.HTML)
+        # update.message.reply_text(text="Please inform the bot admin of this issue.")
 
 
 def main():
