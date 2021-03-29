@@ -47,7 +47,7 @@ class cg_Crypto:
         raw_symbols = r.get("https://api.coingecko.com/api/v3/coins/list").json()
         symbols = pd.DataFrame(data=raw_symbols)
 
-        symbols["description"] = "$$" + symbols["symbol"] + ": " + symbols["name"]
+        symbols["description"] = "$$" + symbols["id"] + ": " + symbols["name"]
         symbols = symbols[["id", "symbol", "name", "description"]]
 
         self.symbol_list = symbols
