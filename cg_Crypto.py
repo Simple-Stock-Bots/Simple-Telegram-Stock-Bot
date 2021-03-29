@@ -263,3 +263,18 @@ class cg_Crypto:
                 return f"{symbol} does not have a description available."
 
         return f"No information found for: {symbol}\nEither today is boring or the symbol does not exist."
+
+    def trending(self) -> list[str]:
+        """Gets current coins trending on coingecko
+
+        Returns
+        -------
+        list[str]
+            list of $$ID: NAME
+        """
+
+        coins = r.get("https://api.coingecko.com/api/v3/search/trending").json()[
+            "coins"
+        ]
+
+        return [f"$${c['item']['id'].upper()}: {c['item']['name']}" for c in coins]

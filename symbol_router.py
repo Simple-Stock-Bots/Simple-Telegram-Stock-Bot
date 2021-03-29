@@ -284,6 +284,30 @@ class Router:
 
         return replies
 
+    def trending(self) -> str:
+        """Checks APIs for trending symbols.
+
+        Returns
+        -------
+        list[str]
+            List of preformatted strings to be sent to user.
+        """
+
+        stocks = self.stock.trending()
+        coins = self.crypto.trending()
+
+        reply = "`Trending Stocks:\n"
+        reply += "-" * len("Trending Stocks:") + "\n"
+        for stock in stocks:
+            reply += stock + "\n"
+
+        reply += "\n\nTrending Crypto:\n"
+        reply += "-" * len("Trending Crypto:") + "\n"
+        for coin in coins:
+            reply += coin + "\n"
+
+        return reply + "`"
+
     def random_pick(self) -> str:
 
         choice = random.choice(

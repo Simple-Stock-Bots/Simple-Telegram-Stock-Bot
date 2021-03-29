@@ -365,6 +365,18 @@ def stat(update: Update, context: CallbackContext):
             )
 
 
+def trending(update: Update, context: CallbackContext):
+    """
+    Trending Symbols
+    """
+
+    chat_id = update.message.chat_id
+
+    context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+
+    update.message.reply_text(text=s.trending(), parse_mode=telegram.ParseMode.MARKDOWN)
+
+
 def inline_query(update: Update, context: CallbackContext):
     """
     Handles inline query.
@@ -448,6 +460,7 @@ def main():
     dp.add_handler(CommandHandler("info", info))
     dp.add_handler(CommandHandler("stat", stat))
     dp.add_handler(CommandHandler("stats", stat))
+    dp.add_handler(CommandHandler("trending", trending))
     dp.add_handler(CommandHandler("search", search))
     dp.add_handler(CommandHandler("intraday", intra))
     dp.add_handler(CommandHandler("intra", intra, run_async=True))

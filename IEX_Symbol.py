@@ -424,3 +424,18 @@ class IEX_Symbol:
             return m
         else:
             return f"No information found for: {symbol}\nEither today is boring or the symbol does not exist."
+
+    def trending(self) -> list[str]:
+        """Gets current coins trending on coingecko
+
+        Returns
+        -------
+        list[str]
+            list of $$ID: NAME
+        """
+
+        stocks = r.get(
+            f"https://cloud.iexapis.com/stable/stock/market/list/mostactive?token={self.IEX_TOKEN}"
+        ).json()
+
+        return [f"${s['symbol']}: {s['companyName']}" for s in stocks]

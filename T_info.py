@@ -26,14 +26,15 @@ The bot detects _"Symbols"_ using either one or two dollar signs before the symb
 Simply calling a symbol in any message that the bot can see will also return the price. So a message like: `I wonder if $$btc will go to the Moon now that $tsla accepts it as payment` would return the current price for both Bitcoin and Tesla. 
 
 **Commands**
-        - /donate [amount in USD] to donate. 🎗️
-        - /dividend $[symbol] will return dividend information for the symbol. 📅
-        - /intra $[symbol] Plot of the stocks movement since the last market open.  📈
-        - /chart $[symbol] Plot of the stocks movement for the past 1 month. 📊
-        - /news $[symbol] News about the symbol. 📰
-        - /info $[symbol] General information about the symbol. ℹ️
-        - /stat $[symbol] Key statistics about the symbol. 🔢
-        - /help Get some help using the bot. 🆘
+        - `/donate [amount in USD]` to donate. 🎗️
+        - `/dividend $[symbol]` Dividend information for the symbol. 📅
+        - `/intra $[symbol]` Plot of the stocks movement since the last market open.  📈
+        - `/chart $[symbol]` Plot of the stocks movement for the past 1 month. 📊
+        - `/news $[symbol]` News about the symbol. 📰
+        - `/info $[symbol]` General information about the symbol. ℹ️
+        - `/stat $[symbol]` Key statistics about the symbol. 🔢
+        - `/trending` Trending Stocks and Cryptos. 
+        - `/help` Get some help using the bot. 🆘
 
 **Inline Features**
     You can type @SimpleStockBot `[search]` in any chat or direct message to search for the stock bots full list of stock symbols and return the price of the ticker. Then once you select the ticker want the bot will send a message as you in that chat with the latest stock price.
