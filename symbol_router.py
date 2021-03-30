@@ -108,7 +108,7 @@ class Router:
 
             df.sort_values(by="Match", ascending=False, inplace=True)
 
-        symbols = df.head(10)
+        symbols = df.head(20)
         symbol_list = list(zip(list(symbols["symbol"]), list(symbols["description"])))
         self.searched_symbols[search] = symbol_list
         return symbol_list

@@ -277,4 +277,4 @@ class cg_Crypto:
             "coins"
         ]
 
-        return [f"$${c['item']['id'].upper()}: {c['item']['name']}" for c in coins]
+        return [f"$${c['item']['symbol'].upper()}: {c['item']['name']}" for c in coins]
