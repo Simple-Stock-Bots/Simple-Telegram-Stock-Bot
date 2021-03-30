@@ -319,3 +319,39 @@ class Router:
         ).strftime("%b %d, %Y")
 
         return f"{choice}\nBuy and hold until: {hold}"
+
+    def batch_price_reply(self, symbols: list[Symbol]) -> List[str]:
+        """Returns current market price or after hours if its available for a given stock symbol.
+
+        Parameters
+        ----------
+        symbols : list
+            List of stock symbols.
+
+        Returns
+        -------
+        Dict[str, str]
+            Each symbol passed in is a key with its value being a human readable
+            markdown formatted string of the symbols price and movement.
+        """
+        replies = []
+        stocks = []
+        coins = []
+
+        for symbol in symbols:
+            if isinstance(symbol, Stock):
+                stocks.append(symbol)
+            elif isinstance(symbol, Coin):
+                coins.append(symbol)
+            else:
+                print(f"{symbol} is not a Stock or Coin")
+
+        if stocks:
+            for (
+                stock
+            ) in stocks:  # IEX batch endpoint doesnt seem to be working right now
+                replies.append(self.stock.price_reply(stock))
+        if coins:
+            replies.append(self.crypto.batch_price(coins))
+
+        return replies

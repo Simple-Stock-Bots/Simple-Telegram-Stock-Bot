@@ -8,6 +8,8 @@ import json
 import traceback
 
 import mplfinance as mpf
+from uuid import uuid4
+
 import telegram
 from telegram import (
     InlineQueryResultArticle,
@@ -383,18 +385,19 @@ def inline_query(update: Update, context: CallbackContext):
     Does a fuzzy search on input and returns stocks that are close.
     """
 
-    matches = s.search_symbols(update.inline_query.query)
+    matches = s.search_symbols(update.inline_query.query)[:]
 
     symbols = " ".join([match[1].split(":")[0] for match in matches])
-    prices = s.price_reply(s.find_symbols(symbols))
-
+    prices = s.batch_price_reply(s.find_symbols(symbols))
+    # print(len(matches), len(prices))
+    # print(prices)
     results = []
+    print(update.inline_query.query)
     for match, price in zip(matches, prices):
-        print(match)
         try:
             results.append(
                 InlineQueryResultArticle(
-                    match[0],
+                    str(uuid4()),
                     title=match[1],
                     input_message_content=InputTextMessageContent(
                         price, parse_mode=telegram.ParseMode.MARKDOWN
@@ -404,10 +407,11 @@ def inline_query(update: Update, context: CallbackContext):
         except TypeError:
             logging.warning(str(match))
             pass
-
-        if len(results) == 10:
+        print(match[0], "\n\n\n")
+        if len(results) == 5:
             update.inline_query.answer(results)
             return
+    update.inline_query.answer(results)
 
 
 def rand_pick(update: Update, context: CallbackContext):

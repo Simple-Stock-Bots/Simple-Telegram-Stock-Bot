@@ -278,3 +278,28 @@ class cg_Crypto:
         ]
 
         return [f"$${c['item']['symbol'].upper()}: {c['item']['name']}" for c in coins]
+
+    def batch_price(self, coins: list[Coin]) -> list[str]:
+        query = ",".join([c.id for c in coins])
+
+        prices = r.get(
+            f"https://api.coingecko.com/api/v3/simple/price?ids={query}&vs_currencies=usd&include_24hr_change=true"
+        ).json()
+
+        replies = []
+        for name, val in prices.items():
+            if price := val.get("usd"):
+                price = val.get("usd")
+            else:
+                replies.append(f"{name} price data unavailable.")
+                break
+
+            change = 0
+            if val.get("usd_24h_change") is not None:
+                change = val.get("usd_24h_change")
+
+            replies.append(
+                f"{name}: ${price:,} and has moved {change:.2f}% in the past 24 hours."
+            )
+
+        return replies

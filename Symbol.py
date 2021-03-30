@@ -1,3 +1,4 @@
+import functools
 import requests as r
 
 
@@ -35,6 +36,7 @@ coins = r.get("https://api.coingecko.com/api/v3/coins/list").json()
 
 
 class Coin(Symbol):
+    @functools.cache
     def __init__(self, symbol: str) -> None:
         self.symbol = symbol
         self.get_data()
@@ -48,4 +50,4 @@ class Coin(Symbol):
 
         self.name = data["name"]
         self.description = data["description"]
-        self.price = data["market_data"]["current_price"][self.currency]
+        # self.price = data["market_data"]["current_price"][self.currency]
