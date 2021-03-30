@@ -33,7 +33,7 @@ Simply calling a symbol in any message that the bot can see will also return the
         - `/news $[symbol]` News about the symbol. 📰
         - `/info $[symbol]` General information about the symbol. ℹ️
         - `/stat $[symbol]` Key statistics about the symbol. 🔢
-        - `/trending` Trending Stocks and Cryptos. 
+        - `/trending` Trending Stocks and Cryptos. 💬
         - `/help` Get some help using the bot. 🆘
 
 **Inline Features**
@@ -67,5 +67,6 @@ news - $[symbol] News about the symbol. 📰
 stat - $[symbol] Key statistics about the symbol. 🔢
 dividend - $[symbol] Dividend info 📅
 intra - $[symbol] Plot since the last market open. 📈
+trending - Trending Stocks and Cryptos. 💬
 chart - $[chart] Plot of the past month. 📊
 """  # Not used by the bot but for updaing commands with BotFather
