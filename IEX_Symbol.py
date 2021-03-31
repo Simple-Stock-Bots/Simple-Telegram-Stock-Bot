@@ -53,10 +53,17 @@ class IEX_Symbol:
         self, return_df=False
     ) -> Optional[Tuple[pd.DataFrame, datetime]]:
 
-        raw_symbols = r.get(
+        reg_symbols = r.get(
             f"https://cloud.iexapis.com/stable/ref-data/symbols?token={self.IEX_TOKEN}"
         ).json()
-        symbols = pd.DataFrame(data=raw_symbols)
+        otc_symbols = r.get(
+            f"https://cloud.iexapis.com/stable/ref-data/otc/symbols{self.IEX_TOKEN}"
+        ).json()
+
+        reg = pd.DataFrame(data=reg_symbols)
+        otc = pd.DataFrame(data=otc_symbols)
+
+        symbols = pd.concat([reg, otc])
 
         symbols["description"] = "$" + symbols["symbol"] + ": " + symbols["name"]
         symbols["id"] = symbols["symbol"]
