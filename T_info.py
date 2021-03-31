@@ -52,7 +52,8 @@ All donations go directly towards paying for servers, and market data is provide
 The easiest way to donate is to run the `/donate [amount in USD]` command with US dollars you would like to donate.
 
 Example: `/donate 2` would donate 2 USD.
-An alternative way to donate is through https://www.buymeacoffee.com/Anson,which accepts Paypal or Credit card.
+
+An alternative way to donate is through https://www.buymeacoffee.com/Anson which requires no account and accepts Paypal or Credit card.
 If you have any questions get in touch: @MisterBiggs or [anson@ansonbiggs.com](http://mailto:anson@ansonbiggs.com/)
 
 _Donations can only be made in a chat directly with @simplestockbot_
