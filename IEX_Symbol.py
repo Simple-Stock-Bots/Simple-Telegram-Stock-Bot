@@ -157,7 +157,6 @@ class IEX_Symbol:
         if response.status_code == 200:
             IEXData = response.json()
             keys = (
-                "isUSMarketOpen",
                 "extendedChangePercent",
                 "extendedPrice",
                 "companyName",
@@ -167,13 +166,10 @@ class IEX_Symbol:
 
             if set(keys).issubset(IEXData):
 
-                try:  # Some symbols dont return if the market is open
-                    IEXData["isUSMarketOpen"]
-                except KeyError:
-                    IEXData["isUSMarketOpen"] = True
+
 
                 if (
-                    IEXData["isUSMarketOpen"]
+                    IEXData.get("isUSMarketOpen", True)
                     or (IEXData["extendedChangePercent"] is None)
                     or (IEXData["extendedPrice"] is None)
                 ):  # Check if market is open.
