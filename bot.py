@@ -52,17 +52,29 @@ print("Bot Online")
 
 def start(update: Update, context: CallbackContext):
     """Send a message when the command /start is issued."""
-    update.message.reply_text(text=t.help_text, parse_mode=telegram.ParseMode.MARKDOWN)
+    update.message.reply_text(
+        text=t.help_text,
+        parse_mode=telegram.ParseMode.MARKDOWN,
+        disable_notification=True,
+    )
 
 
 def help(update: Update, context: CallbackContext):
     """Send link to docs when the command /help is issued."""
-    update.message.reply_text(text=t.help_text, parse_mode=telegram.ParseMode.MARKDOWN)
+    update.message.reply_text(
+        text=t.help_text,
+        parse_mode=telegram.ParseMode.MARKDOWN,
+        disable_notification=True,
+    )
 
 
 def license(update: Update, context: CallbackContext):
     """Return bots license agreement"""
-    update.message.reply_text(text=t.license, parse_mode=telegram.ParseMode.MARKDOWN)
+    update.message.reply_text(
+        text=t.license,
+        parse_mode=telegram.ParseMode.MARKDOWN,
+        disable_notification=True,
+    )
 
 
 def status(update: Update, context: CallbackContext):
@@ -73,6 +85,7 @@ def status(update: Update, context: CallbackContext):
             f"It took {bot_resp.total_seconds()} seconds for the bot to get your message."
         ),
         parse_mode=telegram.ParseMode.MARKDOWN,
+        disable_notification=True,
     )
 
 
@@ -81,7 +94,9 @@ def donate(update: Update, context: CallbackContext):
 
     if update.message.text.strip() == "/donate":
         update.message.reply_text(
-            text=t.donate_text, parse_mode=telegram.ParseMode.MARKDOWN
+            text=t.donate_text,
+            parse_mode=telegram.ParseMode.MARKDOWN,
+            disable_notification=True,
         )
         return
     else:
@@ -145,7 +160,9 @@ def symbol_detect(update: Update, context: CallbackContext):
         print(symbols)
         for reply in s.price_reply(symbols):
             update.message.reply_text(
-                text=reply, parse_mode=telegram.ParseMode.MARKDOWN
+                text=reply,
+                parse_mode=telegram.ParseMode.MARKDOWN,
+                disable_notification=True,
             )
 
 
@@ -168,7 +185,9 @@ def dividend(update: Update, context: CallbackContext):
         context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
         for reply in s.dividend_reply(symbols):
             update.message.reply_text(
-                text=reply, parse_mode=telegram.ParseMode.MARKDOWN
+                text=reply,
+                parse_mode=telegram.ParseMode.MARKDOWN,
+                disable_notification=True,
             )
 
 
@@ -192,7 +211,9 @@ def news(update: Update, context: CallbackContext):
 
         for reply in s.news_reply(symbols):
             update.message.reply_text(
-                text=reply, parse_mode=telegram.ParseMode.MARKDOWN
+                text=reply,
+                parse_mode=telegram.ParseMode.MARKDOWN,
+                disable_notification=True,
             )
 
 
@@ -216,7 +237,9 @@ def info(update: Update, context: CallbackContext):
 
         for reply in s.info_reply(symbols):
             update.message.reply_text(
-                text=reply, parse_mode=telegram.ParseMode.MARKDOWN
+                text=reply,
+                parse_mode=telegram.ParseMode.MARKDOWN,
+                disable_notification=True,
             )
 
 
@@ -236,7 +259,11 @@ def search(update: Update, context: CallbackContext):
         reply = "*Search Results:*\n`$ticker: Company Name`\n`" + ("-" * 21) + "`\n"
         for query in queries:
             reply += "`" + query[1] + "`\n"
-        update.message.reply_text(text=reply, parse_mode=telegram.ParseMode.MARKDOWN)
+        update.message.reply_text(
+            text=reply,
+            parse_mode=telegram.ParseMode.MARKDOWN,
+            disable_notification=True,
+        )
 
 
 def intra(update: Update, context: CallbackContext):
@@ -265,6 +292,7 @@ def intra(update: Update, context: CallbackContext):
         update.message.reply_text(
             text="Invalid symbol please see `/help` for usage details.",
             parse_mode=telegram.ParseMode.MARKDOWN,
+            disable_notification=True,
         )
         return
 
@@ -290,6 +318,7 @@ def intra(update: Update, context: CallbackContext):
         + f" {df.last_valid_index().strftime('%I:%M')} ET on"
         + f" {datetime.date.today().strftime('%d, %b %Y')}\n\n{s.price_reply([symbol])[0]}",
         parse_mode=telegram.ParseMode.MARKDOWN,
+        disable_notification=True,
     )
 
 
@@ -318,6 +347,7 @@ def chart(update: Update, context: CallbackContext):
         update.message.reply_text(
             text="Invalid symbol please see `/help` for usage details.",
             parse_mode=telegram.ParseMode.MARKDOWN,
+            disable_notification=True,
         )
         return
     context.bot.send_chat_action(
@@ -340,6 +370,7 @@ def chart(update: Update, context: CallbackContext):
         caption=f"\n1 Month chart for {symbol.name} from {df.first_valid_index().strftime('%d, %b %Y')}"
         + f" to {df.last_valid_index().strftime('%d, %b %Y')}\n\n{s.price_reply([symbol])[0]}",
         parse_mode=telegram.ParseMode.MARKDOWN,
+        disable_notification=True,
     )
 
 
@@ -363,7 +394,9 @@ def stat(update: Update, context: CallbackContext):
 
         for reply in s.stat_reply(symbols):
             update.message.reply_text(
-                text=reply, parse_mode=telegram.ParseMode.MARKDOWN
+                text=reply,
+                parse_mode=telegram.ParseMode.MARKDOWN,
+                disable_notification=True,
             )
 
 
@@ -376,7 +409,11 @@ def trending(update: Update, context: CallbackContext):
 
     context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
-    update.message.reply_text(text=s.trending(), parse_mode=telegram.ParseMode.MARKDOWN)
+    update.message.reply_text(
+        text=s.trending(),
+        parse_mode=telegram.ParseMode.MARKDOWN,
+        disable_notification=True,
+    )
 
 
 def inline_query(update: Update, context: CallbackContext):
@@ -419,6 +456,7 @@ def rand_pick(update: Update, context: CallbackContext):
     update.message.reply_text(
         text=s.random_pick(),
         parse_mode=telegram.ParseMode.MARKDOWN,
+        disable_notification=True,
     )
 
 
