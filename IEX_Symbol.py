@@ -57,7 +57,7 @@ class IEX_Symbol:
             f"https://cloud.iexapis.com/stable/ref-data/symbols?token={self.IEX_TOKEN}"
         ).json()
         otc_symbols = r.get(
-            f"https://cloud.iexapis.com/stable/ref-data/otc/symbols{self.IEX_TOKEN}"
+            f"https://cloud.iexapis.com/stable/ref-data/otc/symbols?token={self.IEX_TOKEN}"
         ).json()
 
         reg = pd.DataFrame(data=reg_symbols)
