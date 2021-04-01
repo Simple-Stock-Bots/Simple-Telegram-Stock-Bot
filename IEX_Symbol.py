@@ -178,16 +178,19 @@ class IEX_Symbol:
                     or (IEXData["extendedPrice"] is None)
                 ):  # Check if market is open.
                     message = f"The current stock price of {IEXData['companyName']} is $**{IEXData['latestPrice']}**"
-
+                    if change := IEXData.get("changePercent", 0):
+                        change = round(change * 100, 2)
+                    else:
+                        change = 0
                 else:
                     message = (
                         f"{IEXData['companyName']} closed at $**{IEXData['latestPrice']}**,"
                         + f" after hours _(15 minutes delayed)_ the stock price is $**{IEXData['extendedPrice']}**"
                     )
-                if change := IEXData.get("extendedChangePercent", 0):
-                    change = round(change * 100, 2)
-                else:
-                    change = 0
+                    if change := IEXData.get("extendedChangePercent", 0):
+                        change = round(change * 100, 2)
+                    else:
+                        change = 0
 
                 # Determine wording of change text
                 if change > 0:
@@ -259,14 +262,14 @@ class IEX_Symbol:
                 ).days
 
                 return (
-                    "The next dividend for"
-                    + f"${self.symbol_list[self.symbol_list['symbol']==symbol.id.upper()]['description'].item()}"
+                    "The next dividend for "
+                    + f"{self.symbol_list[self.symbol_list['symbol']==symbol.id.upper()]['description'].item()}"  # Get full name without api call
                     + f" is on {payment} which is in {daysDelta} days."
                     + f" The dividend is for {price} per share."
-                    + f"\nThe dividend was declared on {declared} and the ex-dividend date is {ex}"
+                    + f"\n\nThe dividend was declared on {declared} and the ex-dividend date is {ex}"
                 )
 
-        return f"{symbol} either doesn't exist or pays no dividend."
+        return f"${symbol.id.upper()} either doesn't exist or pays no dividend."
 
     def news_reply(self, symbol: Stock) -> str:
         """Gets recent english news on stock symbols.
@@ -284,24 +287,25 @@ class IEX_Symbol:
         if symbol.symbol.upper() in self.otc_list:
             return "OTC stocks do not currently support any commands."
 
-        IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/news/last/5?token={self.IEX_TOKEN}"
+        IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/news/last/15?token={self.IEX_TOKEN}"
         response = r.get(IEXurl)
         if response.status_code == 200:
             data = response.json()
-            if len(data):
-                message = f"News for **{symbol.id.upper()}**:\n\n"
+            if data:
+                line = []
+
                 for news in data:
                     if news["lang"] == "en" and not news["hasPaywall"]:
-                        message = (
-                            f"*{news['source']}*: [{news['headline']}]({news['url']})\n"
+                        line.append(
+                            f"*{news['source']}*: [{news['headline']}]({news['url']})"
                         )
-                        message += message
+
             else:
                 return f"No news found for: {symbol}\nEither today is boring or the symbol does not exist."
         else:
             return f"No news found for: {symbol}\nEither today is boring or the symbol does not exist."
 
-        return message
+        return f"News for **{symbol.id.upper()}**:\n" + "\n".join(line[:5])
 
     def info_reply(self, symbol: Stock) -> str:
         """Gets information on stock symbols.
@@ -324,15 +328,56 @@ class IEX_Symbol:
 
         if response.status_code == 200:
             data = response.json()
-            message = (
-                f"Company Name: [{data['companyName']}]({data['website']})\nIndustry:"
-                + f" {data['industry']}\nSector: {data['sector']}\nCEO: {data['CEO']}\nDescription: {data['description']}\n"
-            )
+            [data.pop(k) for k in list(data) if data[k] == ""]
 
+            if "description" in data:
+                return data["description"]
+
+        return f"No information found for: {symbol}\nEither today is boring or the symbol does not exist."
+
+    def stat_reply(self, symbol: Stock) -> str:
+        """Gets key statistics for each symbol in the list
+
+        Parameters
+        ----------
+        symbols : List[str]
+            List of stock symbols
+
+        Returns
+        -------
+        Dict[str, str]
+            Each symbol passed in is a key with its value being a human readable formatted string of the symbols statistics.
+        """
+        if symbol.symbol.upper() in self.otc_list:
+            return "OTC stocks do not currently support any commands."
+
+        IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/stats?token={self.IEX_TOKEN}"
+        response = r.get(IEXurl)
+
+        if response.status_code == 200:
+            data = response.json()
+            [data.pop(k) for k in list(data) if data[k] == ""]
+
+            m = ""
+            if "companyName" in data:
+                m += f"Company Name: {data['companyName']}\n"
+            if "marketcap" in data:
+                m += f"Market Cap: {data['marketcap']:,}\n"
+            if "week52high" in data:
+                m += f"52 Week (high-low): {data['week52high']:,} "
+            if "week52low" in data:
+                m += f"- {data['week52low']:,}\n"
+            if "employees" in data:
+                m += f"Number of Employees: {data['employees']:,}\n"
+            if "nextEarningsDate" in data:
+                m += f"Next Earnings Date: {data['nextEarningsDate']}\n"
+            if "peRatio" in data:
+                m += f"Price to Earnings: {data['peRatio']:.3f}\n"
+            if "beta" in data:
+                m += f"Beta: {data['beta']:.3f}\n"
+            return m
         else:
-            message = f"No information found for: {symbol}\nEither today is boring or the symbol does not exist."
-
-        return message
+            return f"No information found for: {symbol}\nEither today is boring or the symbol does not exist."
 
     def intra_reply(self, symbol: Stock) -> pd.DataFrame:
         """Returns price data for a symbol since the last market open.
@@ -404,50 +449,6 @@ class IEX_Symbol:
             return df
 
         return pd.DataFrame()
-
-    def stat_reply(self, symbol: Stock) -> str:
-        """Gets key statistics for each symbol in the list
-
-        Parameters
-        ----------
-        symbols : List[str]
-            List of stock symbols
-
-        Returns
-        -------
-        Dict[str, str]
-            Each symbol passed in is a key with its value being a human readable formatted string of the symbols statistics.
-        """
-        if symbol.symbol.upper() in self.otc_list:
-            return "OTC stocks do not currently support any commands."
-
-        IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/stats?token={self.IEX_TOKEN}"
-        response = r.get(IEXurl)
-
-        if response.status_code == 200:
-            data = response.json()
-            [data.pop(k) for k in list(data) if data[k] == ""]
-
-            m = ""
-            if "companyName" in data:
-                m += f"Company Name: {data['companyName']}\n"
-            if "marketcap" in data:
-                m += f"Market Cap: {data['marketcap']:,}\n"
-            if "week52high" in data:
-                m += f"52 Week (high-low): {data['week52high']:,} "
-            if "week52low" in data:
-                m += f"- {data['week52low']:,}\n"
-            if "employees" in data:
-                m += f"Number of Employees: {data['employees']:,}\n"
-            if "nextEarningsDate" in data:
-                m += f"Next Earnings Date: {data['nextEarningsDate']}\n"
-            if "peRatio" in data:
-                m += f"Price to Earnings: {data['peRatio']:.3f}\n"
-            if "beta" in data:
-                m += f"Beta: {data['beta']:.3f}\n"
-            return m
-        else:
-            return f"No information found for: {symbol}\nEither today is boring or the symbol does not exist."
 
     def trending(self) -> list[str]:
         """Gets current coins trending on coingecko
