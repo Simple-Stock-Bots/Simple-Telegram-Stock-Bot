@@ -21,6 +21,7 @@ class IEX_Symbol:
     SYMBOL_REGEX = "[$]([a-zA-Z]{1,4})"
 
     searched_symbols = {}
+    otc_list = []
     charts = {}
 
     def __init__(self) -> None:
@@ -62,6 +63,7 @@ class IEX_Symbol:
 
         reg = pd.DataFrame(data=reg_symbols)
         otc = pd.DataFrame(data=otc_symbols)
+        self.otc_list = set(otc["symbol"].to_list())
 
         symbols = pd.concat([reg, otc])
 
@@ -156,6 +158,10 @@ class IEX_Symbol:
         response = r.get(IEXurl)
         if response.status_code == 200:
             IEXData = response.json()
+
+            if symbol.symbol.upper() in self.otc_list:
+                return f"OTC - {symbol.symbol.upper()}, {IEXData['companyName']} most recent price is: $**{IEXData['latestPrice']}**"
+
             keys = (
                 "extendedChangePercent",
                 "extendedPrice",
@@ -166,28 +172,22 @@ class IEX_Symbol:
 
             if set(keys).issubset(IEXData):
 
-
-
                 if (
                     IEXData.get("isUSMarketOpen", True)
                     or (IEXData["extendedChangePercent"] is None)
                     or (IEXData["extendedPrice"] is None)
                 ):  # Check if market is open.
                     message = f"The current stock price of {IEXData['companyName']} is $**{IEXData['latestPrice']}**"
-                    if change := IEXData.get("changePercent", 0):
-                        change = round(change * 100, 2)
-                    else:
-                        change = 0
 
                 else:
                     message = (
                         f"{IEXData['companyName']} closed at $**{IEXData['latestPrice']}**,"
                         + f" after hours _(15 minutes delayed)_ the stock price is $**{IEXData['extendedPrice']}**"
                     )
-                    if change := IEXData.get("extendedChangePercent", 0):
-                        change = round(change * 100, 2)
-                    else:
-                        change = 0
+                if change := IEXData.get("extendedChangePercent", 0):
+                    change = round(change * 100, 2)
+                else:
+                    change = 0
 
                 # Determine wording of change text
                 if change > 0:
@@ -219,6 +219,8 @@ class IEX_Symbol:
         Dict[str, str]
             Each symbol passed in is a key with its value being a human readable formatted string of the symbols div dates.
         """
+        if symbol.symbol.upper() in self.otc_list:
+            return "OTC stocks do not currently support any commands."
 
         IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/dividends/next?token={self.IEX_TOKEN}"
         response = r.get(IEXurl)
@@ -279,6 +281,8 @@ class IEX_Symbol:
         Dict[str, str]
             Each symbol passed in is a key with its value being a human readable markdown formatted string of the symbols news.
         """
+        if symbol.symbol.upper() in self.otc_list:
+            return "OTC stocks do not currently support any commands."
 
         IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/news/last/5?token={self.IEX_TOKEN}"
         response = r.get(IEXurl)
@@ -312,6 +316,8 @@ class IEX_Symbol:
         Dict[str, str]
             Each symbol passed in is a key with its value being a human readable formatted string of the symbols information.
         """
+        if symbol.symbol.upper() in self.otc_list:
+            return "OTC stocks do not currently support any commands."
 
         IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/company?token={self.IEX_TOKEN}"
         response = r.get(IEXurl)
@@ -341,6 +347,9 @@ class IEX_Symbol:
         pd.DataFrame
             Returns a timeseries dataframe with high, low, and volume data if its available. Otherwise returns empty pd.DataFrame.
         """
+        if symbol.symbol.upper() in self.otc_list:
+            return pd.DataFrame()
+
         if symbol.id.upper() not in list(self.symbol_list["symbol"]):
             return pd.DataFrame()
 
@@ -370,6 +379,9 @@ class IEX_Symbol:
             Returns a timeseries dataframe with high, low, and volume data if its available. Otherwise returns empty pd.DataFrame.
         """
         schedule.run_pending()
+
+        if symbol.symbol.upper() in self.otc_list:
+            return pd.DataFrame()
 
         if symbol.id.upper() not in list(self.symbol_list["symbol"]):
             return pd.DataFrame()
@@ -406,6 +418,8 @@ class IEX_Symbol:
         Dict[str, str]
             Each symbol passed in is a key with its value being a human readable formatted string of the symbols statistics.
         """
+        if symbol.symbol.upper() in self.otc_list:
+            return "OTC stocks do not currently support any commands."
 
         IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/stats?token={self.IEX_TOKEN}"
         response = r.get(IEXurl)
