@@ -100,13 +100,13 @@ class Router:
         )
 
         df.sort_values(by="Match", ascending=False, inplace=True)
-        if df["Match"].head().sum() < 300:
-            df["Match"] = df.apply(
-                lambda x: fuzz.partial_ratio(search, x["name"].lower()),
-                axis=1,
-            )
+        # if df["Match"].head().sum() < 300:
+        #     df["Match"] = df.apply(
+        #         lambda x: fuzz.partial_ratio(search, x["name"].lower()),
+        #         axis=1,
+        #     )
 
-            df.sort_values(by="Match", ascending=False, inplace=True)
+        #     df.sort_values(by="Match", ascending=False, inplace=True)
 
         symbols = df.head(20)
         symbol_list = list(zip(list(symbols["symbol"]), list(symbols["description"])))
