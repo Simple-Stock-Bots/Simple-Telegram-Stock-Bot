@@ -98,17 +98,9 @@ def donate(update: Update, context: CallbackContext):
             parse_mode=telegram.ParseMode.MARKDOWN,
             disable_notification=True,
         )
-        return
+        amount = 1
     else:
         amount = update.message.text.replace("/donate", "").replace("$", "").strip()
-    title = "Simple Stock Bot Donation"
-    description = f"Simple Stock Bot Donation of ${amount}"
-    payload = "simple-stock-bot"
-    provider_token = STRIPE_TOKEN
-    start_parameter = str(chat_id)
-
-    print(start_parameter)
-    currency = "USD"
 
     try:
         price = int(float(amount) * 100)
@@ -117,32 +109,38 @@ def donate(update: Update, context: CallbackContext):
         return
     print(price)
 
-    prices = [LabeledPrice("Donation:", price)]
-
     context.bot.send_invoice(
-        chat_id,
-        title,
-        description,
-        payload,
-        provider_token,
-        start_parameter,
-        currency,
-        prices,
+        chat_id=chat_id,
+        title="Simple Stock Bot Donation",
+        description=f"Simple Stock Bot Donation of ${amount}",
+        payload=f"simple-stock-bot-{chat_id}",
+        provider_token=STRIPE_TOKEN,
+        currency="USD",
+        prices=[LabeledPrice("Donation:", price)],
+        start_parameter="",
+        # suggested_tip_amounts=[100, 500, 1000, 2000],
+        photo_url="https://simple-stock-bots.gitlab.io/site/img/Telegram.png",
+        photo_width=500,
+        photo_height=500,
     )
 
 
 def precheckout_callback(update: Update, context: CallbackContext):
     query = update.pre_checkout_query
 
-    if query.invoice_payload == "simple-stock-bot":
-        # answer False pre_checkout_query
-        query.answer(ok=True)
-    else:
-        query.answer(ok=False, error_message="Something went wrong...")
+    query.answer(ok=True)
+    # I dont think I need to check since its only donations.
+    # if query.invoice_payload == "simple-stock-bot":
+    #     # answer False pre_checkout_query
+    #     query.answer(ok=True)
+    # else:
+    #     query.answer(ok=False, error_message="Something went wrong...")
 
 
 def successful_payment_callback(update: Update, context: CallbackContext):
-    update.message.reply_text("Thank you for your donation!")
+    update.message.reply_text(
+        "Thank you for your donation! It goes a long way to keeping the bot free!"
+    )
 
 
 def symbol_detect(update: Update, context: CallbackContext):
