@@ -44,7 +44,10 @@ class cg_Crypto:
         self, return_df=False
     ) -> Optional[Tuple[pd.DataFrame, datetime]]:
 
-        raw_symbols = r.get("https://api.coingecko.com/api/v3/coins/list").json()
+        raw_symbols = r.get(
+            "https://api.coingecko.com/api/v3/coins/list",
+            timeout=5,
+        ).json()
         symbols = pd.DataFrame(data=raw_symbols)
 
         symbols["description"] = "$$" + symbols["symbol"] + ": " + symbols["name"]
@@ -62,7 +65,10 @@ class cg_Crypto:
         str
             Human readable text on status of CoinGecko API
         """
-        status = r.get("https://api.coingecko.com/api/v3/ping")
+        status = r.get(
+            "https://api.coingecko.com/api/v3/ping",
+            timeout=5,
+        )
 
         if status.status_code == 200:
             return f"CoinGecko API responded that it was OK in {status.elapsed.total_seconds()} Seconds."
@@ -124,7 +130,8 @@ class cg_Crypto:
         """
 
         response = r.get(
-            f"https://api.coingecko.com/api/v3/coins/{symbol.id}?localization=false"
+            f"https://api.coingecko.com/api/v3/coins/{symbol.id}?localization=false",
+            timeout=5,
         )
         if response.status_code == 200:
             data = response.json()
@@ -167,7 +174,8 @@ class cg_Crypto:
             Returns a timeseries dataframe with high, low, and volume data if its available. Otherwise returns empty pd.DataFrame.
         """
         response = r.get(
-            f"https://api.coingecko.com/api/v3/coins/{symbol.id}/ohlc?vs_currency=usd&days=1"
+            f"https://api.coingecko.com/api/v3/coins/{symbol.id}/ohlc?vs_currency=usd&days=1",
+            timeout=5,
         )
         if response.status_code == 200:
             df = pd.DataFrame(
@@ -194,7 +202,8 @@ class cg_Crypto:
             Returns a timeseries dataframe with high, low, and volume data if its available. Otherwise returns empty pd.DataFrame.
         """
         response = r.get(
-            f"https://api.coingecko.com/api/v3/coins/{symbol.id}/ohlc?vs_currency=usd&days=30"
+            f"https://api.coingecko.com/api/v3/coins/{symbol.id}/ohlc?vs_currency=usd&days=30",
+            timeout=5,
         )
 
         if response.status_code == 200:
@@ -221,7 +230,8 @@ class cg_Crypto:
             Each symbol passed in is a key with its value being a human readable formatted string of the symbols statistics.
         """
         response = r.get(
-            f"https://api.coingecko.com/api/v3/coins/{symbol.id}?localization=false"
+            f"https://api.coingecko.com/api/v3/coins/{symbol.id}?localization=false",
+            timeout=5,
         )
         if response.status_code == 200:
             data = response.json()
@@ -253,7 +263,8 @@ class cg_Crypto:
         """
 
         response = r.get(
-            f"https://api.coingecko.com/api/v3/coins/{symbol.id}?localization=false"
+            f"https://api.coingecko.com/api/v3/coins/{symbol.id}?localization=false",
+            timeout=5,
         )
         if response.status_code == 200:
             data = response.json()
@@ -273,9 +284,10 @@ class cg_Crypto:
             list of $$ID: NAME
         """
 
-        coins = r.get("https://api.coingecko.com/api/v3/search/trending").json()[
-            "coins"
-        ]
+        coins = r.get(
+            "https://api.coingecko.com/api/v3/search/trending",
+            timeout=5,
+        ).json()["coins"]
 
         return [f"$${c['item']['symbol'].upper()}: {c['item']['name']}" for c in coins]
 
@@ -283,7 +295,8 @@ class cg_Crypto:
         query = ",".join([c.id for c in coins])
 
         prices = r.get(
-            f"https://api.coingecko.com/api/v3/simple/price?ids={query}&vs_currencies=usd&include_24hr_change=true"
+            f"https://api.coingecko.com/api/v3/simple/price?ids={query}&vs_currencies=usd&include_24hr_change=true",
+            timeout=5,
         ).json()
 
         replies = []
