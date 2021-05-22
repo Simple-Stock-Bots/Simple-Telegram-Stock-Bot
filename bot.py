@@ -305,7 +305,6 @@ def intra(update: Update, context: CallbackContext):
         title=f"\n{symbol.name}",
         volume="volume" in df.keys(),
         style="yahoo",
-        mav=20,
         savefig=dict(fname=buf, dpi=400, bbox_inches="tight"),
     )
     buf.seek(0)
