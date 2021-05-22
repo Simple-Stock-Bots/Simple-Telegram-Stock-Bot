@@ -238,7 +238,8 @@ class cg_Crypto:
 
             return f"""
                 [{data['name']}]({data['links']['homepage'][0]}) Statistics:
-                Maket Cap Ranking: {data.get('market_cap_rank',"Not Available")}
+                Market Cap: {data['market_cap'][self.vs_currency]}
+                Market Cap Ranking: {data.get('market_cap_rank',"Not Available")}
                 CoinGecko Scores:
                     Overall: {data.get('coingecko_score','Not Available')}
                     Development: {data.get('developer_score','Not Available')}
