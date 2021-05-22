@@ -382,7 +382,7 @@ class IEX_Symbol:
             if "companyName" in data:
                 m += f"Company Name: {data['companyName']}\n"
             if "marketcap" in data:
-                m += f"Market Cap: {data['marketcap']:,}\n"
+                m += f"Market Cap: ${data['marketcap']:,}\n"
             if "week52high" in data:
                 m += f"52 Week (high-low): {data['week52high']:,} "
             if "week52low" in data:
