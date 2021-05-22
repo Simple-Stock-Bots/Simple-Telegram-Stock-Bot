@@ -184,7 +184,9 @@ class Router:
                 replies.append(self.stock.news_reply(symbol))
             elif isinstance(symbol, Coin):
                 # replies.append(self.crypto.news_reply(symbol))
-                replies.append("News is not yet supported for cryptocurrencies.")
+                replies.append(
+                    "News is not yet supported for cryptocurrencies. If you have any suggestions for news sources please contatct @MisterBiggs"
+                )
             else:
                 print(f"{symbol} is not a Stock or Coin")
 
