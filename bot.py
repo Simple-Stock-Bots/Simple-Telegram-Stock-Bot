@@ -422,12 +422,11 @@ def inline_query(update: Update, context: CallbackContext):
     Does a fuzzy search on input and returns stocks that are close.
     """
 
-    matches = s.search_symbols(update.inline_query.query)[:]
+    matches = s.inline_search(update.inline_query.query)[:5]
 
     symbols = " ".join([match[1].split(":")[0] for match in matches])
     prices = s.batch_price_reply(s.find_symbols(symbols))
-    # print(len(matches), len(prices))
-    # print(prices)
+
     results = []
     print(update.inline_query.query)
     for match, price in zip(matches, prices):

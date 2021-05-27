@@ -47,8 +47,11 @@ class cg_Crypto:
         raw_symbols = r.get("https://api.coingecko.com/api/v3/coins/list").json()
         symbols = pd.DataFrame(data=raw_symbols)
 
-        symbols["description"] = "$$" + symbols["symbol"] + ": " + symbols["name"]
+        symbols["description"] = (
+            "$$" + symbols["symbol"].str.upper() + ": " + symbols["name"]
+        )
         symbols = symbols[["id", "symbol", "name", "description"]]
+        symbols["type_id"] = "$$" + symbols["id"]
 
         self.symbol_list = symbols
         if return_df:
@@ -287,19 +290,15 @@ class cg_Crypto:
         ).json()
 
         replies = []
-        for name, val in prices.items():
-            if price := val.get("usd"):
-                price = val.get("usd")
-            else:
-                replies.append(f"{name} price data unavailable.")
-                break
+        for coin in coins:
+            if coin.id in prices:
+                p = prices[coin.id]
 
-            change = 0
-            if val.get("usd_24h_change") is not None:
-                change = val.get("usd_24h_change")
+                if p.get("usd_24h_change") is None:
+                    p["usd_24h_change"] = 0
 
-            replies.append(
-                f"{name}: ${price:,} and has moved {change:.2f}% in the past 24 hours."
-            )
+                replies.append(
+                    f"{coin.name}: ${p.get('usd',0):,} and has moved {p.get('usd_24h_change',0.0):.2f}% in the past 24 hours."
+                )
 
         return replies
