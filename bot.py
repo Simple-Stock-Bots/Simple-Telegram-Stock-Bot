@@ -98,17 +98,9 @@ def donate(update: Update, context: CallbackContext):
             parse_mode=telegram.ParseMode.MARKDOWN,
             disable_notification=True,
         )
-        return
+        amount = 1
     else:
         amount = update.message.text.replace("/donate", "").replace("$", "").strip()
-    title = "Simple Stock Bot Donation"
-    description = f"Simple Stock Bot Donation of ${amount}"
-    payload = "simple-stock-bot"
-    provider_token = STRIPE_TOKEN
-    start_parameter = str(chat_id)
-
-    print(start_parameter)
-    currency = "USD"
 
     try:
         price = int(float(amount) * 100)
@@ -117,32 +109,38 @@ def donate(update: Update, context: CallbackContext):
         return
     print(price)
 
-    prices = [LabeledPrice("Donation:", price)]
-
     context.bot.send_invoice(
-        chat_id,
-        title,
-        description,
-        payload,
-        provider_token,
-        start_parameter,
-        currency,
-        prices,
+        chat_id=chat_id,
+        title="Simple Stock Bot Donation",
+        description=f"Simple Stock Bot Donation of ${amount}",
+        payload=f"simple-stock-bot-{chat_id}",
+        provider_token=STRIPE_TOKEN,
+        currency="USD",
+        prices=[LabeledPrice("Donation:", price)],
+        start_parameter="",
+        # suggested_tip_amounts=[100, 500, 1000, 2000],
+        photo_url="https://simple-stock-bots.gitlab.io/site/img/Telegram.png",
+        photo_width=500,
+        photo_height=500,
     )
 
 
 def precheckout_callback(update: Update, context: CallbackContext):
     query = update.pre_checkout_query
 
-    if query.invoice_payload == "simple-stock-bot":
-        # answer False pre_checkout_query
-        query.answer(ok=True)
-    else:
-        query.answer(ok=False, error_message="Something went wrong...")
+    query.answer(ok=True)
+    # I dont think I need to check since its only donations.
+    # if query.invoice_payload == "simple-stock-bot":
+    #     # answer False pre_checkout_query
+    #     query.answer(ok=True)
+    # else:
+    #     query.answer(ok=False, error_message="Something went wrong...")
 
 
 def successful_payment_callback(update: Update, context: CallbackContext):
-    update.message.reply_text("Thank you for your donation!")
+    update.message.reply_text(
+        "Thank you for your donation! It goes a long way to keeping the bot free!"
+    )
 
 
 def symbol_detect(update: Update, context: CallbackContext):
@@ -307,16 +305,15 @@ def intra(update: Update, context: CallbackContext):
         title=f"\n{symbol.name}",
         volume="volume" in df.keys(),
         style="yahoo",
-        mav=20,
         savefig=dict(fname=buf, dpi=400, bbox_inches="tight"),
     )
     buf.seek(0)
 
     update.message.reply_photo(
         photo=buf,
-        caption=f"\nIntraday chart for {symbol.name} from {df.first_valid_index().strftime('%I:%M')} to"
-        + f" {df.last_valid_index().strftime('%I:%M')} ET on"
-        + f" {datetime.date.today().strftime('%d, %b %Y')}\n\n{s.price_reply([symbol])[0]}",
+        caption=f"\nIntraday chart for {symbol.name} from {df.first_valid_index().strftime('%d %b at %H:%M')} to"
+        + f" {df.last_valid_index().strftime('%d %b at %H:%M')}"
+        + f"\n\n{s.price_reply([symbol])[0]}",
         parse_mode=telegram.ParseMode.MARKDOWN,
         disable_notification=True,
     )
@@ -422,12 +419,11 @@ def inline_query(update: Update, context: CallbackContext):
     Does a fuzzy search on input and returns stocks that are close.
     """
 
-    matches = s.search_symbols(update.inline_query.query)[:]
+    matches = s.inline_search(update.inline_query.query)[:5]
 
     symbols = " ".join([match[1].split(":")[0] for match in matches])
     prices = s.batch_price_reply(s.find_symbols(symbols))
-    # print(len(matches), len(prices))
-    # print(prices)
+
     results = []
     print(update.inline_query.query)
     for match, price in zip(matches, prices):
@@ -469,19 +465,22 @@ def error(update: Update, context: CallbackContext):
     )
     tb_string = "".join(tb_list)
     print(tb_string)
-    if update:
-        message = (
-            f"An exception was raised while handling an update\n"
-            f"<pre>update = {html.escape(json.dumps(update.to_dict(), indent=2, ensure_ascii=False))}"
-            "</pre>\n\n"
-            f"<pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n\n"
-            f"<pre>context.user_data = {html.escape(str(context.user_data))}</pre>\n\n"
-            f"<pre>{html.escape(tb_string)}</pre>"
-        )
+    # if update:
+    #     message = (
+    #         f"An exception was raised while handling an update\n"
+    #         f"<pre>update = {html.escape(json.dumps(update.to_dict(), indent=2, ensure_ascii=False))}"
+    #         "</pre>\n\n"
+    #         f"<pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n\n"
+    #         f"<pre>context.user_data = {html.escape(str(context.user_data))}</pre>\n\n"
+    #         f"<pre>{html.escape(tb_string)}</pre>"
+    #     )
+    update.message.reply_text(
+        text="An error has occured. Please inform @MisterBiggs if the error persists."
+    )
 
-        # Finally, send the message
-        # update.message.reply_text(text=message, parse_mode=telegram.ParseMode.HTML)
-        # update.message.reply_text(text="Please inform the bot admin of this issue.")
+    # Finally, send the message
+    # update.message.reply_text(text=message, parse_mode=telegram.ParseMode.HTML)
+    # update.message.reply_text(text="Please inform the bot admin of this issue.")
 
 
 def main():

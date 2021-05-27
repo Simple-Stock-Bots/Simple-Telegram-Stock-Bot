@@ -55,10 +55,12 @@ class IEX_Symbol:
     ) -> Optional[Tuple[pd.DataFrame, datetime]]:
 
         reg_symbols = r.get(
-            f"https://cloud.iexapis.com/stable/ref-data/symbols?token={self.IEX_TOKEN}"
+            f"https://cloud.iexapis.com/stable/ref-data/symbols?token={self.IEX_TOKEN}",
+            timeout=5,
         ).json()
         otc_symbols = r.get(
-            f"https://cloud.iexapis.com/stable/ref-data/otc/symbols?token={self.IEX_TOKEN}"
+            f"https://cloud.iexapis.com/stable/ref-data/otc/symbols?token={self.IEX_TOKEN}",
+            timeout=5,
         ).json()
 
         reg = pd.DataFrame(data=reg_symbols)
@@ -69,8 +71,9 @@ class IEX_Symbol:
 
         symbols["description"] = "$" + symbols["symbol"] + ": " + symbols["name"]
         symbols["id"] = symbols["symbol"]
+        symbols["type_id"] = "$" + symbols["symbol"].str.lower()
 
-        symbols = symbols[["id", "symbol", "name", "description"]]
+        symbols = symbols[["id", "symbol", "name", "description", "type_id"]]
         self.symbol_list = symbols
         if return_df:
             return symbols, datetime.now()
@@ -83,7 +86,10 @@ class IEX_Symbol:
         str
             Human readable text on status of IEX API
         """
-        resp = r.get("https://pjmps0c34hp7.statuspage.io/api/v2/status.json")
+        resp = r.get(
+            "https://pjmps0c34hp7.statuspage.io/api/v2/status.json",
+            timeout=5,
+        )
 
         if resp.status_code == 200:
             status = resp.json()["status"]
@@ -155,7 +161,10 @@ class IEX_Symbol:
 
         IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol.id}/quote?token={self.IEX_TOKEN}"
 
-        response = r.get(IEXurl)
+        response = r.get(
+            IEXurl,
+            timeout=5,
+        )
         if response.status_code == 200:
             IEXData = response.json()
 
@@ -226,7 +235,10 @@ class IEX_Symbol:
             return "OTC stocks do not currently support any commands."
 
         IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/dividends/next?token={self.IEX_TOKEN}"
-        response = r.get(IEXurl)
+        response = r.get(
+            IEXurl,
+            timeout=5,
+        )
         if response.status_code == 200 and response.json():
             IEXData = response.json()[0]
             keys = (
@@ -288,7 +300,10 @@ class IEX_Symbol:
             return "OTC stocks do not currently support any commands."
 
         IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/news/last/15?token={self.IEX_TOKEN}"
-        response = r.get(IEXurl)
+        response = r.get(
+            IEXurl,
+            timeout=5,
+        )
         if response.status_code == 200:
             data = response.json()
             if data:
@@ -324,7 +339,10 @@ class IEX_Symbol:
             return "OTC stocks do not currently support any commands."
 
         IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/company?token={self.IEX_TOKEN}"
-        response = r.get(IEXurl)
+        response = r.get(
+            IEXurl,
+            timeout=5,
+        )
 
         if response.status_code == 200:
             data = response.json()
@@ -352,7 +370,10 @@ class IEX_Symbol:
             return "OTC stocks do not currently support any commands."
 
         IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/stats?token={self.IEX_TOKEN}"
-        response = r.get(IEXurl)
+        response = r.get(
+            IEXurl,
+            timeout=5,
+        )
 
         if response.status_code == 200:
             data = response.json()
@@ -362,7 +383,7 @@ class IEX_Symbol:
             if "companyName" in data:
                 m += f"Company Name: {data['companyName']}\n"
             if "marketcap" in data:
-                m += f"Market Cap: {data['marketcap']:,}\n"
+                m += f"Market Cap: ${data['marketcap']:,}\n"
             if "week52high" in data:
                 m += f"52 Week (high-low): {data['week52high']:,} "
             if "week52low" in data:
@@ -399,7 +420,10 @@ class IEX_Symbol:
             return pd.DataFrame()
 
         IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol}/intraday-prices?token={self.IEX_TOKEN}"
-        response = r.get(IEXurl)
+        response = r.get(
+            IEXurl,
+            timeout=5,
+        )
         if response.status_code == 200:
             df = pd.DataFrame(response.json())
             df.dropna(inplace=True, subset=["date", "minute", "high", "low", "volume"])
@@ -437,7 +461,8 @@ class IEX_Symbol:
             pass
 
         response = r.get(
-            f"https://cloud.iexapis.com/stable/stock/{symbol}/chart/1mm?token={self.IEX_TOKEN}&chartInterval=3&includeToday=false"
+            f"https://cloud.iexapis.com/stable/stock/{symbol}/chart/1mm?token={self.IEX_TOKEN}&chartInterval=3&includeToday=false",
+            timeout=5,
         )
 
         if response.status_code == 200:
@@ -460,7 +485,8 @@ class IEX_Symbol:
         """
 
         stocks = r.get(
-            f"https://cloud.iexapis.com/stable/stock/market/list/mostactive?token={self.IEX_TOKEN}"
+            f"https://cloud.iexapis.com/stable/stock/market/list/mostactive?token={self.IEX_TOKEN}",
+            timeout=5,
         ).json()
 
         return [f"${s['symbol']}: {s['companyName']}" for s in stocks]
