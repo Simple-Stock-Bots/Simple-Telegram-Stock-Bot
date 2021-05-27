@@ -71,8 +71,9 @@ class IEX_Symbol:
 
         symbols["description"] = "$" + symbols["symbol"] + ": " + symbols["name"]
         symbols["id"] = symbols["symbol"]
+        symbols["type_id"] = "$" + symbols["symbol"].str.lower()
 
-        symbols = symbols[["id", "symbol", "name", "description"]]
+        symbols = symbols[["id", "symbol", "name", "description", "type_id"]]
         self.symbol_list = symbols
         if return_df:
             return symbols, datetime.now()

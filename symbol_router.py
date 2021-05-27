@@ -113,6 +113,34 @@ class Router:
         self.searched_symbols[search] = symbol_list
         return symbol_list
 
+    def inline_search(self, search: str) -> List[Tuple[str, str]]:
+        """Searches based on the shortest symbol that contains the same string as the search.
+        Should be very fast compared to a fuzzy search.
+
+        Parameters
+        ----------
+        search : str
+            String used to match against symbols.
+
+        Returns
+        -------
+        List[tuple[str, str]]
+            Each tuple contains: (Symbol, Issue Name).
+        """
+
+        df = pd.concat([self.stock.symbol_list, self.crypto.symbol_list])
+
+        search = search.lower()
+
+        df = df[df["type_id"].str.contains(search, regex=False)].sort_values(
+            by="type_id", key=lambda x: x.str.len()
+        )
+
+        symbols = df.head(20)
+        symbol_list = list(zip(list(symbols["symbol"]), list(symbols["description"])))
+        self.searched_symbols[search] = symbol_list
+        return symbol_list
+
     def price_reply(self, symbols: list[Symbol]) -> List[str]:
         """Returns current market price or after hours if its available for a given stock symbol.
 
@@ -349,11 +377,10 @@ class Router:
                 print(f"{symbol} is not a Stock or Coin")
 
         if stocks:
-            for (
-                stock
-            ) in stocks:  # IEX batch endpoint doesnt seem to be working right now
+            # IEX batch endpoint doesnt seem to be working right now
+            for stock in stocks:
                 replies.append(self.stock.price_reply(stock))
         if coins:
-            replies.append(self.crypto.batch_price(coins))
+            replies = replies + self.crypto.batch_price(coins)
 
         return replies
