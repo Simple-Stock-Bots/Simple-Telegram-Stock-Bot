@@ -16,7 +16,7 @@ from Symbol import Symbol, Stock, Coin
 
 
 class Router:
-    STOCK_REGEX = "(?:^|[^\\$])\\$([a-zA-Z]{1,6})"
+    STOCK_REGEX = "(?:^|[^\\$])\\$([a-zA-Z.]{1,6})"
     CRYPTO_REGEX = "[$]{2}([a-zA-Z]{1,20})"
     searched_symbols = {}
 
