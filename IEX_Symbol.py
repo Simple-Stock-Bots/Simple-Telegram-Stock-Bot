@@ -476,7 +476,7 @@ class IEX_Symbol:
         return pd.DataFrame()
 
     def trending(self) -> list[str]:
-        """Gets current coins trending on IEX. Only returns when market is open. 
+        """Gets current coins trending on IEX. Only returns when market is open.
 
         Returns
         -------
@@ -489,6 +489,9 @@ class IEX_Symbol:
             timeout=5,
         )
         if stocks.status_code == 200:
-            return [f"${s['symbol']}: {s['companyName']}" for s in stocks.json()]
+            return [
+                f"`${s['symbol']}`: {s['companyName']}, {s['changePercent']:.2f}%"
+                for s in stocks.json()
+            ]
         else:
             return ["Trending Stocks Currently Unavailable."]

@@ -326,7 +326,7 @@ class Router:
         stocks = self.stock.trending()
         coins = self.crypto.trending()
 
-        reply = "`Trending Stocks:\n"
+        reply = "Trending Stocks:\n"
         reply += "-" * len("Trending Stocks:") + "\n"
         for stock in stocks:
             reply += stock + "\n"
@@ -336,7 +336,7 @@ class Router:
         for coin in coins:
             reply += coin + "\n"
 
-        return reply + "`"
+        return reply
 
     def random_pick(self) -> str:
 
