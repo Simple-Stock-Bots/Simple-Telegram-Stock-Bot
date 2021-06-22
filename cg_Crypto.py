@@ -291,9 +291,14 @@ class cg_Crypto:
         coins = r.get(
             "https://api.coingecko.com/api/v3/search/trending",
             timeout=5,
-        ).json()["coins"]
-
-        return [f"$${c['item']['symbol'].upper()}: {c['item']['name']}" for c in coins]
+        )
+        if coins.status_code == 200:
+            return [
+                f"$${c['item']['symbol'].upper()}: {c['item']['name']}"
+                for c in coins.json()["coins"]
+            ]
+        else:
+            return ["Trending Coins Currently Unavailable."]
 
     def batch_price(self, coins: list[Coin]) -> list[str]:
         query = ",".join([c.id for c in coins])
