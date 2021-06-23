@@ -400,6 +400,28 @@ class IEX_Symbol:
         else:
             return f"No information found for: {symbol}\nEither today is boring or the symbol does not exist."
 
+    def cap_reply(self, stock: Stock) -> str:
+        """Get the Market Cap of a stock"""
+        response = r.get(
+            f"https://cloud.iexapis.com/stable/stock/{stock.id}/stats?token={self.IEX_TOKEN}",
+            timeout=5,
+        )
+        if response.status_code == 200:
+
+            try:
+                data = response.json()
+
+                cap = data["marketcap"]
+            except KeyError:
+                return f"{stock.id} returned an error."
+
+            message = f"The current market cap of {stock.name} is $**{cap:,.2f}**"
+
+        else:
+            message = f"The Coin: {stock.name} was not found or returned and error."
+
+        return message
+
     def intra_reply(self, symbol: Stock) -> pd.DataFrame:
         """Returns price data for a symbol since the last market open.
 

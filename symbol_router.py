@@ -314,6 +314,31 @@ class Router:
 
         return replies
 
+    def cap_reply(self, symbols: List[Symbol]) -> List[str]:
+        """Gets market cap for each symbol in the list
+
+        Parameters
+        ----------
+        symbols : List[str]
+            List of stock symbols
+
+        Returns
+        -------
+        Dict[str, str]
+            Each symbol passed in is a key with its value being a human readable formatted string of the symbols market cap.
+        """
+        replies = []
+
+        for symbol in symbols:
+            if isinstance(symbol, Stock):
+                replies.append(self.stock.cap_reply(symbol))
+            elif isinstance(symbol, Coin):
+                replies.append(self.crypto.cap_reply(symbol))
+            else:
+                print(f"{symbol} is not a Stock or Coin")
+
+        return replies
+
     def trending(self) -> str:
         """Checks APIs for trending symbols.
 

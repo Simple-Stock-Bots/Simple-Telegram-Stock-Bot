@@ -252,6 +252,43 @@ class cg_Crypto:
         else:
             return f"{symbol.symbol} returned an error."
 
+    def cap_reply(self, coin: Coin) -> str:
+        """Gets market Cap for each symbol in the list
+
+        Parameters
+        ----------
+        symbols : List[str]
+            List of coin symbols
+
+        Returns
+        -------
+        Dict[str, str]
+            Each symbol passed in is a key with its value being a human readable formatted string of the symbols markey cap.
+        """
+        response = r.get(
+            f"https://api.coingecko.com/api/v3/simple/price?ids={coin.id}&vs_currencies={self.vs_currency}&include_market_cap=true",
+            timeout=5,
+        )
+        if response.status_code == 200:
+
+            try:
+                data = response.json()[coin.id]
+
+                price = data[self.vs_currency]
+                cap = data[self.vs_currency + "_market_cap"]
+            except KeyError:
+                return f"{coin.id} returned an error."
+
+            if cap == 0:
+                return f"The market cap for {coin.name} is not available for unknown reasons."
+
+            message = f"The current price of {coin.name} is $**{price:,}** and its market cap is $**{cap:,.2f}** {self.vs_currency.upper()}"
+
+        else:
+            message = f"The Coin: {coin.name} was not found or returned and error."
+
+        return message
+
     def info_reply(self, symbol: Coin) -> str:
         """Gets information on stock symbols.
 

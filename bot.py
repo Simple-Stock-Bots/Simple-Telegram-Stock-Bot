@@ -397,6 +397,32 @@ def stat(update: Update, context: CallbackContext):
             )
 
 
+def cap(update: Update, context: CallbackContext):
+    """
+    Market Cap Information
+    """
+    message = update.message.text
+    chat_id = update.message.chat_id
+
+    if message.strip().split("@")[0] == "/cap":
+        update.message.reply_text(
+            "This command returns the market cap for a symbol.\nExample: /cap $tsla"
+        )
+        return
+
+    symbols = s.find_symbols(message)
+
+    if symbols:
+        context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+
+        for reply in s.cap_reply(symbols):
+            update.message.reply_text(
+                text=reply,
+                parse_mode=telegram.ParseMode.MARKDOWN,
+                disable_notification=True,
+            )
+
+
 def trending(update: Update, context: CallbackContext):
     """
     Trending Symbols
@@ -501,6 +527,7 @@ def main():
     dp.add_handler(CommandHandler("info", info))
     dp.add_handler(CommandHandler("stat", stat))
     dp.add_handler(CommandHandler("stats", stat))
+    dp.add_handler(CommandHandler("cap", cap))
     dp.add_handler(CommandHandler("trending", trending))
     dp.add_handler(CommandHandler("search", search))
     dp.add_handler(CommandHandler("intraday", intra))
