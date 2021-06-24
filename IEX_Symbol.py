@@ -9,7 +9,7 @@ import requests as r
 import schedule
 from fuzzywuzzy import fuzz
 import os
-
+from logging import warning
 from Symbol import Stock
 
 
@@ -36,7 +36,7 @@ class IEX_Symbol:
             self.IEX_TOKEN = os.environ["IEX"]
         except KeyError:
             self.IEX_TOKEN = ""
-            print(
+            warning(
                 "Starting without an IEX Token will not allow you to get market data!"
             )
 

@@ -7,6 +7,8 @@ import html
 import json
 import traceback
 
+from logging import debug, info, warning, error, critical
+
 import mplfinance as mpf
 from uuid import uuid4
 
@@ -36,7 +38,7 @@ try:
     STRIPE_TOKEN = os.environ["STRIPE"]
 except KeyError:
     STRIPE_TOKEN = ""
-    print("Starting without a STRIPE Token will not allow you to accept Donations!")
+    warning("Starting without a STRIPE Token will not allow you to accept Donations!")
 
 s = Router()
 t = T_info()
@@ -47,11 +49,12 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
-print("Bot Online")
+info("Bot script started.")
 
 
 def start(update: Update, context: CallbackContext):
     """Send a message when the command /start is issued."""
+    info(f"Start command ran by {update.message.chat.username}")
     update.message.reply_text(
         text=t.help_text,
         parse_mode=telegram.ParseMode.MARKDOWN,
@@ -61,6 +64,7 @@ def start(update: Update, context: CallbackContext):
 
 def help(update: Update, context: CallbackContext):
     """Send link to docs when the command /help is issued."""
+    info(f"Help command ran by {update.message.chat.username}")
     update.message.reply_text(
         text=t.help_text,
         parse_mode=telegram.ParseMode.MARKDOWN,
@@ -70,6 +74,7 @@ def help(update: Update, context: CallbackContext):
 
 def license(update: Update, context: CallbackContext):
     """Return bots license agreement"""
+    info(f"License command ran by {update.message.chat.username}")
     update.message.reply_text(
         text=t.license,
         parse_mode=telegram.ParseMode.MARKDOWN,
@@ -78,6 +83,7 @@ def license(update: Update, context: CallbackContext):
 
 
 def status(update: Update, context: CallbackContext):
+    warning(f"Status command ran by {update.message.chat.username}")
     bot_resp = datetime.datetime.now(update.message.date.tzinfo) - update.message.date
 
     update.message.reply_text(
@@ -90,6 +96,7 @@ def status(update: Update, context: CallbackContext):
 
 
 def donate(update: Update, context: CallbackContext):
+    info(f"Donate command ran by {update.message.chat.username}")
     chat_id = update.message.chat_id
 
     if update.message.text.strip() == "/donate":
@@ -107,7 +114,7 @@ def donate(update: Update, context: CallbackContext):
     except ValueError:
         update.message.reply_text(f"{amount} is not a valid donation amount or number.")
         return
-    print(price)
+    info(f"Donation amount: {price}")
 
     context.bot.send_invoice(
         chat_id=chat_id,
@@ -126,6 +133,7 @@ def donate(update: Update, context: CallbackContext):
 
 
 def precheckout_callback(update: Update, context: CallbackContext):
+    info(f"precheckout_callback queried")
     query = update.pre_checkout_query
 
     query.answer(ok=True)
@@ -138,6 +146,7 @@ def precheckout_callback(update: Update, context: CallbackContext):
 
 
 def successful_payment_callback(update: Update, context: CallbackContext):
+    info(f"Successful payment!")
     update.message.reply_text(
         "Thank you for your donation! It goes a long way to keeping the bot free!"
     )
@@ -148,6 +157,7 @@ def symbol_detect(update: Update, context: CallbackContext):
     Runs on any message that doesn't have a command and searches for symbols,
         then returns the prices of any symbols found.
     """
+
     message = update.message.text
     chat_id = update.message.chat_id
     symbols = s.find_symbols(message)
@@ -155,7 +165,9 @@ def symbol_detect(update: Update, context: CallbackContext):
     if symbols:
         # Let user know bot is working
         context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-        print(symbols)
+        info(f"User called for symbols: {update.message.chat.username}")
+        info(f"Symbols found: {symbols}")
+
         for reply in s.price_reply(symbols):
             update.message.reply_text(
                 text=reply,
@@ -168,6 +180,7 @@ def dividend(update: Update, context: CallbackContext):
     """
     waits for /dividend or /div command and then finds dividend info on that symbol.
     """
+    info(f"Dividend command ran by {update.message.chat.username}")
     message = update.message.text
     chat_id = update.message.chat_id
 
@@ -193,6 +206,7 @@ def news(update: Update, context: CallbackContext):
     """
     waits for /news command and then finds news info on that symbol.
     """
+    info(f"News command ran by {update.message.chat.username}")
     message = update.message.text
     chat_id = update.message.chat_id
 
@@ -215,10 +229,11 @@ def news(update: Update, context: CallbackContext):
             )
 
 
-def info(update: Update, context: CallbackContext):
+def information(update: Update, context: CallbackContext):
     """
     waits for /info command and then finds info on that symbol.
     """
+    info(f"Information command ran by {update.message.chat.username}")
     message = update.message.text
     chat_id = update.message.chat_id
 
@@ -242,6 +257,7 @@ def info(update: Update, context: CallbackContext):
 
 
 def search(update: Update, context: CallbackContext):
+    info(f"Search command ran by {update.message.chat.username}")
     message = update.message.text.replace("/search ", "")
     chat_id = update.message.chat_id
 
@@ -265,6 +281,7 @@ def search(update: Update, context: CallbackContext):
 
 
 def intra(update: Update, context: CallbackContext):
+    info(f"Intra command ran by {update.message.chat.username}")
     # TODO: Document usage of this command. https://iexcloud.io/docs/api/#historical-prices
 
     message = update.message.text
@@ -320,6 +337,7 @@ def intra(update: Update, context: CallbackContext):
 
 
 def chart(update: Update, context: CallbackContext):
+    info(f"Chart command ran by {update.message.chat.username}")
     # TODO: Document usage of this command. https://iexcloud.io/docs/api/#historical-prices
 
     message = update.message.text
@@ -350,7 +368,7 @@ def chart(update: Update, context: CallbackContext):
     context.bot.send_chat_action(
         chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO
     )
-    print(symbol)
+
     buf = io.BytesIO()
     mpf.plot(
         df,
@@ -375,6 +393,7 @@ def stat(update: Update, context: CallbackContext):
     """
     https://iexcloud.io/docs/api/#key-stats
     """
+    info(f"Stat command ran by {update.message.chat.username}")
     message = update.message.text
     chat_id = update.message.chat_id
 
@@ -401,6 +420,7 @@ def cap(update: Update, context: CallbackContext):
     """
     Market Cap Information
     """
+    info(f"Cap command ran by {update.message.chat.username}")
     message = update.message.text
     chat_id = update.message.chat_id
 
@@ -427,6 +447,7 @@ def trending(update: Update, context: CallbackContext):
     """
     Trending Symbols
     """
+    info(f"Trending command ran by {update.message.chat.username}")
 
     chat_id = update.message.chat_id
 
@@ -444,14 +465,14 @@ def inline_query(update: Update, context: CallbackContext):
     Handles inline query.
     Does a fuzzy search on input and returns stocks that are close.
     """
-
+    info(f"Inline command ran by {update.message.chat.username}")
+    info(f"Query: {update.inline_query.query}")
     matches = s.inline_search(update.inline_query.query)[:5]
 
     symbols = " ".join([match[1].split(":")[0] for match in matches])
     prices = s.batch_price_reply(s.find_symbols(symbols))
 
     results = []
-    print(update.inline_query.query)
     for match, price in zip(matches, prices):
         try:
             results.append(
@@ -464,16 +485,20 @@ def inline_query(update: Update, context: CallbackContext):
                 )
             )
         except TypeError:
-            logging.warning(str(match))
+            warning(f"{match} caused error in inline query.")
             pass
-        print(match[0], "\n\n\n")
+
         if len(results) == 5:
             update.inline_query.answer(results)
+            info("Inline Command was successful")
             return
     update.inline_query.answer(results)
 
 
 def rand_pick(update: Update, context: CallbackContext):
+    info(
+        f"Someone is gambling! Random_pick command ran by {update.message.chat.username}"
+    )
 
     update.message.reply_text(
         text=s.random_pick(),
@@ -484,22 +509,25 @@ def rand_pick(update: Update, context: CallbackContext):
 
 def error(update: Update, context: CallbackContext):
     """Log Errors caused by Updates."""
-    logger.warning('Update "%s" caused error "%s"', update, error)
+    warning('Update "%s" caused error "%s"', update, error)
 
     tb_list = traceback.format_exception(
         None, context.error, context.error.__traceback__
     )
     tb_string = "".join(tb_list)
-    print(tb_string)
-    # if update:
-    #     message = (
-    #         f"An exception was raised while handling an update\n"
-    #         f"<pre>update = {html.escape(json.dumps(update.to_dict(), indent=2, ensure_ascii=False))}"
-    #         "</pre>\n\n"
-    #         f"<pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n\n"
-    #         f"<pre>context.user_data = {html.escape(str(context.user_data))}</pre>\n\n"
-    #         f"<pre>{html.escape(tb_string)}</pre>"
-    #     )
+
+    if update:
+        message = (
+            f"An exception was raised while handling an update\n"
+            f"<pre>update = {html.escape(json.dumps(update.to_dict(), indent=2, ensure_ascii=False))}"
+            "</pre>\n\n"
+            f"<pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n\n"
+            f"<pre>context.user_data = {html.escape(str(context.user_data))}</pre>\n\n"
+            f"<pre>{html.escape(tb_string)}</pre>"
+        )
+        warning(message)
+    else:
+        warning(tb_string)
     update.message.reply_text(
         text="An error has occured. Please inform @MisterBiggs if the error persists."
     )
@@ -524,7 +552,7 @@ def main():
     dp.add_handler(CommandHandler("dividend", dividend))
     dp.add_handler(CommandHandler("div", dividend))
     dp.add_handler(CommandHandler("news", news))
-    dp.add_handler(CommandHandler("info", info))
+    dp.add_handler(CommandHandler("info", information))
     dp.add_handler(CommandHandler("stat", stat))
     dp.add_handler(CommandHandler("stats", stat))
     dp.add_handler(CommandHandler("cap", cap))
