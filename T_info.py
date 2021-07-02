@@ -21,7 +21,7 @@ Keep up with the latest news for the bot in its Telegram Channel: https://t.me/s
 
 Full documentation on using and running your own stock bot can be found [on the bots website.](https://simple-stock-bots.gitlab.io/site)
 
-The bot detects _"Symbols"_ using either one or two dollar signs before the symbol. One dollar sign is for a stock market ticker, while two is for a cryptocurrency coin. `/chart $$eth` would return a chart of the past month of data for Ethereum, while `/dividend $psec` returns dividend information for Prospect Capital stock.
+The bot detects _"Symbols"_ using either one `$` or two `$$` dollar signs before the symbol. One dollar sign is for a stock market ticker, while two is for a cryptocurrency coin. `/chart $$eth` would return a chart of the past month of data for Ethereum, while `/dividend $psec` returns dividend information for Prospect Capital stock.
 
 Simply calling a symbol in any message that the bot can see will also return the price. So a message like: `I wonder if $$btc will go to the Moon now that $tsla accepts it as payment` would return the current price for both Bitcoin and Tesla. 
 
@@ -67,7 +67,7 @@ info - $[symbol] General information about the symbol. ℹ️
 news - $[symbol] News about the symbol. 📰
 stat - $[symbol] Key statistics about the symbol. 🔢
 dividend - $[symbol] Dividend info 📅
-intra - $[symbol] Plot since the last market open. 📈
 trending - Trending Stocks and Cryptos. 💬
+intra - $[symbol] Plot since the last market open. 📈
 chart - $[chart] Plot of the past month. 📊
 """  # Not used by the bot but for updaing commands with BotFather

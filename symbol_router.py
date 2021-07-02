@@ -27,7 +27,6 @@ class Router:
     def find_symbols(self, text: str) -> list[Symbol]:
         """Finds stock tickers starting with a dollar sign, and cryptocurrencies with two dollar signs
         in a blob of text and returns them in a list.
-        Only returns each match once. Example: Whats the price of $tsla?
 
         Parameters
         ----------
@@ -91,7 +90,8 @@ class Router:
         Returns
         -------
         list[tuple[str, str]]
-            A list tuples of every stock sorted in order of how well they match. Each tuple contains: (Symbol, Issue Name).
+            A list tuples of every stock sorted in order of how well they match.
+                Each tuple contains: (Symbol, Issue Name).
         """
 
         df = pd.concat([self.stock.symbol_list, self.crypto.symbol_list])
@@ -183,7 +183,8 @@ class Router:
         Returns
         -------
         Dict[str, str]
-            Each symbol passed in is a key with its value being a human readable formatted string of the symbols div dates.
+            Each symbol passed in is a key with its value being a human readable
+                formatted string of the symbols div dates.
         """
         replies = []
         for symbol in symbols:
@@ -207,7 +208,8 @@ class Router:
         Returns
         -------
         Dict[str, str]
-            Each symbol passed in is a key with its value being a human readable markdown formatted string of the symbols news.
+            Each symbol passed in is a key with its value being a human
+                readable markdown formatted string of the symbols news.
         """
         replies = []
 
@@ -235,7 +237,8 @@ class Router:
         Returns
         -------
         Dict[str, str]
-            Each symbol passed in is a key with its value being a human readable formatted string of the symbols information.
+            Each symbol passed in is a key with its value being a human readable formatted
+                string of the symbols information.
         """
         replies = []
 
@@ -260,7 +263,8 @@ class Router:
         Returns
         -------
         pd.DataFrame
-            Returns a timeseries dataframe with high, low, and volume data if its available. Otherwise returns empty pd.DataFrame.
+            Returns a timeseries dataframe with high, low, and volume data if its available.
+                Otherwise returns empty pd.DataFrame.
         """
 
         if isinstance(symbol, Stock):
@@ -283,7 +287,8 @@ class Router:
         Returns
         -------
         pd.DataFrame
-            Returns a timeseries dataframe with high, low, and volume data if its available. Otherwise returns empty pd.DataFrame.
+            Returns a timeseries dataframe with high, low, and volume data if its available.
+                Otherwise returns empty pd.DataFrame.
         """
         if isinstance(symbol, Stock):
             return self.stock.chart_reply(symbol)
@@ -304,7 +309,8 @@ class Router:
         Returns
         -------
         Dict[str, str]
-            Each symbol passed in is a key with its value being a human readable formatted string of the symbols statistics.
+            Each symbol passed in is a key with its value being a human readable
+                formatted string of the symbols statistics.
         """
         replies = []
 
@@ -329,7 +335,8 @@ class Router:
         Returns
         -------
         Dict[str, str]
-            Each symbol passed in is a key with its value being a human readable formatted string of the symbols market cap.
+            Each symbol passed in is a key with its value being a human readable
+                formatted string of the symbols market cap.
         """
         replies = []
 

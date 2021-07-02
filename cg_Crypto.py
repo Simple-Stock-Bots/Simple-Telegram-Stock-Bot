@@ -220,18 +220,18 @@ class cg_Crypto:
         return pd.DataFrame()
 
     def stat_reply(self, symbol: Coin) -> str:
-        """Gets key statistics for each symbol in the list
+        """Gathers key statistics on coin. Mostly just CoinGecko scores.
 
         Parameters
         ----------
-        symbols : List[str]
-            List of coin symbols
+        symbol : Coin
 
         Returns
         -------
-        Dict[str, str]
-            Each symbol passed in is a key with its value being a human readable formatted string of the symbols statistics.
+        str
+            Preformatted markdown.
         """
+
         response = r.get(
             f"https://api.coingecko.com/api/v3/coins/{symbol.id}?localization=false",
             timeout=5,
@@ -253,17 +253,16 @@ class cg_Crypto:
             return f"{symbol.symbol} returned an error."
 
     def cap_reply(self, coin: Coin) -> str:
-        """Gets market Cap for each symbol in the list
+        """Gets market cap for Coin
 
         Parameters
         ----------
-        symbols : List[str]
-            List of coin symbols
+        coin : Coin
 
         Returns
         -------
-        Dict[str, str]
-            Each symbol passed in is a key with its value being a human readable formatted string of the symbols markey cap.
+        str
+            Preformatted markdown.
         """
         response = r.get(
             f"https://api.coingecko.com/api/v3/simple/price?ids={coin.id}&vs_currencies={self.vs_currency}&include_market_cap=true",
@@ -290,17 +289,16 @@ class cg_Crypto:
         return message
 
     def info_reply(self, symbol: Coin) -> str:
-        """Gets information on stock symbols.
+        """Gets coin description
 
         Parameters
         ----------
-        symbols : List[str]
-            List of stock symbols.
+        symbol : Coin
 
         Returns
         -------
-        Dict[str, str]
-            Each symbol passed in is a key with its value being a human readable formatted string of the symbols information.
+        str
+            Preformatted markdown.
         """
 
         response = r.get(
@@ -322,7 +320,7 @@ class cg_Crypto:
         Returns
         -------
         list[str]
-            list of $$ID: NAME
+            list of $$ID: NAME, CHANGE%
         """
 
         coins = r.get(
@@ -352,6 +350,17 @@ class cg_Crypto:
         return trending
 
     def batch_price(self, coins: list[Coin]) -> list[str]:
+        """Gets price of a list of coins all in one API call
+
+        Parameters
+        ----------
+        coins : list[Coin]
+
+        Returns
+        -------
+        list[str]
+            returns preformatted list of strings detailing price movement of each coin passed in.
+        """
         query = ",".join([c.id for c in coins])
 
         prices = r.get(

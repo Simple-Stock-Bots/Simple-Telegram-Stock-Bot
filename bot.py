@@ -53,7 +53,7 @@ info("Bot script started.")
 
 
 def start(update: Update, context: CallbackContext):
-    """Send a message when the command /start is issued."""
+    """Send help text when the command /start is issued."""
     info(f"Start command ran by {update.message.chat.username}")
     update.message.reply_text(
         text=t.help_text,
@@ -63,7 +63,7 @@ def start(update: Update, context: CallbackContext):
 
 
 def help(update: Update, context: CallbackContext):
-    """Send link to docs when the command /help is issued."""
+    """Send help text when the command /help is issued."""
     info(f"Help command ran by {update.message.chat.username}")
     update.message.reply_text(
         text=t.help_text,
@@ -73,7 +73,7 @@ def help(update: Update, context: CallbackContext):
 
 
 def license(update: Update, context: CallbackContext):
-    """Return bots license agreement"""
+    """Send bots license when the /license command is issued."""
     info(f"License command ran by {update.message.chat.username}")
     update.message.reply_text(
         text=t.license,
@@ -83,6 +83,7 @@ def license(update: Update, context: CallbackContext):
 
 
 def status(update: Update, context: CallbackContext):
+    """Gather status of bot and dependant services and return important status updates."""
     warning(f"Status command ran by {update.message.chat.username}")
     bot_resp = datetime.datetime.now(update.message.date.tzinfo) - update.message.date
 
@@ -96,6 +97,7 @@ def status(update: Update, context: CallbackContext):
 
 
 def donate(update: Update, context: CallbackContext):
+    """Sets up donation."""
     info(f"Donate command ran by {update.message.chat.username}")
     chat_id = update.message.chat_id
 
@@ -133,6 +135,7 @@ def donate(update: Update, context: CallbackContext):
 
 
 def precheckout_callback(update: Update, context: CallbackContext):
+    """Approves donation"""
     info(f"precheckout_callback queried")
     query = update.pre_checkout_query
 
@@ -146,6 +149,7 @@ def precheckout_callback(update: Update, context: CallbackContext):
 
 
 def successful_payment_callback(update: Update, context: CallbackContext):
+    """Thanks user for donation"""
     info(f"Successful payment!")
     update.message.reply_text(
         "Thank you for your donation! It goes a long way to keeping the bot free!"
@@ -177,9 +181,7 @@ def symbol_detect(update: Update, context: CallbackContext):
 
 
 def dividend(update: Update, context: CallbackContext):
-    """
-    waits for /dividend or /div command and then finds dividend info on that symbol.
-    """
+    """/dividend or /div command and then finds dividend info on that symbol."""
     info(f"Dividend command ran by {update.message.chat.username}")
     message = update.message.text
     chat_id = update.message.chat_id
@@ -203,9 +205,7 @@ def dividend(update: Update, context: CallbackContext):
 
 
 def news(update: Update, context: CallbackContext):
-    """
-    waits for /news command and then finds news info on that symbol.
-    """
+    """/news command then finds news info on that symbol."""
     info(f"News command ran by {update.message.chat.username}")
     message = update.message.text
     chat_id = update.message.chat_id
@@ -230,9 +230,7 @@ def news(update: Update, context: CallbackContext):
 
 
 def information(update: Update, context: CallbackContext):
-    """
-    waits for /info command and then finds info on that symbol.
-    """
+    """/info command then finds info on that symbol."""
     info(f"Information command ran by {update.message.chat.username}")
     message = update.message.text
     chat_id = update.message.chat_id
@@ -257,6 +255,10 @@ def information(update: Update, context: CallbackContext):
 
 
 def search(update: Update, context: CallbackContext):
+    """
+    Uses fuzzy search on full list of stocks and crypto names
+        and descriptions then returns the top matches in order.
+    """
     info(f"Search command ran by {update.message.chat.username}")
     message = update.message.text.replace("/search ", "")
     chat_id = update.message.chat_id
@@ -281,8 +283,8 @@ def search(update: Update, context: CallbackContext):
 
 
 def intra(update: Update, context: CallbackContext):
+    """returns a chart of intraday data for a symbol"""
     info(f"Intra command ran by {update.message.chat.username}")
-    # TODO: Document usage of this command. https://iexcloud.io/docs/api/#historical-prices
 
     message = update.message.text
     chat_id = update.message.chat_id
@@ -337,8 +339,8 @@ def intra(update: Update, context: CallbackContext):
 
 
 def chart(update: Update, context: CallbackContext):
+    """returns a chart of the past month of data for a symbol"""
     info(f"Chart command ran by {update.message.chat.username}")
-    # TODO: Document usage of this command. https://iexcloud.io/docs/api/#historical-prices
 
     message = update.message.text
     chat_id = update.message.chat_id
@@ -390,9 +392,7 @@ def chart(update: Update, context: CallbackContext):
 
 
 def stat(update: Update, context: CallbackContext):
-    """
-    https://iexcloud.io/docs/api/#key-stats
-    """
+    """returns key statistics on symbol"""
     info(f"Stat command ran by {update.message.chat.username}")
     message = update.message.text
     chat_id = update.message.chat_id
@@ -417,9 +417,7 @@ def stat(update: Update, context: CallbackContext):
 
 
 def cap(update: Update, context: CallbackContext):
-    """
-    Market Cap Information
-    """
+    """returns market cap for symbol"""
     info(f"Cap command ran by {update.message.chat.username}")
     message = update.message.text
     chat_id = update.message.chat_id
@@ -444,9 +442,7 @@ def cap(update: Update, context: CallbackContext):
 
 
 def trending(update: Update, context: CallbackContext):
-    """
-    Trending Symbols
-    """
+    """returns currently trending symbols and how much they've moved in the past trading day."""
     info(f"Trending command ran by {update.message.chat.username}")
 
     chat_id = update.message.chat_id
@@ -462,8 +458,8 @@ def trending(update: Update, context: CallbackContext):
 
 def inline_query(update: Update, context: CallbackContext):
     """
-    Handles inline query.
-    Does a fuzzy search on input and returns stocks that are close.
+    Handles inline query. Searches by looking if query is contained
+        in the symbol and returns matches in alphabetical order.
     """
     info(f"Inline command ran by {update.message.chat.username}")
     info(f"Query: {update.inline_query.query}")
@@ -496,6 +492,7 @@ def inline_query(update: Update, context: CallbackContext):
 
 
 def rand_pick(update: Update, context: CallbackContext):
+    """For the gamblers. Returns a random symbol to buy and a sell date"""
     info(
         f"Someone is gambling! Random_pick command ran by {update.message.chat.username}"
     )
@@ -558,12 +555,16 @@ def main():
     dp.add_handler(CommandHandler("cap", cap))
     dp.add_handler(CommandHandler("trending", trending))
     dp.add_handler(CommandHandler("search", search))
-    dp.add_handler(CommandHandler("intraday", intra))
-    dp.add_handler(CommandHandler("intra", intra, run_async=True))
-    dp.add_handler(CommandHandler("chart", chart, run_async=True))
     dp.add_handler(CommandHandler("random", rand_pick))
     dp.add_handler(CommandHandler("donate", donate))
     dp.add_handler(CommandHandler("status", status))
+
+    # Charting can be slow so they run async.
+    dp.add_handler(CommandHandler("intra", intra, run_async=True))
+    dp.add_handler(CommandHandler("intraday", intra, run_async=True))
+    dp.add_handler(CommandHandler("day", intra, run_async=True))
+    dp.add_handler(CommandHandler("chart", chart, run_async=True))
+    dp.add_handler(CommandHandler("month", chart, run_async=True))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, symbol_detect))
