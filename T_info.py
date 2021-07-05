@@ -20,7 +20,7 @@ Thanks for using this bot, consider supporting it by [buying me a beer.](https:/
 
 Keep up with the latest news for the bot in its Telegram Channel: https://t.me/simplestockbotnews
 
-Full documentation on using and running your own stock bot can be found [on the bots website.](https://simple-stock-bots.gitlab.io/site)
+Full documentation on using and running your own stock bot can be found on the bots [docs.](https://docs.simplestockbot.com)
 
 The bot detects _"Symbols"_ using either one `$` or two `$$` dollar signs before the symbol. One dollar sign is for a stock market ticker, while two is for a cryptocurrency coin. `/chart $$eth` would return a chart of the past month of data for Ethereum, while `/dividend $psec` returns dividend information for Prospect Capital stock.
 
