@@ -1,15 +1,16 @@
 """Class with functions for running the bot with IEX Cloud.
 """
 
+import os
 from datetime import datetime
-from typing import Optional, List, Tuple
+from logging import warning
+from typing import List, Optional, Tuple
 
 import pandas as pd
 import requests as r
 import schedule
 from fuzzywuzzy import fuzz
-import os
-from logging import warning
+
 from Symbol import Stock
 
 

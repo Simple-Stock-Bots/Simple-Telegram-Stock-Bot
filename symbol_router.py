@@ -1,18 +1,17 @@
 """Function that routes symbols to the correct API provider.
 """
 
-import re
-import pandas as pd
-import random
 import datetime
+import random
+import re
+from logging import critical, debug, error, info, warning
+
+import pandas as pd
 from fuzzywuzzy import fuzz
 
-from logging import debug, info, warning, error, critical
-
-from IEX_Symbol import IEX_Symbol
 from cg_Crypto import cg_Crypto
-
-from Symbol import Symbol, Stock, Coin
+from IEX_Symbol import IEX_Symbol
+from Symbol import Coin, Stock, Symbol
 
 
 class Router:

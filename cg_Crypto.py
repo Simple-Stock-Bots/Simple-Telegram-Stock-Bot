@@ -2,13 +2,14 @@
 """
 
 from datetime import datetime
-from typing import Optional, List, Tuple
+from typing import List, Optional, Tuple
 
 import pandas as pd
 import requests as r
 import schedule
 from fuzzywuzzy import fuzz
 from markdownify import markdownify
+
 from Symbol import Coin
 
 

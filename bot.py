@@ -1,17 +1,15 @@
 # Works with Python 3.8
 import datetime
+import html
 import io
+import json
 import logging
 import os
-import html
-import json
 import traceback
-
-from logging import debug, info, warning, error, critical
-
-import mplfinance as mpf
+from logging import critical, debug, error, info, warning
 from uuid import uuid4
 
+import mplfinance as mpf
 import telegram
 from telegram import (
     InlineQueryResultArticle,
@@ -20,13 +18,13 @@ from telegram import (
     Update,
 )
 from telegram.ext import (
+    CallbackContext,
     CommandHandler,
     Filters,
     InlineQueryHandler,
     MessageHandler,
     PreCheckoutQueryHandler,
     Updater,
-    CallbackContext,
 )
 
 from symbol_router import Router
