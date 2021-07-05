@@ -5,6 +5,8 @@ import io
 import json
 import logging
 import os
+import random
+import string
 import traceback
 from logging import critical, debug, error, info, warning
 from uuid import uuid4
@@ -511,6 +513,9 @@ def error(update: Update, context: CallbackContext):
     )
     tb_string = "".join(tb_list)
 
+    err_code = "".join([random.choice(string.ascii_lowercase) for i in range(5)])
+    warning(f"Logging error: {err_code}")
+
     if update:
         message = (
             f"An exception was raised while handling an update\n"
@@ -523,8 +528,10 @@ def error(update: Update, context: CallbackContext):
         warning(message)
     else:
         warning(tb_string)
+
     update.message.reply_text(
-        text="An error has occured. Please inform @MisterBiggs if the error persists."
+        text=f"An error has occured. Please inform @MisterBiggs if the error persists. Error Code: `{err_code}`",
+        parse_mode=telegram.ParseMode.MARKDOWN,
     )
 
     # Finally, send the message
