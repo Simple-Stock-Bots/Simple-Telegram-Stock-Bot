@@ -1,18 +1,17 @@
 """Function that routes symbols to the correct API provider.
 """
 
-import re
-import pandas as pd
-import random
 import datetime
+import random
+import re
+from logging import critical, debug, error, info, warning
+
+import pandas as pd
 from fuzzywuzzy import fuzz
 
-from typing import List, Tuple
-
-from IEX_Symbol import IEX_Symbol
 from cg_Crypto import cg_Crypto
-
-from Symbol import Symbol, Stock, Coin
+from IEX_Symbol import IEX_Symbol
+from Symbol import Coin, Stock, Symbol
 
 
 class Router:
@@ -24,10 +23,9 @@ class Router:
         self.stock = IEX_Symbol()
         self.crypto = cg_Crypto()
 
-    def find_symbols(self, text: str) -> List[Symbol]:
+    def find_symbols(self, text: str) -> list[Symbol]:
         """Finds stock tickers starting with a dollar sign, and cryptocurrencies with two dollar signs
         in a blob of text and returns them in a list.
-        Only returns each match once. Example: Whats the price of $tsla?
 
         Parameters
         ----------
@@ -36,7 +34,7 @@ class Router:
 
         Returns
         -------
-        List[str]
+        list[str]
             List of stock symbols as strings without dollar sign.
         """
         symbols = []
@@ -45,15 +43,15 @@ class Router:
             if stock.upper() in self.stock.symbol_list["symbol"].values:
                 symbols.append(Stock(stock))
             else:
-                print(f"{stock} is not in list of stocks")
+                info(f"{stock} is not in list of stocks")
 
         coins = set(re.findall(self.CRYPTO_REGEX, text))
         for coin in coins:
             if coin.lower() in self.crypto.symbol_list["symbol"].values:
                 symbols.append(Coin(coin.lower()))
             else:
-                print(f"{coin} is not in list of coins")
-        print(symbols)
+                info(f"{coin} is not in list of coins")
+        info(symbols)
         return symbols
 
     def status(self, bot_resp) -> str:
@@ -65,7 +63,7 @@ class Router:
             Human readable text on status of the bot and relevant APIs
         """
 
-        return f"""
+        stats = f"""
         Bot Status:
         {bot_resp}
 
@@ -76,7 +74,11 @@ class Router:
         {self.crypto.status()}
         """
 
-    def search_symbols(self, search: str) -> List[Tuple[str, str]]:
+        warning(stats)
+
+        return stats
+
+    def search_symbols(self, search: str) -> list[tuple[str, str]]:
         """Performs a fuzzy search to find stock symbols closest to a search term.
 
         Parameters
@@ -86,8 +88,9 @@ class Router:
 
         Returns
         -------
-        List[tuple[str, str]]
-            A list tuples of every stock sorted in order of how well they match. Each tuple contains: (Symbol, Issue Name).
+        list[tuple[str, str]]
+            A list tuples of every stock sorted in order of how well they match.
+                Each tuple contains: (Symbol, Issue Name).
         """
 
         df = pd.concat([self.stock.symbol_list, self.crypto.symbol_list])
@@ -113,7 +116,7 @@ class Router:
         self.searched_symbols[search] = symbol_list
         return symbol_list
 
-    def inline_search(self, search: str) -> List[Tuple[str, str]]:
+    def inline_search(self, search: str) -> list[tuple[str, str]]:
         """Searches based on the shortest symbol that contains the same string as the search.
         Should be very fast compared to a fuzzy search.
 
@@ -124,7 +127,7 @@ class Router:
 
         Returns
         -------
-        List[tuple[str, str]]
+        list[tuple[str, str]]
             Each tuple contains: (Symbol, Issue Name).
         """
 
@@ -141,7 +144,7 @@ class Router:
         self.searched_symbols[search] = symbol_list
         return symbol_list
 
-    def price_reply(self, symbols: list[Symbol]) -> List[str]:
+    def price_reply(self, symbols: list[Symbol]) -> list[str]:
         """Returns current market price or after hours if its available for a given stock symbol.
 
         Parameters
@@ -158,17 +161,17 @@ class Router:
         replies = []
 
         for symbol in symbols:
-            print(symbol)
+            info(symbol)
             if isinstance(symbol, Stock):
                 replies.append(self.stock.price_reply(symbol))
             elif isinstance(symbol, Coin):
                 replies.append(self.crypto.price_reply(symbol))
             else:
-                print(f"{symbol} is not a Stock or Coin")
+                info(f"{symbol} is not a Stock or Coin")
 
         return replies
 
-    def dividend_reply(self, symbols: list) -> List[str]:
+    def dividend_reply(self, symbols: list) -> list[str]:
         """Returns the most recent, or next dividend date for a stock symbol.
 
         Parameters
@@ -179,7 +182,8 @@ class Router:
         Returns
         -------
         Dict[str, str]
-            Each symbol passed in is a key with its value being a human readable formatted string of the symbols div dates.
+            Each symbol passed in is a key with its value being a human readable
+                formatted string of the symbols div dates.
         """
         replies = []
         for symbol in symbols:
@@ -192,7 +196,7 @@ class Router:
 
         return replies
 
-    def news_reply(self, symbols: list) -> List[str]:
+    def news_reply(self, symbols: list) -> list[str]:
         """Gets recent english news on stock symbols.
 
         Parameters
@@ -203,7 +207,8 @@ class Router:
         Returns
         -------
         Dict[str, str]
-            Each symbol passed in is a key with its value being a human readable markdown formatted string of the symbols news.
+            Each symbol passed in is a key with its value being a human
+                readable markdown formatted string of the symbols news.
         """
         replies = []
 
@@ -220,18 +225,19 @@ class Router:
 
         return replies
 
-    def info_reply(self, symbols: list) -> List[str]:
+    def info_reply(self, symbols: list) -> list[str]:
         """Gets information on stock symbols.
 
         Parameters
         ----------
-        symbols : List[str]
+        symbols : list[str]
             List of stock symbols.
 
         Returns
         -------
         Dict[str, str]
-            Each symbol passed in is a key with its value being a human readable formatted string of the symbols information.
+            Each symbol passed in is a key with its value being a human readable formatted
+                string of the symbols information.
         """
         replies = []
 
@@ -256,7 +262,8 @@ class Router:
         Returns
         -------
         pd.DataFrame
-            Returns a timeseries dataframe with high, low, and volume data if its available. Otherwise returns empty pd.DataFrame.
+            Returns a timeseries dataframe with high, low, and volume data if its available.
+                Otherwise returns empty pd.DataFrame.
         """
 
         if isinstance(symbol, Stock):
@@ -279,7 +286,8 @@ class Router:
         Returns
         -------
         pd.DataFrame
-            Returns a timeseries dataframe with high, low, and volume data if its available. Otherwise returns empty pd.DataFrame.
+            Returns a timeseries dataframe with high, low, and volume data if its available.
+                Otherwise returns empty pd.DataFrame.
         """
         if isinstance(symbol, Stock):
             return self.stock.chart_reply(symbol)
@@ -289,18 +297,19 @@ class Router:
             print(f"{symbol} is not a Stock or Coin")
             return pd.DataFrame()
 
-    def stat_reply(self, symbols: List[Symbol]) -> List[str]:
+    def stat_reply(self, symbols: list[Symbol]) -> list[str]:
         """Gets key statistics for each symbol in the list
 
         Parameters
         ----------
-        symbols : List[str]
+        symbols : list[str]
             List of stock symbols
 
         Returns
         -------
         Dict[str, str]
-            Each symbol passed in is a key with its value being a human readable formatted string of the symbols statistics.
+            Each symbol passed in is a key with its value being a human readable
+                formatted string of the symbols statistics.
         """
         replies = []
 
@@ -309,6 +318,32 @@ class Router:
                 replies.append(self.stock.stat_reply(symbol))
             elif isinstance(symbol, Coin):
                 replies.append(self.crypto.stat_reply(symbol))
+            else:
+                print(f"{symbol} is not a Stock or Coin")
+
+        return replies
+
+    def cap_reply(self, symbols: list[Symbol]) -> list[str]:
+        """Gets market cap for each symbol in the list
+
+        Parameters
+        ----------
+        symbols : list[str]
+            List of stock symbols
+
+        Returns
+        -------
+        Dict[str, str]
+            Each symbol passed in is a key with its value being a human readable
+                formatted string of the symbols market cap.
+        """
+        replies = []
+
+        for symbol in symbols:
+            if isinstance(symbol, Stock):
+                replies.append(self.stock.cap_reply(symbol))
+            elif isinstance(symbol, Coin):
+                replies.append(self.crypto.cap_reply(symbol))
             else:
                 print(f"{symbol} is not a Stock or Coin")
 
@@ -326,7 +361,7 @@ class Router:
         stocks = self.stock.trending()
         coins = self.crypto.trending()
 
-        reply = "`Trending Stocks:\n"
+        reply = "Trending Stocks:\n"
         reply += "-" * len("Trending Stocks:") + "\n"
         for stock in stocks:
             reply += stock + "\n"
@@ -336,7 +371,7 @@ class Router:
         for coin in coins:
             reply += coin + "\n"
 
-        return reply + "`"
+        return reply
 
     def random_pick(self) -> str:
 
@@ -350,7 +385,7 @@ class Router:
 
         return f"{choice}\nBuy and hold until: {hold}"
 
-    def batch_price_reply(self, symbols: list[Symbol]) -> List[str]:
+    def batch_price_reply(self, symbols: list[Symbol]) -> list[str]:
         """Returns current market price or after hours if its available for a given stock symbol.
 
         Parameters

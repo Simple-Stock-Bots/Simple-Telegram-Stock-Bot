@@ -2,13 +2,14 @@
 """
 
 from datetime import datetime
-from typing import Optional, List, Tuple
+from typing import List, Optional, Tuple
 
 import pandas as pd
 import requests as r
 import schedule
 from fuzzywuzzy import fuzz
 from markdownify import markdownify
+
 from Symbol import Coin
 
 
@@ -117,7 +118,7 @@ class cg_Crypto:
         self.searched_symbols[search] = symbol_list
         return symbol_list
 
-    def price_reply(self, symbol: Coin) -> str:
+    def price_reply(self, coin: Coin) -> str:
         """Returns current market price or after hours if its available for a given coin symbol.
 
         Parameters
@@ -133,22 +134,22 @@ class cg_Crypto:
         """
 
         response = r.get(
-            f"https://api.coingecko.com/api/v3/coins/{symbol.id}?localization=false",
+            f"https://api.coingecko.com/api/v3/simple/price?ids={coin.id}&vs_currencies={self.vs_currency}&include_24hr_change=true",
             timeout=5,
         )
         if response.status_code == 200:
-            data = response.json()
 
             try:
-                name = data["name"]
-                price = data["market_data"]["current_price"][self.vs_currency]
-                change = data["market_data"]["price_change_percentage_24h"]
+                data = response.json()[coin.id]
+
+                price = data[self.vs_currency]
+                change = data[self.vs_currency + "_24h_change"]
                 if change is None:
                     change = 0
             except KeyError:
-                return f"{symbol} returned an error."
+                return f"{coin.id} returned an error."
 
-            message = f"The current price of {name} is $**{price:,}**"
+            message = f"The current price of {coin.name} is $**{price:,}**"
 
             # Determine wording of change text
             if change > 0:
@@ -159,7 +160,7 @@ class cg_Crypto:
                 message += ", the coin hasn't shown any movement today."
 
         else:
-            message = f"The Coin: {symbol.name} was not found."
+            message = f"The Coin: {coin.name} was not found."
 
         return message
 
@@ -220,18 +221,18 @@ class cg_Crypto:
         return pd.DataFrame()
 
     def stat_reply(self, symbol: Coin) -> str:
-        """Gets key statistics for each symbol in the list
+        """Gathers key statistics on coin. Mostly just CoinGecko scores.
 
         Parameters
         ----------
-        symbols : List[str]
-            List of coin symbols
+        symbol : Coin
 
         Returns
         -------
-        Dict[str, str]
-            Each symbol passed in is a key with its value being a human readable formatted string of the symbols statistics.
+        str
+            Preformatted markdown.
         """
+
         response = r.get(
             f"https://api.coingecko.com/api/v3/coins/{symbol.id}?localization=false",
             timeout=5,
@@ -252,18 +253,53 @@ class cg_Crypto:
         else:
             return f"{symbol.symbol} returned an error."
 
-    def info_reply(self, symbol: Coin) -> str:
-        """Gets information on stock symbols.
+    def cap_reply(self, coin: Coin) -> str:
+        """Gets market cap for Coin
 
         Parameters
         ----------
-        symbols : List[str]
-            List of stock symbols.
+        coin : Coin
 
         Returns
         -------
-        Dict[str, str]
-            Each symbol passed in is a key with its value being a human readable formatted string of the symbols information.
+        str
+            Preformatted markdown.
+        """
+        response = r.get(
+            f"https://api.coingecko.com/api/v3/simple/price?ids={coin.id}&vs_currencies={self.vs_currency}&include_market_cap=true",
+            timeout=5,
+        )
+        if response.status_code == 200:
+
+            try:
+                data = response.json()[coin.id]
+
+                price = data[self.vs_currency]
+                cap = data[self.vs_currency + "_market_cap"]
+            except KeyError:
+                return f"{coin.id} returned an error."
+
+            if cap == 0:
+                return f"The market cap for {coin.name} is not available for unknown reasons."
+
+            message = f"The current price of {coin.name} is $**{price:,}** and its market cap is $**{cap:,.2f}** {self.vs_currency.upper()}"
+
+        else:
+            message = f"The Coin: {coin.name} was not found or returned and error."
+
+        return message
+
+    def info_reply(self, symbol: Coin) -> str:
+        """Gets coin description
+
+        Parameters
+        ----------
+        symbol : Coin
+
+        Returns
+        -------
+        str
+            Preformatted markdown.
         """
 
         response = r.get(
@@ -285,17 +321,47 @@ class cg_Crypto:
         Returns
         -------
         list[str]
-            list of $$ID: NAME
+            list of $$ID: NAME, CHANGE%
         """
 
         coins = r.get(
             "https://api.coingecko.com/api/v3/search/trending",
             timeout=5,
-        ).json()["coins"]
+        )
+        try:
+            trending = []
+            if coins.status_code == 200:
+                for coin in coins.json()["coins"]:
+                    c = coin["item"]
 
-        return [f"$${c['item']['symbol'].upper()}: {c['item']['name']}" for c in coins]
+                    sym = c["symbol"].upper()
+                    name = c["name"]
+                    change = r.get(
+                        f"https://api.coingecko.com/api/v3/simple/price?ids={c['id']}&vs_currencies={self.vs_currency}&include_24hr_change=true"
+                    ).json()[c["id"]]["usd_24h_change"]
+
+                    msg = f"`$${sym}`: {name}, {change:.2f}%"
+
+                    trending.append(msg)
+
+        except Exception as e:
+            print(e)
+            trending = ["Trending Coins Currently Unavailable."]
+
+        return trending
 
     def batch_price(self, coins: list[Coin]) -> list[str]:
+        """Gets price of a list of coins all in one API call
+
+        Parameters
+        ----------
+        coins : list[Coin]
+
+        Returns
+        -------
+        list[str]
+            returns preformatted list of strings detailing price movement of each coin passed in.
+        """
         query = ",".join([c.id for c in coins])
 
         prices = r.get(

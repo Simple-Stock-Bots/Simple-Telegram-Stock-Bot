@@ -1,14 +1,15 @@
 """Class with functions for running the bot with IEX Cloud.
 """
 
+import os
 from datetime import datetime
-from typing import Optional, List, Tuple
+from logging import warning
+from typing import List, Optional, Tuple
 
 import pandas as pd
 import requests as r
 import schedule
 from fuzzywuzzy import fuzz
-import os
 
 from Symbol import Stock
 
@@ -30,13 +31,13 @@ class IEX_Symbol:
         Parameters
         ----------
         IEX_TOKEN : str
-            IEX Token
+            IEX API Token
         """
         try:
             self.IEX_TOKEN = os.environ["IEX"]
         except KeyError:
             self.IEX_TOKEN = ""
-            print(
+            warning(
                 "Starting without an IEX Token will not allow you to get market data!"
             )
 
@@ -47,12 +48,28 @@ class IEX_Symbol:
             schedule.every().day.do(self.clear_charts)
 
     def clear_charts(self) -> None:
-        """Clears cache of chart data."""
+        """
+        Clears cache of chart data.
+        Charts are cached so that only 1 API call per 24 hours is needed since the
+            chart data is expensive and a large download.
+        """
         self.charts = {}
 
     def get_symbol_list(
         self, return_df=False
     ) -> Optional[Tuple[pd.DataFrame, datetime]]:
+        """Gets list of all symbols supported by IEX
+
+        Parameters
+        ----------
+        return_df : bool, optional
+            return the dataframe of all stock symbols, by default False
+
+        Returns
+        -------
+        Optional[Tuple[pd.DataFrame, datetime]]
+            If `return_df` is set to `True` returns a dataframe, otherwise returns `None`.
+        """
 
         reg_symbols = r.get(
             f"https://cloud.iexapis.com/stable/ref-data/symbols?token={self.IEX_TOKEN}",
@@ -145,18 +162,16 @@ class IEX_Symbol:
         return symbol_list
 
     def price_reply(self, symbol: Stock) -> str:
-        """Returns current market price or after hours if its available for a given stock symbol.
+        """Returns price movement of Stock for the last market day, or after hours.
 
         Parameters
         ----------
-        symbols : list
-            List of stock symbols.
+        symbol : Stock
 
         Returns
         -------
-        Dict[str, str]
-            Each symbol passed in is a key with its value being a human readable
-            markdown formatted string of the symbols price and movement.
+        str
+            Formatted markdown
         """
 
         IEXurl = f"https://cloud.iexapis.com/stable/stock/{symbol.id}/quote?token={self.IEX_TOKEN}"
@@ -223,13 +238,12 @@ class IEX_Symbol:
 
         Parameters
         ----------
-        symbols : list
-            List of stock symbols.
+        symbol : Stock
 
         Returns
         -------
-        Dict[str, str]
-            Each symbol passed in is a key with its value being a human readable formatted string of the symbols div dates.
+        str
+            Formatted markdown
         """
         if symbol.symbol.upper() in self.otc_list:
             return "OTC stocks do not currently support any commands."
@@ -284,17 +298,16 @@ class IEX_Symbol:
         return f"${symbol.id.upper()} either doesn't exist or pays no dividend."
 
     def news_reply(self, symbol: Stock) -> str:
-        """Gets recent english news on stock symbols.
+        """Gets most recent, english, non-paywalled news
 
         Parameters
         ----------
-        symbols : list
-            List of stock symbols.
+        symbol : Stock
 
         Returns
         -------
-        Dict[str, str]
-            Each symbol passed in is a key with its value being a human readable markdown formatted string of the symbols news.
+        str
+            Formatted markdown
         """
         if symbol.symbol.upper() in self.otc_list:
             return "OTC stocks do not currently support any commands."
@@ -323,17 +336,16 @@ class IEX_Symbol:
         return f"News for **{symbol.id.upper()}**:\n" + "\n".join(line[:5])
 
     def info_reply(self, symbol: Stock) -> str:
-        """Gets information on stock symbols.
+        """Gets description for Stock
 
         Parameters
         ----------
-        symbols : List[str]
-            List of stock symbols.
+        symbol : Stock
 
         Returns
         -------
-        Dict[str, str]
-            Each symbol passed in is a key with its value being a human readable formatted string of the symbols information.
+        str
+            Formatted text
         """
         if symbol.symbol.upper() in self.otc_list:
             return "OTC stocks do not currently support any commands."
@@ -354,17 +366,16 @@ class IEX_Symbol:
         return f"No information found for: {symbol}\nEither today is boring or the symbol does not exist."
 
     def stat_reply(self, symbol: Stock) -> str:
-        """Gets key statistics for each symbol in the list
+        """Key statistics on a Stock
 
         Parameters
         ----------
-        symbols : List[str]
-            List of stock symbols
+        symbol : Stock
 
         Returns
         -------
-        Dict[str, str]
-            Each symbol passed in is a key with its value being a human readable formatted string of the symbols statistics.
+        str
+            Formatted markdown
         """
         if symbol.symbol.upper() in self.otc_list:
             return "OTC stocks do not currently support any commands."
@@ -399,6 +410,28 @@ class IEX_Symbol:
             return m
         else:
             return f"No information found for: {symbol}\nEither today is boring or the symbol does not exist."
+
+    def cap_reply(self, stock: Stock) -> str:
+        """Get the Market Cap of a stock"""
+        response = r.get(
+            f"https://cloud.iexapis.com/stable/stock/{stock.id}/stats?token={self.IEX_TOKEN}",
+            timeout=5,
+        )
+        if response.status_code == 200:
+
+            try:
+                data = response.json()
+
+                cap = data["marketcap"]
+            except KeyError:
+                return f"{stock.id} returned an error."
+
+            message = f"The current market cap of {stock.name} is $**{cap:,.2f}**"
+
+        else:
+            message = f"The Coin: {stock.name} was not found or returned and error."
+
+        return message
 
     def intra_reply(self, symbol: Stock) -> pd.DataFrame:
         """Returns price data for a symbol since the last market open.
@@ -476,17 +509,22 @@ class IEX_Symbol:
         return pd.DataFrame()
 
     def trending(self) -> list[str]:
-        """Gets current coins trending on coingecko
+        """Gets current coins trending on IEX. Only returns when market is open.
 
         Returns
         -------
         list[str]
-            list of $$ID: NAME
+            list of $ID: NAME, CHANGE%
         """
 
         stocks = r.get(
             f"https://cloud.iexapis.com/stable/stock/market/list/mostactive?token={self.IEX_TOKEN}",
             timeout=5,
-        ).json()
-
-        return [f"${s['symbol']}: {s['companyName']}" for s in stocks]
+        )
+        if stocks.status_code == 200:
+            return [
+                f"`${s['symbol']}`: {s['companyName']}, {s['changePercent']:.2f}%"
+                for s in stocks.json()
+            ]
+        else:
+            return ["Trending Stocks Currently Unavailable."]

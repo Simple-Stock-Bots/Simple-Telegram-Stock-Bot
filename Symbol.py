@@ -1,4 +1,5 @@
 import functools
+
 import requests as r
 
 
@@ -25,6 +26,8 @@ class Symbol:
 
 
 class Stock(Symbol):
+    """Stock Market Object. Gets data from IEX Cloud"""
+
     def __init__(self, symbol: str) -> None:
         self.symbol = symbol
         self.id = symbol
@@ -36,6 +39,8 @@ coins = r.get("https://api.coingecko.com/api/v3/coins/list").json()
 
 
 class Coin(Symbol):
+    """Cryptocurrency Object. Gets data from CoinGecko."""
+
     @functools.cache
     def __init__(self, symbol: str) -> None:
         self.symbol = symbol
