@@ -34,6 +34,7 @@ Simply calling a symbol in any message that the bot can see will also return the
         - `/news $[symbol]` News about the symbol. 📰
         - `/info $[symbol]` General information about the symbol. ℹ️
         - `/stat $[symbol]` Key statistics about the symbol. 🔢
+        - `/cap $[symbol]` Market Capitalization of symbol. 💰
         - `/trending` Trending Stocks and Cryptos. 💬
         - `/help` Get some help using the bot. 🆘
 
@@ -42,7 +43,7 @@ Simply calling a symbol in any message that the bot can see will also return the
     
     Market data is provided by [IEX Cloud](https://iexcloud.io)
 
-    If you believe the bot is not behaving properly run `/status`.
+    If you believe the bot is not behaving properly run `/status` or [get in touch](https://docs.simplestockbot.com/contact).
     """
 
     donate_text = """
@@ -55,9 +56,8 @@ The easiest way to donate is to run the `/donate [amount in USD]` command with U
 Example: `/donate 2` would donate 2 USD.
 
 An alternative way to donate is through https://www.buymeacoffee.com/Anson which requires no account and accepts Paypal or Credit card.
-If you have any questions get in touch: @MisterBiggs or [anson@ansonbiggs.com](http://mailto:anson@ansonbiggs.com/)
+If you have any questions see the [website](https:docs.simplestockbot.com)
 
-_Donations can only be made in a chat directly with @simplestockbot_
     """
 
 
@@ -67,6 +67,7 @@ help - Get some help using the bot. 🆘
 info - $[symbol] General information about the symbol. ℹ️
 news - $[symbol] News about the symbol. 📰
 stat - $[symbol] Key statistics about the symbol. 🔢
+cap - $[symbol] Market Capitalization of symbol. 💰
 dividend - $[symbol] Dividend info 📅
 trending - Trending Stocks and Cryptos. 💬
 intra - $[symbol] Plot since the last market open. 📈

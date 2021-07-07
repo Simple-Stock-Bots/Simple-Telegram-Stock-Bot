@@ -128,7 +128,7 @@ def donate(update: Update, context: CallbackContext):
         prices=[LabeledPrice("Donation:", price)],
         start_parameter="",
         # suggested_tip_amounts=[100, 500, 1000, 2000],
-        photo_url="https://simple-stock-bots.gitlab.io/site/img/Telegram.png",
+        photo_url="https://simple-stock-bots.gitlab.io/docs/img/Telegram.png",
         photo_width=500,
         photo_height=500,
     )
