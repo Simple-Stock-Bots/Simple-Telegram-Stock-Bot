@@ -523,7 +523,7 @@ class IEX_Symbol:
         )
         if stocks.status_code == 200:
             return [
-                f"`${s['symbol']}`: {s['companyName']}, {s['changePercent']:.2f}%"
+                f"`${s['symbol']}`: {s['companyName']}, {100*s['changePercent']:.2f}%"
                 for s in stocks.json()
             ]
         else:
