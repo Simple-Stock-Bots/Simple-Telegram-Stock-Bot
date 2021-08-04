@@ -196,19 +196,20 @@ class IEX_Symbol:
 
             if set(keys).issubset(IEXData):
 
+                if change := IEXData.get("changePercent", 0):
+                    change = round(change * 100, 2)
+                else:
+                    change = 0
+
                 if (
                     IEXData.get("isUSMarketOpen", True)
                     or (IEXData["extendedChangePercent"] is None)
                     or (IEXData["extendedPrice"] is None)
                 ):  # Check if market is open.
                     message = f"The current stock price of {IEXData['companyName']} is $**{IEXData['latestPrice']}**"
-                    if change := IEXData.get("changePercent", 0):
-                        change = round(change * 100, 2)
-                    else:
-                        change = 0
                 else:
                     message = (
-                        f"{IEXData['companyName']} closed at $**{IEXData['latestPrice']}**,"
+                        f"{IEXData['companyName']} closed at $**{IEXData['latestPrice']}**, with a change of {change}"
                         + f" after hours _(15 minutes delayed)_ the stock price is $**{IEXData['extendedPrice']}**"
                     )
                     if change := IEXData.get("extendedChangePercent", 0):
