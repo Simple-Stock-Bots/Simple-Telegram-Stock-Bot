@@ -209,7 +209,7 @@ class IEX_Symbol:
                     message = f"The current stock price of {IEXData['companyName']} is $**{IEXData['latestPrice']}**"
                 else:
                     message = (
-                        f"{IEXData['companyName']} closed at $**{IEXData['latestPrice']}**, with a change of {change}"
+                        f"{IEXData['companyName']} closed at $**{IEXData['latestPrice']}** with a change of {change}%,"
                         + f" after hours _(15 minutes delayed)_ the stock price is $**{IEXData['extendedPrice']}**"
                     )
                     if change := IEXData.get("extendedChangePercent", 0):
