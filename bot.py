@@ -101,7 +101,7 @@ def donate(update: Update, context: CallbackContext):
     info(f"Donate command ran by {update.message.chat.username}")
     chat_id = update.message.chat_id
 
-    if update.message.text.strip() == "/donate":
+    if update.message.text.strip() == "/donate" or "/donate@" in update.message.text:
         update.message.reply_text(
             text=t.donate_text,
             parse_mode=telegram.ParseMode.MARKDOWN,

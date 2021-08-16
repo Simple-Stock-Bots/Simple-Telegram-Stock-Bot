@@ -1,6 +1,7 @@
 """Class with functions for running the bot with IEX Cloud.
 """
 
+import logging
 from datetime import datetime
 from typing import List, Optional, Tuple
 
@@ -33,6 +34,25 @@ class cg_Crypto:
         self.get_symbol_list()
         schedule.every().day.do(self.get_symbol_list)
 
+    def get(self, endpoint, params: dict = {}, timeout=10) -> dict:
+
+        url = "https://api.coingecko.com/api/v3" + endpoint
+        resp = r.get(url, params=params, timeout=timeout)
+        # Make sure API returned a proper status code
+        try:
+            resp.raise_for_status()
+        except r.exceptions.HTTPError as e:
+            logging.error(e)
+            return {}
+
+        # Make sure API returned valid JSON
+        try:
+            resp_json = resp.json()
+            return resp_json
+        except r.exceptions.JSONDecodeError as e:
+            logging.error(e)
+            return {}
+
     def symbol_id(self, symbol) -> str:
         try:
             return self.symbol_list[self.symbol_list["symbol"] == symbol]["id"].values[
@@ -45,10 +65,7 @@ class cg_Crypto:
         self, return_df=False
     ) -> Optional[Tuple[pd.DataFrame, datetime]]:
 
-        raw_symbols = r.get(
-            "https://api.coingecko.com/api/v3/coins/list",
-            timeout=5,
-        ).json()
+        raw_symbols = self.get("/coins/list")
         symbols = pd.DataFrame(data=raw_symbols)
 
         symbols["description"] = (
@@ -69,15 +86,16 @@ class cg_Crypto:
         str
             Human readable text on status of CoinGecko API
         """
-        status = r.get(
-            "https://api.coingecko.com/api/v3/ping",
+        status = self.get(
+            "/ping",
             timeout=5,
         )
 
-        if status.status_code == 200:
-            return f"CoinGecko API responded that it was OK in {status.elapsed.total_seconds()} Seconds."
-        else:
-            return f"CoinGecko API returned an error in {status.elapsed.total_seconds()} Seconds."
+        try:
+            status.raise_for_status()
+            return f"CoinGecko API responded that it was OK with a {status.status_code} in {status.elapsed.total_seconds()} Seconds."
+        except:
+            return f"CoinGecko API returned an error code {status.status_code} in {status.elapsed.total_seconds()} Seconds."
 
     def search_symbols(self, search: str) -> List[Tuple[str, str]]:
         """Performs a fuzzy search to find coin symbols closest to a search term.
@@ -133,14 +151,16 @@ class cg_Crypto:
             markdown formatted string of the symbols price and movement.
         """
 
-        response = r.get(
-            f"https://api.coingecko.com/api/v3/simple/price?ids={coin.id}&vs_currencies={self.vs_currency}&include_24hr_change=true",
-            timeout=5,
-        )
-        if response.status_code == 200:
-
+        if resp := self.get(
+            "/simple/price",
+            params={
+                "ids": coin.id,
+                "vs_currencies": self.vs_currency,
+                "include_24hr_change": "true",
+            },
+        ):
             try:
-                data = response.json()[coin.id]
+                data = resp[coin.id]
 
                 price = data[self.vs_currency]
                 change = data[self.vs_currency + "_24h_change"]
@@ -160,7 +180,7 @@ class cg_Crypto:
                 message += ", the coin hasn't shown any movement today."
 
         else:
-            message = f"The Coin: {coin.name} was not found."
+            message = f"The price for {coin.name} is not available. If you suspect this is an error run `/status`"
 
         return message
 
@@ -177,13 +197,13 @@ class cg_Crypto:
         pd.DataFrame
             Returns a timeseries dataframe with high, low, and volume data if its available. Otherwise returns empty pd.DataFrame.
         """
-        response = r.get(
-            f"https://api.coingecko.com/api/v3/coins/{symbol.id}/ohlc?vs_currency=usd&days=1",
-            timeout=5,
-        )
-        if response.status_code == 200:
+
+        if resp := self.get(
+            f"/coins/{symbol.id}/ohlc",
+            params={"vs_currency": self.vs_currency, "days": 1},
+        ):
             df = pd.DataFrame(
-                response.json(), columns=["Date", "Open", "High", "Low", "Close"]
+                resp, columns=["Date", "Open", "High", "Low", "Close"]
             ).dropna()
             df["Date"] = pd.to_datetime(df["Date"], unit="ms")
             df = df.set_index("Date")
@@ -205,14 +225,13 @@ class cg_Crypto:
         pd.DataFrame
             Returns a timeseries dataframe with high, low, and volume data if its available. Otherwise returns empty pd.DataFrame.
         """
-        response = r.get(
-            f"https://api.coingecko.com/api/v3/coins/{symbol.id}/ohlc?vs_currency=usd&days=30",
-            timeout=5,
-        )
 
-        if response.status_code == 200:
+        if resp := self.get(
+            f"/coins/{symbol.id}/ohlc",
+            params={"vs_currency": self.vs_currency, "days": 30},
+        ):
             df = pd.DataFrame(
-                response.json(), columns=["Date", "Open", "High", "Low", "Close"]
+                resp, columns=["Date", "Open", "High", "Low", "Close"]
             ).dropna()
             df["Date"] = pd.to_datetime(df["Date"], unit="ms")
             df = df.set_index("Date")
@@ -233,12 +252,12 @@ class cg_Crypto:
             Preformatted markdown.
         """
 
-        response = r.get(
-            f"https://api.coingecko.com/api/v3/coins/{symbol.id}?localization=false",
-            timeout=5,
-        )
-        if response.status_code == 200:
-            data = response.json()
+        if data := self.get(
+            f"/coins/{symbol.id}",
+            params={
+                "localization": "false",
+            },
+        ):
 
             return f"""
                 [{data['name']}]({data['links']['homepage'][0]}) Statistics:
@@ -265,14 +284,18 @@ class cg_Crypto:
         str
             Preformatted markdown.
         """
-        response = r.get(
-            f"https://api.coingecko.com/api/v3/simple/price?ids={coin.id}&vs_currencies={self.vs_currency}&include_market_cap=true",
-            timeout=5,
-        )
-        if response.status_code == 200:
 
+        if resp := self.get(
+            f"/simple/price",
+            params={
+                "ids": coin.id,
+                "vs_currencies": self.vs_currency,
+                "include_market_cap": "true",
+            },
+        ):
+            print(resp)
             try:
-                data = response.json()[coin.id]
+                data = resp[coin.id]
 
                 price = data[self.vs_currency]
                 cap = data[self.vs_currency + "_market_cap"]
@@ -302,12 +325,10 @@ class cg_Crypto:
             Preformatted markdown.
         """
 
-        response = r.get(
-            f"https://api.coingecko.com/api/v3/coins/{symbol.id}?localization=false",
-            timeout=5,
-        )
-        if response.status_code == 200:
-            data = response.json()
+        if data := self.get(
+            f"/coins/{symbol.id}",
+            params={"localization": "false"},
+        ):
             try:
                 return markdownify(data["description"]["en"])
             except KeyError:
@@ -324,28 +345,29 @@ class cg_Crypto:
             list of $$ID: NAME, CHANGE%
         """
 
-        coins = r.get(
-            "https://api.coingecko.com/api/v3/search/trending",
-            timeout=5,
-        )
+        coins = self.get("/search/trending")
         try:
             trending = []
-            if coins.status_code == 200:
-                for coin in coins.json()["coins"]:
-                    c = coin["item"]
+            for coin in coins["coins"]:
+                c = coin["item"]
 
-                    sym = c["symbol"].upper()
-                    name = c["name"]
-                    change = r.get(
-                        f"https://api.coingecko.com/api/v3/simple/price?ids={c['id']}&vs_currencies={self.vs_currency}&include_24hr_change=true"
-                    ).json()[c["id"]]["usd_24h_change"]
+                sym = c["symbol"].upper()
+                name = c["name"]
+                change = self.get(
+                    f"/simple/price",
+                    params={
+                        "ids": c["id"],
+                        "vs_currencies": self.vs_currency,
+                        "include_24hr_change": "true",
+                    },
+                )[c["id"]]["usd_24h_change"]
 
-                    msg = f"`$${sym}`: {name}, {change:.2f}%"
+                msg = f"`$${sym}`: {name}, {change:.2f}%"
 
-                    trending.append(msg)
+                trending.append(msg)
 
         except Exception as e:
-            print(e)
+            logging.warning(e)
             trending = ["Trending Coins Currently Unavailable."]
 
         return trending
@@ -364,10 +386,14 @@ class cg_Crypto:
         """
         query = ",".join([c.id for c in coins])
 
-        prices = r.get(
-            f"https://api.coingecko.com/api/v3/simple/price?ids={query}&vs_currencies=usd&include_24hr_change=true",
-            timeout=5,
-        ).json()
+        prices = self.get(
+            f"/simple/price",
+            params={
+                "ids": query,
+                "vs_currencies": self.vs_currency,
+                "include_24hr_change": "true",
+            },
+        )
 
         replies = []
         for coin in coins:
