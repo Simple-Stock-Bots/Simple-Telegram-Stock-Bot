@@ -1,0 +1,20 @@
+{
+    "workbench.iconTheme": "vscode-icons",
+    "editor.suggestSelection": "first",
+    "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+    "python.languageServer": "Pylance",
+    "git.autofetch": true,
+    "editor.formatOnSave": true,
+    "files.associations": {
+        "DockerDev": "dockerfile",
+    },
+    "workbench.colorTheme": "One Dark Pro",
+    "explorer.confirmDelete": false,
+    "editor.fontFamily": "JetBrains Mono",
+    "editor.letterSpacing": 1.2,
+    "editor.fontLigatures": true,
+    "editor.wordWrap": "on",
+    "python.formatting.provider": "black",
+    "python.showStartPage": false,
+    "editor.fontSize": 13,
+}
