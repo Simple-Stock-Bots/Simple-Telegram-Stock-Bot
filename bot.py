@@ -161,11 +161,13 @@ def symbol_detect(update: Update, context: CallbackContext):
     Runs on any message that doesn't have a command and searches for symbols,
         then returns the prices of any symbols found.
     """
-
-    message = update.message.text
-    chat_id = update.message.chat_id
-    symbols = s.find_symbols(message)
-
+    try:
+        message = update.message.text
+        chat_id = update.message.chat_id
+        symbols = s.find_symbols(message)
+    except AttributeError as ex:
+        info(ex)
+        return
     if symbols:
         # Let user know bot is working
         context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
