@@ -86,8 +86,8 @@ class cg_Crypto:
         str
             Human readable text on status of CoinGecko API
         """
-        status = self.get(
-            "/ping",
+        status = r.get(
+            "https://api.coingecko.com/api/v3/ping",
             timeout=5,
         )
 
