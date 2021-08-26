@@ -212,7 +212,9 @@ def news(update: Update, context: CallbackContext):
     message = update.message.text
     chat_id = update.message.chat_id
 
-    update.message.reply_text("The bot is currently running on a free plan which does not include news information. Please see the `/donate` command to see ways that you can help.")
+    update.message.reply_text(
+        "The bot is currently running on a free plan which does not include news information. Please see https://t.me/simplestockbotnews/19"
+    )
 
     if message.strip().split("@")[0] == "/news":
         update.message.reply_text(
@@ -544,7 +546,7 @@ def error(update: Update, context: CallbackContext):
         warning(tb_string)
 
     update.message.reply_text(
-        text=f"An error has occured. Please inform @MisterBiggs if the error persists. Error Code: `{err_code}`\nThe bot is currently running on a free plan for stock market data so not all information is currently available. Please see `/donate` if you would like to help.",
+        text=f"An error has occured. Please inform @MisterBiggs if the error persists. Error Code: `{err_code}`\nThe bot is currently running on a free plan for stock market data so not all information is currently available. Please see https://t.me/simplestockbotnews/19",
         parse_mode=telegram.ParseMode.MARKDOWN,
     )
 
