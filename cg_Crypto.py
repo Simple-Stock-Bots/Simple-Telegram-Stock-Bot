@@ -22,6 +22,7 @@ class cg_Crypto:
     vs_currency = "usd"  # simple/supported_vs_currencies for list of options
 
     searched_symbols = {}
+    trending_cache = ["Trending Coins Currently Unavailable."]
 
     def __init__(self) -> None:
         """Creates a Symbol Object
@@ -368,8 +369,9 @@ class cg_Crypto:
 
         except Exception as e:
             logging.warning(e)
-            trending = ["Trending Coins Currently Unavailable."]
+            return self.trending_cache
 
+        self.trending_cache = trending
         return trending
 
     def batch_price(self, coins: list[Coin]) -> list[str]:

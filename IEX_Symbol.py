@@ -25,6 +25,7 @@ class IEX_Symbol:
     searched_symbols = {}
     otc_list = []
     charts = {}
+    trending_cache = ["Trending Stocks Currently Unavailable."]
 
     def __init__(self) -> None:
         """Creates a Symbol Object
@@ -494,9 +495,9 @@ class IEX_Symbol:
         """
 
         if data := self.get(f"/stock/market/list/mostactive"):
-            return [
+            self.trending_cache = [
                 f"`${s['symbol']}`: {s['companyName']}, {100*s['changePercent']:.2f}%"
                 for s in data
             ]
-        else:
-            return ["Trending Stocks Currently Unavailable."]
+
+        return self.trending_cache
