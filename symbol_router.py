@@ -200,7 +200,7 @@ class Router:
             elif isinstance(symbol, Coin):
                 replies.append("Cryptocurrencies do no have Dividends.")
             else:
-                print(f"{symbol} is not a Stock or Coin")
+                debug(f"{symbol} is not a Stock or Coin")
 
         return replies
 
@@ -229,7 +229,7 @@ class Router:
                     "News is not yet supported for cryptocurrencies. If you have any suggestions for news sources please contatct @MisterBiggs"
                 )
             else:
-                print(f"{symbol} is not a Stock or Coin")
+                debug(f"{symbol} is not a Stock or Coin")
 
         return replies
 
@@ -255,7 +255,7 @@ class Router:
             elif isinstance(symbol, Coin):
                 replies.append(self.crypto.info_reply(symbol))
             else:
-                print(f"{symbol} is not a Stock or Coin")
+                debug(f"{symbol} is not a Stock or Coin")
 
         return replies
 
@@ -279,7 +279,7 @@ class Router:
         elif isinstance(symbol, Coin):
             return self.crypto.intra_reply(symbol)
         else:
-            print(f"{symbol} is not a Stock or Coin")
+            debug(f"{symbol} is not a Stock or Coin")
             return pd.DataFrame()
 
     def chart_reply(self, symbol: Symbol) -> pd.DataFrame:
@@ -302,7 +302,7 @@ class Router:
         elif isinstance(symbol, Coin):
             return self.crypto.chart_reply(symbol)
         else:
-            print(f"{symbol} is not a Stock or Coin")
+            debug(f"{symbol} is not a Stock or Coin")
             return pd.DataFrame()
 
     def stat_reply(self, symbols: list[Symbol]) -> list[str]:
@@ -327,7 +327,7 @@ class Router:
             elif isinstance(symbol, Coin):
                 replies.append(self.crypto.stat_reply(symbol))
             else:
-                print(f"{symbol} is not a Stock or Coin")
+                debug(f"{symbol} is not a Stock or Coin")
 
         return replies
 
@@ -353,7 +353,7 @@ class Router:
             elif isinstance(symbol, Coin):
                 replies.append(self.crypto.cap_reply(symbol))
             else:
-                print(f"{symbol} is not a Stock or Coin")
+                debug(f"{symbol} is not a Stock or Coin")
 
         return replies
 
@@ -429,7 +429,7 @@ class Router:
             elif isinstance(symbol, Coin):
                 coins.append(symbol)
             else:
-                print(f"{symbol} is not a Stock or Coin")
+                debug(f"{symbol} is not a Stock or Coin")
 
         if stocks:
             # IEX batch endpoint doesnt seem to be working right now
