@@ -161,11 +161,13 @@ def symbol_detect(update: Update, context: CallbackContext):
     Runs on any message that doesn't have a command and searches for symbols,
         then returns the prices of any symbols found.
     """
-
-    message = update.message.text
-    chat_id = update.message.chat_id
-    symbols = s.find_symbols(message)
-
+    try:
+        message = update.message.text
+        chat_id = update.message.chat_id
+        symbols = s.find_symbols(message)
+    except AttributeError as ex:
+        info(ex)
+        return
     if symbols:
         # Let user know bot is working
         context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
@@ -306,6 +308,11 @@ def intra(update: Update, context: CallbackContext):
         update.message.reply_text("No symbols or coins found.")
         return
 
+    from Symbol import Stock
+
+    if isinstance(symbol, Stock):
+        return "Stock market data is currently unavailable see: https://t.me/simplestockbotnews \nCryptocurrency data is still available."
+
     df = s.intra_reply(symbol)
     if df.empty:
         update.message.reply_text(
@@ -360,6 +367,11 @@ def chart(update: Update, context: CallbackContext):
     else:
         update.message.reply_text("No symbols or coins found.")
         return
+
+    from Symbol import Stock
+
+    if isinstance(symbol, Stock):
+        return "Stock market data is currently unavailable see: https://t.me/simplestockbotnews \nCryptocurrency data is still available."
 
     df = s.chart_reply(symbol)
     if df.empty:

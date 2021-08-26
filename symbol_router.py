@@ -40,18 +40,21 @@ class Router:
         symbols = []
         stocks = set(re.findall(self.STOCK_REGEX, text))
         for stock in stocks:
-            if stock.upper() in self.stock.symbol_list["symbol"].values:
-                symbols.append(Stock(stock))
-            else:
-                info(f"{stock} is not in list of stocks")
-
+            # if stock.upper() in self.stock.symbol_list["symbol"].values:
+            #     symbols.append(Stock(stock))
+            # else:
+            #     info(f"{stock} is not in list of stocks")
+            return [Stock()]
         coins = set(re.findall(self.CRYPTO_REGEX, text))
         for coin in coins:
             if coin.lower() in self.crypto.symbol_list["symbol"].values:
                 symbols.append(Coin(coin.lower()))
             else:
                 info(f"{coin} is not in list of coins")
-        info(symbols)
+
+        if symbols:
+            info(symbols)
+
         return symbols
 
     def status(self, bot_resp) -> str:
@@ -68,7 +71,7 @@ class Router:
         {bot_resp}
 
         Stock Market Data:
-        {self.stock.status()}
+        STOCK MARKET DATA CURRENTLY UNAVAILABLE SEE: https://t.me/simplestockbotnews
 
         Cryptocurrency Data:
         {self.crypto.status()}
@@ -267,7 +270,7 @@ class Router:
         """
 
         if isinstance(symbol, Stock):
-            return self.stock.intra_reply(symbol)
+            return pd.DataFrame()
         elif isinstance(symbol, Coin):
             return self.crypto.intra_reply(symbol)
         else:
@@ -290,7 +293,7 @@ class Router:
                 Otherwise returns empty pd.DataFrame.
         """
         if isinstance(symbol, Stock):
-            return self.stock.chart_reply(symbol)
+            return pd.DataFrame()
         elif isinstance(symbol, Coin):
             return self.crypto.chart_reply(symbol)
         else:
