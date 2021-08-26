@@ -51,10 +51,7 @@ class Router:
                 symbols.append(Coin(coin.lower()))
             else:
                 info(f"{coin} is not in list of coins")
-
-        if symbols:
-            info(symbols)
-
+        info(symbols)
         return symbols
 
     def status(self, bot_resp) -> str:
