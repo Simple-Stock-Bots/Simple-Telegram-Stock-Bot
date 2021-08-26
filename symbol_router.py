@@ -18,6 +18,7 @@ class Router:
     STOCK_REGEX = "(?:^|[^\\$])\\$([a-zA-Z.]{1,6})"
     CRYPTO_REGEX = "[$]{2}([a-zA-Z]{1,20})"
     searched_symbols = {}
+    trending_count = {}
 
     def __init__(self):
         self.stock = IEX_Symbol()
@@ -54,8 +55,12 @@ class Router:
 
         if symbols:
             info(symbols)
+            for symbol in symbols:
+                self.trending_count[symbol.tag] = (
+                    self.trending_count.get(symbol.tag, 0) + 1
+                )
 
-        return symbols
+            return symbols
 
     def status(self, bot_resp) -> str:
         """Checks for any issues with APIs.
@@ -364,7 +369,19 @@ class Router:
         stocks = self.stock.trending()
         coins = self.crypto.trending()
 
-        reply = "Trending Stocks:\n"
+        reply = ""
+
+        reply += "Trending on the Stock Bot:\n"
+        reply += "-" * len("Trending on the Stock Bot:") + "\n"
+
+        sorted_trending = [
+            s[0] for s in sorted(self.trending_count.items(), key=lambda item: item[1])
+        ][::-1][0:5]
+
+        for t in sorted_trending:
+            reply += self.price_reply(self.find_symbols(t))[0] + "\n"
+
+        reply += "\n\nTrending Stocks:\n"
         reply += "-" * len("Trending Stocks:") + "\n"
         for stock in stocks:
             reply += stock + "\n"
