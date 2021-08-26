@@ -306,6 +306,11 @@ def intra(update: Update, context: CallbackContext):
         update.message.reply_text("No symbols or coins found.")
         return
 
+    from Symbol import Stock
+
+    if isinstance(symbol, Stock):
+        return "Stock market data is currently unavailable see: https://t.me/simplestockbotnews \nCryptocurrency data is still available."
+
     df = s.intra_reply(symbol)
     if df.empty:
         update.message.reply_text(
@@ -360,6 +365,11 @@ def chart(update: Update, context: CallbackContext):
     else:
         update.message.reply_text("No symbols or coins found.")
         return
+
+    from Symbol import Stock
+
+    if isinstance(symbol, Stock):
+        return "Stock market data is currently unavailable see: https://t.me/simplestockbotnews \nCryptocurrency data is still available."
 
     df = s.chart_reply(symbol)
     if df.empty:
