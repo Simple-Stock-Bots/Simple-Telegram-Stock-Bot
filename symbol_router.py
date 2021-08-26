@@ -44,7 +44,7 @@ class Router:
             #     symbols.append(Stock(stock))
             # else:
             #     info(f"{stock} is not in list of stocks")
-            return [Stock()]
+            return [Stock("Anson")]
         coins = set(re.findall(self.CRYPTO_REGEX, text))
         for coin in coins:
             if coin.lower() in self.crypto.symbol_list["symbol"].values:
