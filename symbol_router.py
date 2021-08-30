@@ -388,27 +388,35 @@ class Router:
 
         reply = ""
 
-        reply += "Trending on the Stock Bot:\n"
-        reply += "-" * len("Trending on the Stock Bot:") + "\n"
+        if self.trending_count:
+            reply += "🔥Trending on the Stock Bot:\n`"
+            reply += "━" * len("Trending on the Stock Bot:") + "`\n"
 
-        sorted_trending = [
-            s[0] for s in sorted(self.trending_count.items(), key=lambda item: item[1])
-        ][::-1][0:5]
+            sorted_trending = [
+                s[0]
+                for s in sorted(self.trending_count.items(), key=lambda item: item[1])
+            ][::-1][0:5]
 
-        for t in sorted_trending:
-            reply += self.price_reply(self.find_symbols(t))[0] + "\n"
+            for t in sorted_trending:
+                reply += self.price_reply(self.find_symbols(t))[0] + "\n"
 
-        reply += "\n\nTrending Stocks:\n"
-        reply += "-" * len("Trending Stocks:") + "\n"
-        for stock in stocks:
-            reply += stock + "\n"
+        if stocks:
+            reply += "\n\n💵Trending Stocks:\n`"
+            reply += "━" * len("Trending Stocks:") + "`\n"
+            for stock in stocks:
+                reply += stock + "\n"
 
-        reply += "\n\nTrending Crypto:\n"
-        reply += "-" * len("Trending Crypto:") + "\n"
-        for coin in coins:
-            reply += coin + "\n"
+        if coins:
+            reply += "\n\n🦎Trending Crypto:\n`"
+            reply += "━" * len("Trending Crypto:") + "`\n"
+            for coin in coins:
+                reply += coin + "\n"
 
-        return reply
+        if reply:
+            return reply
+        else:
+            warning("Failed to collect trending data.")
+            return "Trending data is not currently available."
 
     def random_pick(self) -> str:
 

@@ -25,7 +25,7 @@ class IEX_Symbol:
     searched_symbols = {}
     otc_list = []
     charts = {}
-    trending_cache = ["Trending Stocks Currently Unavailable."]
+    trending_cache = None
 
     def __init__(self) -> None:
         """Creates a Symbol Object

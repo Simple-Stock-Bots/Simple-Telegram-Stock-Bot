@@ -22,7 +22,7 @@ class cg_Crypto:
     vs_currency = "usd"  # simple/supported_vs_currencies for list of options
 
     searched_symbols = {}
-    trending_cache = ["Trending Coins Currently Unavailable."]
+    trending_cache = None
 
     def __init__(self) -> None:
         """Creates a Symbol Object
