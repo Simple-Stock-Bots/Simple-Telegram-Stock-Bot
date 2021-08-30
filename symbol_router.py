@@ -35,8 +35,8 @@ class Router:
 
         Returns
         -------
-        list[str]
-            List of stock symbols as strings without dollar sign.
+        list[Symbol]
+            List of stock symbols as Symbol objects
         """
         symbols = []
         stocks = set(re.findall(self.STOCK_REGEX, text))
