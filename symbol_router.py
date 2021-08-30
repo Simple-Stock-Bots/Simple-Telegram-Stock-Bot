@@ -25,7 +25,7 @@ class Router:
         self.stock = IEX_Symbol()
         self.crypto = cg_Crypto()
 
-        schedule.every().hour().do(self.trending_decay)
+        schedule.every().hour.do(self.trending_decay)
 
     def trending_decay(self, decay=0.5):
         """Decays the value of each trending stock by a multiplier"""
