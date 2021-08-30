@@ -7,6 +7,7 @@ import re
 from logging import critical, debug, error, info, warning
 
 import pandas as pd
+import schedule
 from fuzzywuzzy import fuzz
 
 from cg_Crypto import cg_Crypto
@@ -24,6 +25,20 @@ class Router:
         self.stock = IEX_Symbol()
         self.crypto = cg_Crypto()
 
+        schedule.every().hour().do(self.trending_decay)
+
+    def trending_decay(self, decay=0.5):
+        """Decays the value of each trending stock by a multiplier"""
+
+        info("Decaying trending symbols.")
+        if self.trending_count:
+            for key in self.trending_count.keys():
+                if self.trending_count[key] < 0.01:
+                    # This just makes sure were not keeping around keys that havent been called in a very long time.
+                    self.trending_count.pop(key, None)
+                else:
+                    self.trending_count[key] = self.trending_count[key] * decay
+
     def find_symbols(self, text: str) -> list[Symbol]:
         """Finds stock tickers starting with a dollar sign, and cryptocurrencies with two dollar signs
         in a blob of text and returns them in a list.
@@ -38,6 +53,8 @@ class Router:
         list[Symbol]
             List of stock symbols as Symbol objects
         """
+        schedule.run_pending()
+
         symbols = []
         stocks = set(re.findall(self.STOCK_REGEX, text))
         for stock in stocks:
