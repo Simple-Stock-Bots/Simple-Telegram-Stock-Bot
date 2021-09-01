@@ -437,6 +437,9 @@ class Router:
             for coin in coins:
                 reply += coin + "\n"
 
+        if "`$GME" in reply:
+            reply = reply.replace("🔥", "🦍")
+
         if reply:
             return reply
         else:
