@@ -560,7 +560,7 @@ def main():
     dp.add_handler(CommandHandler("stat", stat))
     dp.add_handler(CommandHandler("stats", stat))
     dp.add_handler(CommandHandler("cap", cap))
-    dp.add_handler(CommandHandler("trending", trending, run_async=True))
+    dp.add_handler(CommandHandler("trending", trending))
     dp.add_handler(CommandHandler("search", search))
     dp.add_handler(CommandHandler("random", rand_pick))
     dp.add_handler(CommandHandler("donate", donate))
