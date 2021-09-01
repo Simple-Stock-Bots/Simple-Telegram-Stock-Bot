@@ -7,6 +7,7 @@ import re
 from logging import critical, debug, error, info, warning
 
 import pandas as pd
+import schedule
 from fuzzywuzzy import fuzz
 
 from cg_Crypto import cg_Crypto
@@ -18,10 +19,25 @@ class Router:
     STOCK_REGEX = "(?:^|[^\\$])\\$([a-zA-Z.]{1,6})"
     CRYPTO_REGEX = "[$]{2}([a-zA-Z]{1,20})"
     searched_symbols = {}
+    trending_count = {}
 
     def __init__(self):
         self.stock = IEX_Symbol()
         self.crypto = cg_Crypto()
+
+        schedule.every().hour.do(self.trending_decay)
+
+    def trending_decay(self, decay=0.5):
+        """Decays the value of each trending stock by a multiplier"""
+
+        info("Decaying trending symbols.")
+        if self.trending_count:
+            for key in self.trending_count.keys():
+                if self.trending_count[key] < 0.01:
+                    # This just makes sure were not keeping around keys that havent been called in a very long time.
+                    self.trending_count.pop(key, None)
+                else:
+                    self.trending_count[key] = self.trending_count[key] * decay
 
     def find_symbols(self, text: str) -> list[Symbol]:
         """Finds stock tickers starting with a dollar sign, and cryptocurrencies with two dollar signs
@@ -34,9 +50,11 @@ class Router:
 
         Returns
         -------
-        list[str]
-            List of stock symbols as strings without dollar sign.
+        list[Symbol]
+            List of stock symbols as Symbol objects
         """
+        schedule.run_pending()
+
         symbols = []
         stocks = set(re.findall(self.STOCK_REGEX, text))
         for stock in stocks:
@@ -54,8 +72,12 @@ class Router:
 
         if symbols:
             info(symbols)
+            for symbol in symbols:
+                self.trending_count[symbol.tag] = (
+                    self.trending_count.get(symbol.tag, 0) + 1
+                )
 
-        return symbols
+            return symbols
 
     def status(self, bot_resp) -> str:
         """Checks for any issues with APIs.
@@ -195,7 +217,7 @@ class Router:
             elif isinstance(symbol, Coin):
                 replies.append("Cryptocurrencies do no have Dividends.")
             else:
-                print(f"{symbol} is not a Stock or Coin")
+                debug(f"{symbol} is not a Stock or Coin")
 
         return replies
 
@@ -224,7 +246,7 @@ class Router:
                     "News is not yet supported for cryptocurrencies. If you have any suggestions for news sources please contatct @MisterBiggs"
                 )
             else:
-                print(f"{symbol} is not a Stock or Coin")
+                debug(f"{symbol} is not a Stock or Coin")
 
         return replies
 
@@ -250,7 +272,7 @@ class Router:
             elif isinstance(symbol, Coin):
                 replies.append(self.crypto.info_reply(symbol))
             else:
-                print(f"{symbol} is not a Stock or Coin")
+                debug(f"{symbol} is not a Stock or Coin")
 
         return replies
 
@@ -274,7 +296,7 @@ class Router:
         elif isinstance(symbol, Coin):
             return self.crypto.intra_reply(symbol)
         else:
-            print(f"{symbol} is not a Stock or Coin")
+            debug(f"{symbol} is not a Stock or Coin")
             return pd.DataFrame()
 
     def chart_reply(self, symbol: Symbol) -> pd.DataFrame:
@@ -297,7 +319,7 @@ class Router:
         elif isinstance(symbol, Coin):
             return self.crypto.chart_reply(symbol)
         else:
-            print(f"{symbol} is not a Stock or Coin")
+            debug(f"{symbol} is not a Stock or Coin")
             return pd.DataFrame()
 
     def stat_reply(self, symbols: list[Symbol]) -> list[str]:
@@ -322,7 +344,7 @@ class Router:
             elif isinstance(symbol, Coin):
                 replies.append(self.crypto.stat_reply(symbol))
             else:
-                print(f"{symbol} is not a Stock or Coin")
+                debug(f"{symbol} is not a Stock or Coin")
 
         return replies
 
@@ -348,7 +370,32 @@ class Router:
             elif isinstance(symbol, Coin):
                 replies.append(self.crypto.cap_reply(symbol))
             else:
-                print(f"{symbol} is not a Stock or Coin")
+                debug(f"{symbol} is not a Stock or Coin")
+
+        return replies
+
+    def spark_reply(self, symbols: list[Symbol]) -> list[str]:
+        """Gets change for each symbol and returns it in a compact format
+
+        Parameters
+        ----------
+        symbols : list[str]
+            List of stock symbols
+
+        Returns
+        -------
+        list[str]
+            List of human readable strings.
+        """
+        replies = []
+
+        for symbol in symbols:
+            if isinstance(symbol, Stock):
+                replies.append(self.stock.spark_reply(symbol))
+            elif isinstance(symbol, Coin):
+                replies.append(self.crypto.spark_reply(symbol))
+            else:
+                debug(f"{symbol} is not a Stock or Coin")
 
         return replies
 
@@ -364,17 +411,40 @@ class Router:
         stocks = self.stock.trending()
         coins = self.crypto.trending()
 
-        reply = "Trending Stocks:\n"
-        reply += "-" * len("Trending Stocks:") + "\n"
-        for stock in stocks:
-            reply += stock + "\n"
+        reply = ""
 
-        reply += "\n\nTrending Crypto:\n"
-        reply += "-" * len("Trending Crypto:") + "\n"
-        for coin in coins:
-            reply += coin + "\n"
+        if self.trending_count:
+            reply += "🔥Trending on the Stock Bot:\n`"
+            reply += "━" * len("Trending on the Stock Bot:") + "`\n"
 
-        return reply
+            sorted_trending = [
+                s[0]
+                for s in sorted(self.trending_count.items(), key=lambda item: item[1])
+            ][::-1][0:5]
+
+            for t in sorted_trending:
+                reply += self.spark_reply(self.find_symbols(t))[0] + "\n"
+
+        if stocks:
+            reply += "\n\n💵Trending Stocks:\n`"
+            reply += "━" * len("Trending Stocks:") + "`\n"
+            for stock in stocks:
+                reply += stock + "\n"
+
+        if coins:
+            reply += "\n\n🦎Trending Crypto:\n`"
+            reply += "━" * len("Trending Crypto:") + "`\n"
+            for coin in coins:
+                reply += coin + "\n"
+
+        if "`$GME" in reply:
+            reply = reply.replace("🔥", "🦍")
+
+        if reply:
+            return reply
+        else:
+            warning("Failed to collect trending data.")
+            return "Trending data is not currently available."
 
     def random_pick(self) -> str:
 
@@ -412,7 +482,7 @@ class Router:
             elif isinstance(symbol, Coin):
                 coins.append(symbol)
             else:
-                print(f"{symbol} is not a Stock or Coin")
+                debug(f"{symbol} is not a Stock or Coin")
 
         if stocks:
             # IEX batch endpoint doesnt seem to be working right now

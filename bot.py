@@ -116,12 +116,12 @@ def donate(update: Update, context: CallbackContext):
     except ValueError:
         update.message.reply_text(f"{amount} is not a valid donation amount or number.")
         return
-    info(f"Donation amount: {price}")
+    info(f"Donation amount: {price} by {update.message.chat.username}")
 
     context.bot.send_invoice(
         chat_id=chat_id,
         title="Simple Stock Bot Donation",
-        description=f"Simple Stock Bot Donation of ${amount}",
+        description=f"Simple Stock Bot Donation of ${amount} by {update.message.chat.username}",
         payload=f"simple-stock-bot-{chat_id}",
         provider_token=STRIPE_TOKEN,
         currency="USD",
@@ -560,7 +560,7 @@ def main():
     dp.add_handler(CommandHandler("stat", stat))
     dp.add_handler(CommandHandler("stats", stat))
     dp.add_handler(CommandHandler("cap", cap))
-    dp.add_handler(CommandHandler("trending", trending))
+    dp.add_handler(CommandHandler("trending", trending, run_async=True))
     dp.add_handler(CommandHandler("search", search))
     dp.add_handler(CommandHandler("random", rand_pick))
     dp.add_handler(CommandHandler("donate", donate))

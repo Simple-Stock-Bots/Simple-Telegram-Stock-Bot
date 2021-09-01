@@ -3,6 +3,7 @@
 
 import logging
 from datetime import datetime
+from logging import critical, debug, error, info, warning
 from typing import List, Optional, Tuple
 
 import pandas as pd
@@ -22,6 +23,7 @@ class cg_Crypto:
     vs_currency = "usd"  # simple/supported_vs_currencies for list of options
 
     searched_symbols = {}
+    trending_cache = None
 
     def __init__(self) -> None:
         """Creates a Symbol Object
@@ -293,7 +295,7 @@ class cg_Crypto:
                 "include_market_cap": "true",
             },
         ):
-            print(resp)
+            debug(resp)
             try:
                 data = resp[coin.id]
 
@@ -336,6 +338,18 @@ class cg_Crypto:
 
         return f"No information found for: {symbol}\nEither today is boring or the symbol does not exist."
 
+    def spark_reply(self, symbol: Coin) -> str:
+        change = self.get(
+            f"/simple/price",
+            params={
+                "ids": symbol.id,
+                "vs_currencies": self.vs_currency,
+                "include_24hr_change": "true",
+            },
+        )[symbol.id]["usd_24h_change"]
+
+        return f"`{symbol.tag}`: {symbol.name}, {change:.2f}%"
+
     def trending(self) -> list[str]:
         """Gets current coins trending on coingecko
 
@@ -368,8 +382,9 @@ class cg_Crypto:
 
         except Exception as e:
             logging.warning(e)
-            trending = ["Trending Coins Currently Unavailable."]
+            return self.trending_cache
 
+        self.trending_cache = trending
         return trending
 
     def batch_price(self, coins: list[Coin]) -> list[str]:

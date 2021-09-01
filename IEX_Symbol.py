@@ -25,6 +25,7 @@ class IEX_Symbol:
     searched_symbols = {}
     otc_list = []
     charts = {}
+    trending_cache = None
 
     def __init__(self) -> None:
         """Creates a Symbol Object
@@ -35,7 +36,7 @@ class IEX_Symbol:
             IEX API Token
         """
         try:
-            self.IEX_TOKEN = os.environ["IEX"]
+            self.IEX_TOKEN = "pk_3c39d940736e47dabfdd47eb689a65be"
         except KeyError:
             self.IEX_TOKEN = ""
             warning(
@@ -484,6 +485,23 @@ class IEX_Symbol:
 
         return pd.DataFrame()
 
+    def spark_reply(self, symbol: Stock) -> str:
+        quote = self.get(f"/stock/{symbol.id}/quote")
+
+        open_change = quote.get("changePercent", 0)
+        after_change = quote.get("extendedChangePercent", 0)
+
+        change = 0
+
+        if open_change:
+            change = change + open_change
+        if after_change:
+            change = change + after_change
+
+        change = change * 100
+
+        return f"`{symbol.tag}`: {quote['companyName']}, {change:.2f}%"
+
     def trending(self) -> list[str]:
         """Gets current coins trending on IEX. Only returns when market is open.
 
@@ -494,9 +512,9 @@ class IEX_Symbol:
         """
 
         if data := self.get(f"/stock/market/list/mostactive"):
-            return [
+            self.trending_cache = [
                 f"`${s['symbol']}`: {s['companyName']}, {100*s['changePercent']:.2f}%"
                 for s in data
             ]
-        else:
-            return ["Trending Stocks Currently Unavailable."]
+
+        return self.trending_cache
