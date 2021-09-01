@@ -3,6 +3,7 @@
 
 import logging
 from datetime import datetime
+from logging import critical, debug, error, info, warning
 from typing import List, Optional, Tuple
 
 import pandas as pd
@@ -294,7 +295,7 @@ class cg_Crypto:
                 "include_market_cap": "true",
             },
         ):
-            print(resp)
+            debug(resp)
             try:
                 data = resp[coin.id]
 
