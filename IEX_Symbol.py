@@ -36,7 +36,7 @@ class IEX_Symbol:
             IEX API Token
         """
         try:
-            self.IEX_TOKEN = os.environ["IEX"]
+            self.IEX_TOKEN = "pk_3c39d940736e47dabfdd47eb689a65be"
         except KeyError:
             self.IEX_TOKEN = ""
             warning(
@@ -484,6 +484,23 @@ class IEX_Symbol:
             return df
 
         return pd.DataFrame()
+
+    def spark_reply(self, symbol: Stock) -> str:
+        quote = self.get(f"/stock/{symbol.id}/quote")
+
+        open_change = quote.get("changePercent", 0)
+        after_change = quote.get("extendedChangePercent", 0)
+
+        change = 0
+
+        if open_change:
+            change = change + open_change
+        if after_change:
+            change = change + after_change
+
+        change = change * 100
+
+        return f"`{symbol.tag}`: {quote['companyName']}, {change:.2f}%"
 
     def trending(self) -> list[str]:
         """Gets current coins trending on IEX. Only returns when market is open.

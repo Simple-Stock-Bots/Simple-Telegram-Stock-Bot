@@ -374,6 +374,31 @@ class Router:
 
         return replies
 
+    def spark_reply(self, symbols: list[Symbol]) -> list[str]:
+        """Gets change for each symbol and returns it in a compact format
+
+        Parameters
+        ----------
+        symbols : list[str]
+            List of stock symbols
+
+        Returns
+        -------
+        list[str]
+            List of human readable strings.
+        """
+        replies = []
+
+        for symbol in symbols:
+            if isinstance(symbol, Stock):
+                replies.append(self.stock.spark_reply(symbol))
+            elif isinstance(symbol, Coin):
+                replies.append(self.crypto.spark_reply(symbol))
+            else:
+                debug(f"{symbol} is not a Stock or Coin")
+
+        return replies
+
     def trending(self) -> str:
         """Checks APIs for trending symbols.
 
@@ -398,7 +423,7 @@ class Router:
             ][::-1][0:5]
 
             for t in sorted_trending:
-                reply += self.price_reply(self.find_symbols(t))[0] + "\n"
+                reply += self.spark_reply(self.find_symbols(t))[0] + "\n"
 
         if stocks:
             reply += "\n\n💵Trending Stocks:\n`"

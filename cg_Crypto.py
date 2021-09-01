@@ -338,6 +338,18 @@ class cg_Crypto:
 
         return f"No information found for: {symbol}\nEither today is boring or the symbol does not exist."
 
+    def spark_reply(self, symbol: Coin) -> str:
+        change = self.get(
+            f"/simple/price",
+            params={
+                "ids": symbol.id,
+                "vs_currencies": self.vs_currency,
+                "include_24hr_change": "true",
+            },
+        )[symbol.id]["usd_24h_change"]
+
+        return f"`{symbol.tag}`: {symbol.name}, {change:.2f}%"
+
     def trending(self) -> list[str]:
         """Gets current coins trending on coingecko
 
