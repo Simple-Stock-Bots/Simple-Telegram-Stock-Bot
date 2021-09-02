@@ -8,6 +8,7 @@ from logging import critical, debug, error, info, warning
 
 import pandas as pd
 import schedule
+from cachetools import TTLCache, cached
 from fuzzywuzzy import fuzz
 
 from cg_Crypto import cg_Crypto
@@ -399,6 +400,7 @@ class Router:
 
         return replies
 
+    @cached(cache=TTLCache(maxsize=1024, ttl=600))
     def trending(self) -> str:
         """Checks APIs for trending symbols.
 
