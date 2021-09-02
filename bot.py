@@ -531,10 +531,10 @@ def error(update: Update, context: CallbackContext):
     else:
         warning(tb_string)
 
-    update.message.reply_text(
-        text=f"An error has occured. Please inform @MisterBiggs if the error persists. Error Code: `{err_code}`",
-        parse_mode=telegram.ParseMode.MARKDOWN,
-    )
+    # update.message.reply_text(
+    #     text=f"An error has occured. Please inform @MisterBiggs if the error persists. Error Code: `{err_code}`",
+    #     parse_mode=telegram.ParseMode.MARKDOWN,
+    # )
 
     # Finally, send the message
     # update.message.reply_text(text=message, parse_mode=telegram.ParseMode.HTML)
