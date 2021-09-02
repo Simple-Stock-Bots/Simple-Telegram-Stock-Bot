@@ -36,7 +36,7 @@ class IEX_Symbol:
             IEX API Token
         """
         try:
-            self.IEX_TOKEN = os.environ["IEX_TOKEN"]
+            self.IEX_TOKEN = os.environ["IEX"]
         except KeyError:
             self.IEX_TOKEN = ""
             warning(
