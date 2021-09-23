@@ -30,6 +30,7 @@ class Router:
     def trending_decay(self, decay=0.5):
         """Decays the value of each trending stock by a multiplier"""
 
+        return
         info("Decaying trending symbols.")
         if self.trending_count:
             for key in self.trending_count.keys():
