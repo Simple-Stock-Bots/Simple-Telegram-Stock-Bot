@@ -20,7 +20,7 @@ class Router:
     STOCK_REGEX = "(?:^|[^\\$])\\$([a-zA-Z.]{1,6})"
     CRYPTO_REGEX = "[$]{2}([a-zA-Z]{1,20})"
     searched_symbols = {}
-    trending_count = { }
+    trending_count = {}
 
     def __init__(self):
         self.stock = IEX_Symbol()
