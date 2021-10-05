@@ -1,5 +1,5 @@
 black:
-  stage: linting
+  stage: .pre
   image: registry.gitlab.com/pipeline-components/black:latest
   script:
     - black --check --verbose -- .
