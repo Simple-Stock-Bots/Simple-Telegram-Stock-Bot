@@ -164,14 +164,17 @@ def symbol_detect(update: Update, context: CallbackContext):
     try:
         message = update.message.text
         chat_id = update.message.chat_id
-        symbols = s.find_symbols(message)
+        if "$" in message:
+            symbols = s.find_symbols(message)
+            info("Looking for Symbols")
+        else:
+            return
     except AttributeError as ex:
         info(ex)
         return
     if symbols:
         # Let user know bot is working
         context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-        info(f"User called for symbols: {update.message.chat.username}")
         info(f"Symbols found: {symbols}")
 
         for reply in s.price_reply(symbols):
