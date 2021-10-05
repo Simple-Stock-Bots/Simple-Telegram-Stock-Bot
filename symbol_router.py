@@ -8,6 +8,7 @@ from logging import critical, debug, error, info, warning
 
 import pandas as pd
 import schedule
+from cachetools import TTLCache, cached
 from fuzzywuzzy import fuzz
 
 from cg_Crypto import cg_Crypto
@@ -30,15 +31,16 @@ class Router:
     def trending_decay(self, decay=0.5):
         """Decays the value of each trending stock by a multiplier"""
 
-        return
-        info("Decaying trending symbols.")
         if self.trending_count:
-            for key in self.trending_count.keys():
-                if self.trending_count[key] < 0.01:
+            t_copy = self.trending_count.copy()
+            for key in t_copy.keys():
+                if t_copy[key] < 0.01:
                     # This just makes sure were not keeping around keys that havent been called in a very long time.
-                    self.trending_count.pop(key, None)
+                    t_copy.pop(key, None)
                 else:
-                    self.trending_count[key] = self.trending_count[key] * decay
+                    t_copy[key] = t_copy[key] * decay
+        self.trending_count = t_copy.copy()
+        info("Decayed trending symbols.")
 
     def find_symbols(self, text: str) -> list[Symbol]:
         """Finds stock tickers starting with a dollar sign, and cryptocurrencies with two dollar signs
@@ -400,6 +402,7 @@ class Router:
 
         return replies
 
+    @cached(cache=TTLCache(maxsize=1024, ttl=600))
     def trending(self) -> str:
         """Checks APIs for trending symbols.
 
