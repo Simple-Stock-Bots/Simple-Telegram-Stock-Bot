@@ -31,14 +31,18 @@ class Router:
     def trending_decay(self, decay=0.5):
         """Decays the value of each trending stock by a multiplier"""
         t_copy = {}
+        dead_keys = []
         if self.trending_count:
             t_copy = self.trending_count.copy()
             for key in t_copy.keys():
                 if t_copy[key] < 0.01:
                     # This just makes sure were not keeping around keys that havent been called in a very long time.
-                    t_copy.pop(key, None)
+                    dead_keys.append(key)
                 else:
                     t_copy[key] = t_copy[key] * decay
+        for dead in dead_keys:
+            t_copy.pop(dead)
+            
         self.trending_count = t_copy.copy()
         info("Decayed trending symbols.")
 
