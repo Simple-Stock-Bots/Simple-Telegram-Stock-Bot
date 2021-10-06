@@ -30,7 +30,7 @@ class Router:
 
     def trending_decay(self, decay=0.5):
         """Decays the value of each trending stock by a multiplier"""
-
+        t_copy = {}
         if self.trending_count:
             t_copy = self.trending_count.copy()
             for key in t_copy.keys():
