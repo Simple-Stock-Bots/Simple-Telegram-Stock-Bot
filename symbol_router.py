@@ -42,7 +42,7 @@ class Router:
                     t_copy[key] = t_copy[key] * decay
         for dead in dead_keys:
             t_copy.pop(dead)
-            
+
         self.trending_count = t_copy.copy()
         info("Decayed trending symbols.")
 
