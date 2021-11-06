@@ -225,7 +225,8 @@ class IEX_Symbol:
             try:
                 IEXData = resp[0]
             except IndexError as e:
-                return f"${symbol.id.upper()} either doesn't exist or pays no dividend."
+                logging.info(e)
+                return f"Getting dividend information for ${symbol.id.upper()} encountered an error. The provider for upcoming dividend information has been having issues recently which has likely caused this error. It is also possible that the stock has no dividend or does not exist."
             keys = (
                 "amount",
                 "currency",
@@ -266,7 +267,7 @@ class IEX_Symbol:
                     + f"\n\nThe dividend was declared on {declared} and the ex-dividend date is {ex}"
                 )
 
-        return f"${symbol.id.upper()} either doesn't exist or pays no dividend."
+        return f"Getting dividend information for ${symbol.id.upper()} encountered an error. The provider for upcoming dividend information has been having issues recently which has likely caused this error. It is also possible that the stock has no dividend or does not exist."
 
     def news_reply(self, symbol: Stock) -> str:
         """Gets most recent, english, non-paywalled news
