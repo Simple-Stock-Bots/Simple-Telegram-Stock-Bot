@@ -362,7 +362,7 @@ class IEX_Symbol:
     def cap_reply(self, symbol: Stock) -> str:
         """Get the Market Cap of a stock"""
 
-        if data := self.get(f"/stable/stock/{symbol.id}/stats"):
+        if data := self.get(f"/stock/{symbol.id}/stats"):
 
             try:
                 cap = data["marketcap"]
