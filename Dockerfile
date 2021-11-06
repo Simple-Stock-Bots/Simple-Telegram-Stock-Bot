@@ -1,9 +1,14 @@
-FROM python:3.9-buster
+FROM python:3.9-buster AS builder
 
 
+COPY requirements.txt /requirements.txt
+RUN pip install --user -r requirements.txt
 
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -U -r requirements.txt
+
+FROM python:3.9-slim
+
+COPY --from=builder /root/.local /root/.local
+
 
 COPY . .
 
