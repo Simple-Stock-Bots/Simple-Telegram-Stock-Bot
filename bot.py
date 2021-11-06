@@ -474,6 +474,25 @@ def inline_query(update: Update, context: CallbackContext):
     # info(f"Inline command ran by {update.message.chat.username}")
     info(f"Query: {update.inline_query.query}")
 
+    ignored_queries = {"$", "$$", " ", ""}
+
+    if update.inline_query.query.strip() in ignored_queries:
+        default_message = """
+        You can type:\n@SimpleStockBot `[search]`\nin any chat or direct message to search for the stock bots full list of stock and crypto symbols and return the price.
+        """
+
+        update.inline_query.answer(
+            [
+                InlineQueryResultArticle(
+                    str(uuid4()),
+                    title="Please enter a query. It can be a ticker or a name of a company.",
+                    input_message_content=InputTextMessageContent(
+                        default_message, parse_mode=telegram.ParseMode.MARKDOWN
+                    ),
+                )
+            ]
+        )
+
     matches = s.inline_search(update.inline_query.query)
 
     results = []
@@ -490,7 +509,7 @@ def inline_query(update: Update, context: CallbackContext):
         )
 
         if len(results) == 5:
-            update.inline_query.answer(results)
+            update.inline_query.answer(results, cache_time=60 * 60)
             info("Inline Command was successful")
             return
     update.inline_query.answer(results)
