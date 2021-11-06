@@ -85,14 +85,17 @@ def license(update: Update, context: CallbackContext):
 def status(update: Update, context: CallbackContext):
     """Gather status of bot and dependant services and return important status updates."""
     warning(f"Status command ran by {update.message.chat.username}")
-    bot_resp = datetime.datetime.now(update.message.date.tzinfo) - update.message.date
+    bot_resp_time = (
+        datetime.datetime.now(update.message.date.tzinfo) - update.message.date
+    )
+
+    bot_status = s.status(
+        f"It took {bot_resp_time.total_seconds()} seconds for the bot to get your message."
+    )
 
     update.message.reply_text(
-        text=s.status(
-            f"It took {bot_resp.total_seconds()} seconds for the bot to get your message."
-        ),
+        text=bot_status,
         parse_mode=telegram.ParseMode.MARKDOWN,
-        disable_notification=True,
     )
 
 

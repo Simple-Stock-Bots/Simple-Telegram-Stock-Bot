@@ -36,6 +36,9 @@ class IEX_Symbol:
         """
         try:
             self.IEX_TOKEN = os.environ["IEX"]
+
+            if self.IEX_TOKEN == "TOKEN":
+                self.IEX_TOKEN = ""
         except KeyError:
             self.IEX_TOKEN = ""
             warning(
@@ -122,6 +125,10 @@ class IEX_Symbol:
         str
             Human readable text on status of IEX API
         """
+
+        if self.IEX_TOKEN == "":
+            return "The `IEX_TOKEN` is not set so Stock Market data is not available."
+
         resp = r.get(
             "https://pjmps0c34hp7.statuspage.io/api/v2/status.json",
             timeout=15,
