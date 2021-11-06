@@ -9,7 +9,6 @@ from logging import critical, debug, error, info, warning
 import pandas as pd
 import schedule
 from cachetools import TTLCache, cached
-from fuzzywuzzy import fuzz
 
 from cg_Crypto import cg_Crypto
 from IEX_Symbol import IEX_Symbol
@@ -19,7 +18,6 @@ from Symbol import Coin, Stock, Symbol
 class Router:
     STOCK_REGEX = "(?:^|[^\\$])\\$([a-zA-Z.]{1,6})"
     CRYPTO_REGEX = "[$]{2}([a-zA-Z]{1,20})"
-    searched_symbols = {}
     trending_count = {}
 
     def __init__(self):
@@ -110,45 +108,7 @@ class Router:
 
         return stats
 
-    def search_symbols(self, search: str) -> list[tuple[str, str]]:
-        """Performs a fuzzy search to find stock symbols closest to a search term.
-
-        Parameters
-        ----------
-        search : str
-            String used to search, could be a company name or something close to the companies stock ticker.
-
-        Returns
-        -------
-        list[tuple[str, str]]
-            A list tuples of every stock sorted in order of how well they match.
-                Each tuple contains: (Symbol, Issue Name).
-        """
-
-        df = pd.concat([self.stock.symbol_list, self.crypto.symbol_list])
-
-        search = search.lower()
-
-        df["Match"] = df.apply(
-            lambda x: fuzz.ratio(search, f"{x['symbol']}".lower()),
-            axis=1,
-        )
-
-        df.sort_values(by="Match", ascending=False, inplace=True)
-        # if df["Match"].head().sum() < 300:
-        #     df["Match"] = df.apply(
-        #         lambda x: fuzz.partial_ratio(search, x["name"].lower()),
-        #         axis=1,
-        #     )
-
-        #     df.sort_values(by="Match", ascending=False, inplace=True)
-
-        symbols = df.head(20)
-        symbol_list = list(zip(list(symbols["symbol"]), list(symbols["description"])))
-        self.searched_symbols[search] = symbol_list
-        return symbol_list
-
-    def inline_search(self, search: str) -> list[tuple[str, str]]:
+    def inline_search(self, search: str, matches: int = 5) -> pd.DataFrame:
         """Searches based on the shortest symbol that contains the same string as the search.
         Should be very fast compared to a fuzzy search.
 
@@ -165,16 +125,16 @@ class Router:
 
         df = pd.concat([self.stock.symbol_list, self.crypto.symbol_list])
 
-        search = search.lower()
+        df = df[
+            df["description"].str.contains(search, regex=False, case=False)
+        ].sort_values(by="type_id", key=lambda x: x.str.len())
 
-        df = df[df["type_id"].str.contains(search, regex=False)].sort_values(
-            by="type_id", key=lambda x: x.str.len()
+        symbols = df.head(matches)
+        symbols["price_reply"] = symbols["type_id"].apply(
+            lambda sym: self.price_reply(self.find_symbols(sym))[0]
         )
 
-        symbols = df.head(20)
-        symbol_list = list(zip(list(symbols["symbol"]), list(symbols["description"])))
-        self.searched_symbols[search] = symbol_list
-        return symbol_list
+        return symbols
 
     def price_reply(self, symbols: list[Symbol]) -> list[str]:
         """Returns current market price or after hours if its available for a given stock symbol.

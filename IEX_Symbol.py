@@ -10,7 +10,6 @@ from typing import List, Optional, Tuple
 import pandas as pd
 import requests as r
 import schedule
-from fuzzywuzzy import fuzz
 
 from Symbol import Stock
 
@@ -140,46 +139,6 @@ class IEX_Symbol:
                 f"{status['indicator']}: {status['description']}."
                 + " Please check the status page for more information. https://status.iexapis.com"
             )
-
-    def search_symbols(self, search: str) -> List[Tuple[str, str]]:
-        """Performs a fuzzy search to find stock symbols closest to a search term.
-
-        Parameters
-        ----------
-        search : str
-            String used to search, could be a company name or something close to the companies stock ticker.
-
-        Returns
-        -------
-        List[tuple[str, str]]
-            A list tuples of every stock sorted in order of how well they match. Each tuple contains: (Symbol, Issue Name).
-        """
-
-        schedule.run_pending()
-        search = search.lower()
-        try:  # https://stackoverflow.com/a/3845776/8774114
-            return self.searched_symbols[search]
-        except KeyError:
-            pass
-
-        symbols = self.symbol_list
-        symbols["Match"] = symbols.apply(
-            lambda x: fuzz.ratio(search, f"{x['symbol']}".lower()),
-            axis=1,
-        )
-
-        symbols.sort_values(by="Match", ascending=False, inplace=True)
-        if symbols["Match"].head().sum() < 300:
-            symbols["Match"] = symbols.apply(
-                lambda x: fuzz.partial_ratio(search, x["name"].lower()),
-                axis=1,
-            )
-
-            symbols.sort_values(by="Match", ascending=False, inplace=True)
-        symbols = symbols.head(10)
-        symbol_list = list(zip(list(symbols["symbol"]), list(symbols["description"])))
-        self.searched_symbols[search] = symbol_list
-        return symbol_list
 
     def price_reply(self, symbol: Stock) -> str:
         """Returns price movement of Stock for the last market day, or after hours.
