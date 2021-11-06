@@ -9,7 +9,6 @@ from typing import List, Optional, Tuple
 import pandas as pd
 import requests as r
 import schedule
-from fuzzywuzzy import fuzz
 from markdownify import markdownify
 
 from Symbol import Coin
@@ -74,7 +73,7 @@ class cg_Crypto:
             "$$" + symbols["symbol"].str.upper() + ": " + symbols["name"]
         )
         symbols = symbols[["id", "symbol", "name", "description"]]
-        symbols["type_id"] = "$$" + symbols["id"]
+        symbols["type_id"] = "$$" + symbols["symbol"]
 
         self.symbol_list = symbols
         if return_df:
@@ -98,45 +97,6 @@ class cg_Crypto:
             return f"CoinGecko API responded that it was OK with a {status.status_code} in {status.elapsed.total_seconds()} Seconds."
         except:
             return f"CoinGecko API returned an error code {status.status_code} in {status.elapsed.total_seconds()} Seconds."
-
-    def search_symbols(self, search: str) -> List[Tuple[str, str]]:
-        """Performs a fuzzy search to find coin symbols closest to a search term.
-
-        Parameters
-        ----------
-        search : str
-            String used to search, could be a company name or something close to the companies coin ticker.
-
-        Returns
-        -------
-        List[tuple[str, str]]
-            A list tuples of every coin sorted in order of how well they match. Each tuple contains: (Symbol, Issue Name).
-        """
-        schedule.run_pending()
-        search = search.lower()
-        try:  # https://stackoverflow.com/a/3845776/8774114
-            return self.searched_symbols[search]
-        except KeyError:
-            pass
-
-        symbols = self.symbol_list
-        symbols["Match"] = symbols.apply(
-            lambda x: fuzz.ratio(search, f"{x['symbol']}".lower()),
-            axis=1,
-        )
-
-        symbols.sort_values(by="Match", ascending=False, inplace=True)
-        if symbols["Match"].head().sum() < 300:
-            symbols["Match"] = symbols.apply(
-                lambda x: fuzz.partial_ratio(search, x["name"].lower()),
-                axis=1,
-            )
-
-            symbols.sort_values(by="Match", ascending=False, inplace=True)
-        symbols = symbols.head(10)
-        symbol_list = list(zip(list(symbols["symbol"]), list(symbols["description"])))
-        self.searched_symbols[search] = symbol_list
-        return symbol_list
 
     def price_reply(self, coin: Coin) -> str:
         """Returns current market price or after hours if its available for a given coin symbol.

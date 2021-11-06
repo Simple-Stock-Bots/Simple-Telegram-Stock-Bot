@@ -85,14 +85,17 @@ def license(update: Update, context: CallbackContext):
 def status(update: Update, context: CallbackContext):
     """Gather status of bot and dependant services and return important status updates."""
     warning(f"Status command ran by {update.message.chat.username}")
-    bot_resp = datetime.datetime.now(update.message.date.tzinfo) - update.message.date
+    bot_resp_time = (
+        datetime.datetime.now(update.message.date.tzinfo) - update.message.date
+    )
+
+    bot_status = s.status(
+        f"It took {bot_resp_time.total_seconds()} seconds for the bot to get your message."
+    )
 
     update.message.reply_text(
-        text=s.status(
-            f"It took {bot_resp.total_seconds()} seconds for the bot to get your message."
-        ),
+        text=bot_status,
         parse_mode=telegram.ParseMode.MARKDOWN,
-        disable_notification=True,
     )
 
 
@@ -261,8 +264,8 @@ def information(update: Update, context: CallbackContext):
 
 def search(update: Update, context: CallbackContext):
     """
-    Uses fuzzy search on full list of stocks and crypto names
-        and descriptions then returns the top matches in order.
+    Searches on full list of stocks and crypto descriptions
+    then returns the top matches in order of smallest symbol name length.
     """
     info(f"Search command ran by {update.message.chat.username}")
     message = update.message.text.replace("/search ", "")
@@ -275,11 +278,13 @@ def search(update: Update, context: CallbackContext):
         return
 
     context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-    queries = s.search_symbols(message)[:10]
-    if queries:
-        reply = "*Search Results:*\n`$ticker: Company Name`\n`" + ("-" * 21) + "`\n"
-        for query in queries:
-            reply += "`" + query[1] + "`\n"
+    queries = s.inline_search(message, matches=10)
+    if not queries.empty:
+        reply = "*Search Results:*\n`$ticker` : Company Name\n`" + ("-" * 21) + "`\n"
+        for _, query in queries.iterrows():
+            desc = query["description"]
+            reply += "`" + desc.replace(": ", "` : ") + "\n"
+
         update.message.reply_text(
             text=reply,
             parse_mode=telegram.ParseMode.MARKDOWN,
@@ -466,31 +471,45 @@ def inline_query(update: Update, context: CallbackContext):
     Handles inline query. Searches by looking if query is contained
         in the symbol and returns matches in alphabetical order.
     """
-    info(f"Inline command ran by {update.message.chat.username}")
+    # info(f"Inline command ran by {update.message.chat.username}")
     info(f"Query: {update.inline_query.query}")
-    matches = s.inline_search(update.inline_query.query)[:5]
 
-    symbols = " ".join([match[1].split(":")[0] for match in matches])
-    prices = s.batch_price_reply(s.find_symbols(symbols))
+    ignored_queries = {"$", "$$", " ", ""}
 
-    results = []
-    for match, price in zip(matches, prices):
-        try:
-            results.append(
+    if update.inline_query.query.strip() in ignored_queries:
+        default_message = """
+        You can type:\n@SimpleStockBot `[search]`\nin any chat or direct message to search for the stock bots full list of stock and crypto symbols and return the price.
+        """
+
+        update.inline_query.answer(
+            [
                 InlineQueryResultArticle(
                     str(uuid4()),
-                    title=match[1],
+                    title="Please enter a query. It can be a ticker or a name of a company.",
                     input_message_content=InputTextMessageContent(
-                        price, parse_mode=telegram.ParseMode.MARKDOWN
+                        default_message, parse_mode=telegram.ParseMode.MARKDOWN
                     ),
                 )
+            ]
+        )
+
+    matches = s.inline_search(update.inline_query.query)
+
+    results = []
+    for _, row in matches.iterrows():
+
+        results.append(
+            InlineQueryResultArticle(
+                str(uuid4()),
+                title=row["description"],
+                input_message_content=InputTextMessageContent(
+                    row["price_reply"], parse_mode=telegram.ParseMode.MARKDOWN
+                ),
             )
-        except TypeError:
-            warning(f"{match} caused error in inline query.")
-            pass
+        )
 
         if len(results) == 5:
-            update.inline_query.answer(results)
+            update.inline_query.answer(results, cache_time=60 * 60)
             info("Inline Command was successful")
             return
     update.inline_query.answer(results)
@@ -568,6 +587,7 @@ def main():
     dp.add_handler(CommandHandler("random", rand_pick))
     dp.add_handler(CommandHandler("donate", donate))
     dp.add_handler(CommandHandler("status", status))
+    dp.add_handler(CommandHandler("inline", inline_query))
 
     # Charting can be slow so they run async.
     dp.add_handler(CommandHandler("intra", intra, run_async=True))

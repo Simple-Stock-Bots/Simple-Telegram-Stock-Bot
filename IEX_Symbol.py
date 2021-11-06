@@ -10,7 +10,6 @@ from typing import List, Optional, Tuple
 import pandas as pd
 import requests as r
 import schedule
-from fuzzywuzzy import fuzz
 
 from Symbol import Stock
 
@@ -37,6 +36,9 @@ class IEX_Symbol:
         """
         try:
             self.IEX_TOKEN = os.environ["IEX"]
+
+            if self.IEX_TOKEN == "TOKEN":
+                self.IEX_TOKEN = ""
         except KeyError:
             self.IEX_TOKEN = ""
             warning(
@@ -123,6 +125,10 @@ class IEX_Symbol:
         str
             Human readable text on status of IEX API
         """
+
+        if self.IEX_TOKEN == "":
+            return "The `IEX_TOKEN` is not set so Stock Market data is not available."
+
         resp = r.get(
             "https://pjmps0c34hp7.statuspage.io/api/v2/status.json",
             timeout=15,
@@ -140,46 +146,6 @@ class IEX_Symbol:
                 f"{status['indicator']}: {status['description']}."
                 + " Please check the status page for more information. https://status.iexapis.com"
             )
-
-    def search_symbols(self, search: str) -> List[Tuple[str, str]]:
-        """Performs a fuzzy search to find stock symbols closest to a search term.
-
-        Parameters
-        ----------
-        search : str
-            String used to search, could be a company name or something close to the companies stock ticker.
-
-        Returns
-        -------
-        List[tuple[str, str]]
-            A list tuples of every stock sorted in order of how well they match. Each tuple contains: (Symbol, Issue Name).
-        """
-
-        schedule.run_pending()
-        search = search.lower()
-        try:  # https://stackoverflow.com/a/3845776/8774114
-            return self.searched_symbols[search]
-        except KeyError:
-            pass
-
-        symbols = self.symbol_list
-        symbols["Match"] = symbols.apply(
-            lambda x: fuzz.ratio(search, f"{x['symbol']}".lower()),
-            axis=1,
-        )
-
-        symbols.sort_values(by="Match", ascending=False, inplace=True)
-        if symbols["Match"].head().sum() < 300:
-            symbols["Match"] = symbols.apply(
-                lambda x: fuzz.partial_ratio(search, x["name"].lower()),
-                axis=1,
-            )
-
-            symbols.sort_values(by="Match", ascending=False, inplace=True)
-        symbols = symbols.head(10)
-        symbol_list = list(zip(list(symbols["symbol"]), list(symbols["description"])))
-        self.searched_symbols[search] = symbol_list
-        return symbol_list
 
     def price_reply(self, symbol: Stock) -> str:
         """Returns price movement of Stock for the last market day, or after hours.
@@ -266,7 +232,8 @@ class IEX_Symbol:
             try:
                 IEXData = resp[0]
             except IndexError as e:
-                return f"${symbol.id.upper()} either doesn't exist or pays no dividend."
+                logging.info(e)
+                return f"Getting dividend information for ${symbol.id.upper()} encountered an error. The provider for upcoming dividend information has been having issues recently which has likely caused this error. It is also possible that the stock has no dividend or does not exist."
             keys = (
                 "amount",
                 "currency",
@@ -307,7 +274,7 @@ class IEX_Symbol:
                     + f"\n\nThe dividend was declared on {declared} and the ex-dividend date is {ex}"
                 )
 
-        return f"${symbol.id.upper()} either doesn't exist or pays no dividend."
+        return f"Getting dividend information for ${symbol.id.upper()} encountered an error. The provider for upcoming dividend information has been having issues recently which has likely caused this error. It is also possible that the stock has no dividend or does not exist."
 
     def news_reply(self, symbol: Stock) -> str:
         """Gets most recent, english, non-paywalled news
@@ -403,7 +370,7 @@ class IEX_Symbol:
     def cap_reply(self, symbol: Stock) -> str:
         """Get the Market Cap of a stock"""
 
-        if data := self.get(f"/stable/stock/{symbol.id}/stats"):
+        if data := self.get(f"/stock/{symbol.id}/stats"):
 
             try:
                 cap = data["marketcap"]

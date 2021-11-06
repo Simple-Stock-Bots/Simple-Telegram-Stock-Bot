@@ -39,7 +39,7 @@ Simply calling a symbol in any message that the bot can see will also return the
         - `/help` Get some help using the bot. 🆘
 
 **Inline Features**
-    You can type @SimpleStockBot `[search]` in any chat or direct message to search for the stock bots full list of stock symbols and return the price of the ticker. Then once you select the ticker want the bot will send a message as you in that chat with the latest stock price.
+    You can type @SimpleStockBot `[search]` in any chat or direct message to search for the stock bots full list of stock and crypto symbols and return the price. Then once you select the ticker want the bot will send a message as you in that chat with the latest stock price. Prices may be delayed by up to an hour.
     
     Market data is provided by [IEX Cloud](https://iexcloud.io)
 
@@ -73,3 +73,24 @@ trending - Trending Stocks and Cryptos. 💬
 intra - $[symbol] Plot since the last market open. 📈
 chart - $[chart] Plot of the past month. 📊
 """  # Not used by the bot but for updaing commands with BotFather
+
+
+tests = """
+/info $tsla
+/info $$btc
+/news $tsla
+/news $$btc
+/stat $tsla
+/stat $$btc
+/cap $tsla
+/cap $$btc
+/dividend $tsla
+/dividend $msft
+/dividend $$btc
+/intra $tsla
+/intra $$btc
+/chart $tsla
+/chart $$btc
+/help
+/trending
+"""
