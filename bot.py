@@ -281,7 +281,7 @@ def search(update: Update, context: CallbackContext):
         for _, query in queries.iterrows():
             desc = query["description"]
             reply += "`" + desc.replace(": ", "` : ") + "\n"
-        print(reply)
+
         update.message.reply_text(
             text=reply,
             parse_mode=telegram.ParseMode.MARKDOWN,
@@ -475,7 +475,7 @@ def inline_query(update: Update, context: CallbackContext):
 
     results = []
     for _, row in matches.iterrows():
-        print(row)
+
         results.append(
             InlineQueryResultArticle(
                 str(uuid4()),
