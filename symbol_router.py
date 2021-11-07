@@ -44,7 +44,7 @@ class Router:
         self.trending_count = t_copy.copy()
         info("Decayed trending symbols.")
 
-    def find_symbols(self, text: str) -> list[Symbol]:
+    def find_symbols(self, text: str, *, trending_weight: int = 1) -> list[Symbol]:
         """Finds stock tickers starting with a dollar sign, and cryptocurrencies with two dollar signs
         in a blob of text and returns them in a list.
 
@@ -79,7 +79,7 @@ class Router:
             info(symbols)
             for symbol in symbols:
                 self.trending_count[symbol.tag] = (
-                    self.trending_count.get(symbol.tag, 0) + 1
+                    self.trending_count.get(symbol.tag, 0) + trending_weight
                 )
 
             return symbols
@@ -131,7 +131,7 @@ class Router:
 
         symbols = df.head(matches)
         symbols["price_reply"] = symbols["type_id"].apply(
-            lambda sym: self.price_reply(self.find_symbols(sym))[0]
+            lambda sym: self.price_reply(self.find_symbols(sym, trending_weight=0))[0]
         )
 
         return symbols

@@ -224,7 +224,7 @@ def news(update: Update, context: CallbackContext):
         )
         return
 
-    symbols = s.find_symbols(message)
+    symbols = s.find_symbols(message,trending_weight=10)
 
     if symbols:
         context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
@@ -305,7 +305,7 @@ def intra(update: Update, context: CallbackContext):
         )
         return
 
-    symbols = s.find_symbols(message)
+    symbols = s.find_symbols(message, trending_weight=5)
     symbol = symbols[0]
 
     if len(symbols):
@@ -361,7 +361,7 @@ def chart(update: Update, context: CallbackContext):
         )
         return
 
-    symbols = s.find_symbols(message)
+    symbols = s.find_symbols(message, trending_weight=10)
 
     if len(symbols):
         symbol = symbols[0]
