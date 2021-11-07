@@ -70,6 +70,15 @@ class IEX_Symbol:
         # Make sure API returned valid JSON
         try:
             resp_json = resp.json()
+            print(type(resp_json))
+
+            # IEX uses backtick ` as apostrophe which breaks telegram markdown parsing
+            if type(resp_json) is dict:
+                print("Fixing format ` to '")
+                resp_json["companyName"] = resp_json.get("companyName", "").replace(
+                    "`", "'"
+                )
+
             return resp_json
         except r.exceptions.JSONDecodeError as e:
             logging.error(e)
@@ -107,6 +116,9 @@ class IEX_Symbol:
         self.otc_list = set(otc["symbol"].to_list())
 
         symbols = pd.concat([reg, otc])
+
+        # IEX uses backtick ` as apostrophe which breaks telegram markdown parsing
+        symbols["name"] = symbols["name"].str.replace("`", "'")
 
         symbols["description"] = "$" + symbols["symbol"] + ": " + symbols["name"]
         symbols["id"] = symbols["symbol"]
