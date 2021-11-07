@@ -159,9 +159,19 @@ def successful_payment_callback(update: Update, context: CallbackContext):
     )
 
 
+def symbol_detect_image(update: Update, context: CallbackContext):
+    """
+    Makes image captions into text then passes the `update` and `context`
+        to symbol detect so that it can reply cashtags in image captions.
+    """
+    if update.message.caption:
+        update.message.text = update.message.caption
+        symbol_detect(update, context)
+
+
 def symbol_detect(update: Update, context: CallbackContext):
     """
-    Runs on any message that doesn't have a command and searches for symbols,
+    Runs on any message that doesn't have a command and searches for cashtags,
         then returns the prices of any symbols found.
     """
     try:
@@ -224,7 +234,7 @@ def news(update: Update, context: CallbackContext):
         )
         return
 
-    symbols = s.find_symbols(message,trending_weight=10)
+    symbols = s.find_symbols(message, trending_weight=10)
 
     if symbols:
         context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
@@ -598,6 +608,7 @@ def main():
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, symbol_detect))
+    dp.add_handler(MessageHandler(Filters.photo, symbol_detect_image))
 
     # Inline Bot commands
     dp.add_handler(InlineQueryHandler(inline_query))
