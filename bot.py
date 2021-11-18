@@ -469,8 +469,11 @@ def trending(update: Update, context: CallbackContext):
 
     context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
+    trending_list = s.trending()
+    info(trending_list)
+
     update.message.reply_text(
-        text=s.trending(),
+        text=trending_list,
         parse_mode=telegram.ParseMode.MARKDOWN,
         disable_notification=True,
     )
