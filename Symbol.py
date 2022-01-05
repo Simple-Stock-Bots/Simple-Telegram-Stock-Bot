@@ -1,6 +1,5 @@
-import functools
-
-import requests as r
+import pandas as pd
+import logging
 
 
 class Symbol:
@@ -30,33 +29,26 @@ class Symbol:
 class Stock(Symbol):
     """Stock Market Object. Gets data from IEX Cloud"""
 
-    def __init__(self, symbol: str) -> None:
-        self.symbol = symbol
-        self.id = symbol
-        self.name = "$" + symbol.upper()
-        self.tag = "$" + symbol.upper()
+    def __init__(self, symbol: pd.DataFrame) -> None:
+        if len(symbol) > 1:
+            logging.info(f"Crypto with shared id:\n\t{symbol.id}")
+            symbol = symbol.head(1)
 
-
-# Used by Coin to change symbols for ids
-coins = r.get("https://api.coingecko.com/api/v3/coins/list").json()
+        self.symbol = symbol.symbol.values[0]
+        self.id = symbol.id.values[0]
+        self.name = symbol.name.values[0]
+        self.tag = symbol.type_id.values[0].upper()
 
 
 class Coin(Symbol):
     """Cryptocurrency Object. Gets data from CoinGecko."""
 
-    @functools.cache
-    def __init__(self, symbol: str) -> None:
-        self.symbol = symbol
-        self.tag = "$$" + symbol.upper()
-        self.get_data()
+    def __init__(self, symbol: pd.DataFrame) -> None:
+        if len(symbol) > 1:
+            logging.info(f"Crypto with shared id:\n\t{symbol.id}")
+            symbol = symbol.head(1)
 
-    def get_data(self) -> None:
-        self.id = list(filter(lambda coin: coin["symbol"] == self.symbol, coins))[0][
-            "id"
-        ]
-        data = r.get("https://api.coingecko.com/api/v3/coins/" + self.id).json()
-        self.data = data
-
-        self.name = data["name"]
-        self.description = data["description"]
-        # self.price = data["market_data"]["current_price"][self.currency]
+        self.symbol = symbol.symbol.values[0]
+        self.id = symbol.id.values[0]
+        self.name = symbol.name.values[0]
+        self.tag = symbol.type_id.values[0].upper()
