@@ -2,6 +2,7 @@
 """
 
 import datetime
+import logging
 import random
 import re
 from logging import critical, debug, error, info, warning
@@ -63,18 +64,26 @@ class Router:
         symbols = []
         stocks = set(re.findall(self.STOCK_REGEX, text))
         for stock in stocks:
-            if stock.upper() in self.stock.symbol_list["symbol"].values:
-                symbols.append(Stock(stock))
+            sym = self.stock.symbol_list[
+                self.stock.symbol_list["symbol"].str.fullmatch(stock, case=False)
+            ]
+            if ~sym.empty:
+                print(sym)
+                symbols.append(Stock(sym))
             else:
                 info(f"{stock} is not in list of stocks")
 
         coins = set(re.findall(self.CRYPTO_REGEX, text))
         for coin in coins:
-            if coin.lower() in self.crypto.symbol_list["symbol"].values:
-                symbols.append(Coin(coin.lower()))
+            sym = self.crypto.symbol_list[
+                self.crypto.symbol_list["symbol"].str.fullmatch(
+                    coin.lower(), case=False
+                )
+            ]
+            if ~sym.empty:
+                symbols.append(Coin(sym))
             else:
                 info(f"{coin} is not in list of coins")
-
         if symbols:
             info(symbols)
             for symbol in symbols:

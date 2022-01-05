@@ -73,24 +73,3 @@ trending - Trending Stocks and Cryptos. 💬
 intra - $[symbol] Plot since the last market open. 📈
 chart - $[chart] Plot of the past month. 📊
 """  # Not used by the bot but for updaing commands with BotFather
-
-
-tests = """
-/info $tsla
-/info $$btc
-/news $tsla
-/news $$btc
-/stat $tsla
-/stat $$btc
-/cap $tsla
-/cap $$btc
-/dividend $tsla
-/dividend $msft
-/dividend $$btc
-/intra $tsla
-/intra $$btc
-/chart $tsla
-/chart $$btc
-/help
-/trending
-"""
