@@ -69,6 +69,9 @@ class cg_Crypto:
         raw_symbols = self.get("/coins/list")
         symbols = pd.DataFrame(data=raw_symbols)
 
+        # Removes all binance-peg symbols
+        symbols = symbols[~symbols["id"].str.contains("binance-peg")]
+
         symbols["description"] = (
             "$$" + symbols["symbol"].str.upper() + ": " + symbols["name"]
         )
