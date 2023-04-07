@@ -1,13 +1,5 @@
 {
-    "workbench.iconTheme": "vscode-icons",
-    "editor.suggestSelection": "first",
-    "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
-    "python.languageServer": "Pylance",
-    "git.autofetch": true,
-    "editor.formatOnSave": true,
-    "files.associations": {
-        "DockerDev": "dockerfile",
-    },
     "python.formatting.provider": "black",
-    "python.showStartPage": false,
+    "python.linting.mypyEnabled": true,
+    "python.linting.flake8Enabled": true,
 }

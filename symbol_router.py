@@ -12,7 +12,7 @@ import schedule
 from cachetools import TTLCache, cached
 
 from cg_Crypto import cg_Crypto
-from IEX_Symbol import IEX_Symbol
+from MarketData import MarketData
 from Symbol import Coin, Stock, Symbol
 
 
@@ -22,7 +22,7 @@ class Router:
     trending_count = {}
 
     def __init__(self):
-        self.stock = IEX_Symbol()
+        self.stock = MarketData()
         self.crypto = cg_Crypto()
 
         schedule.every().hour.do(self.trending_decay)
@@ -64,22 +64,12 @@ class Router:
         symbols = []
         stocks = set(re.findall(self.STOCK_REGEX, text))
         for stock in stocks:
-            sym = self.stock.symbol_list[
-                self.stock.symbol_list["symbol"].str.fullmatch(stock, case=False)
-            ]
-            if ~sym.empty:
-                print(sym)
-                symbols.append(Stock(sym))
-            else:
-                info(f"{stock} is not in list of stocks")
+            # Market data lacks tools to check if a symbol is valid.
+            symbols.append(Stock(stock))
 
         coins = set(re.findall(self.CRYPTO_REGEX, text))
         for coin in coins:
-            sym = self.crypto.symbol_list[
-                self.crypto.symbol_list["symbol"].str.fullmatch(
-                    coin.lower(), case=False
-                )
-            ]
+            sym = self.crypto.symbol_list[self.crypto.symbol_list["symbol"].str.fullmatch(coin.lower(), case=False)]
             if ~sym.empty:
                 symbols.append(Coin(sym))
             else:
@@ -87,9 +77,7 @@ class Router:
         if symbols:
             info(symbols)
             for symbol in symbols:
-                self.trending_count[symbol.tag] = (
-                    self.trending_count.get(symbol.tag, 0) + trending_weight
-                )
+                self.trending_count[symbol.tag] = self.trending_count.get(symbol.tag, 0) + trending_weight
 
             return symbols
 
@@ -134,9 +122,9 @@ class Router:
 
         df = pd.concat([self.stock.symbol_list, self.crypto.symbol_list])
 
-        df = df[
-            df["description"].str.contains(search, regex=False, case=False)
-        ].sort_values(by="type_id", key=lambda x: x.str.len())
+        df = df[df["description"].str.contains(search, regex=False, case=False)].sort_values(
+            by="type_id", key=lambda x: x.str.len()
+        )
 
         symbols = df.head(matches)
         symbols["price_reply"] = symbols["type_id"].apply(
@@ -169,60 +157,6 @@ class Router:
                 replies.append(self.crypto.price_reply(symbol))
             else:
                 info(f"{symbol} is not a Stock or Coin")
-
-        return replies
-
-    def dividend_reply(self, symbols: list) -> list[str]:
-        """Returns the most recent, or next dividend date for a stock symbol.
-
-        Parameters
-        ----------
-        symbols : list
-            List of stock symbols.
-
-        Returns
-        -------
-        Dict[str, str]
-            Each symbol passed in is a key with its value being a human readable
-                formatted string of the symbols div dates.
-        """
-        replies = []
-        for symbol in symbols:
-            if isinstance(symbol, Stock):
-                replies.append(self.stock.dividend_reply(symbol))
-            elif isinstance(symbol, Coin):
-                replies.append("Cryptocurrencies do no have Dividends.")
-            else:
-                debug(f"{symbol} is not a Stock or Coin")
-
-        return replies
-
-    def news_reply(self, symbols: list) -> list[str]:
-        """Gets recent english news on stock symbols.
-
-        Parameters
-        ----------
-        symbols : list
-            List of stock symbols.
-
-        Returns
-        -------
-        Dict[str, str]
-            Each symbol passed in is a key with its value being a human
-                readable markdown formatted string of the symbols news.
-        """
-        replies = []
-
-        for symbol in symbols:
-            if isinstance(symbol, Stock):
-                replies.append(self.stock.news_reply(symbol))
-            elif isinstance(symbol, Coin):
-                # replies.append(self.crypto.news_reply(symbol))
-                replies.append(
-                    "News is not yet supported for cryptocurrencies. If you have any suggestions for news sources please contatct @MisterBiggs"
-                )
-            else:
-                debug(f"{symbol} is not a Stock or Coin")
 
         return replies
 
@@ -367,7 +301,8 @@ class Router:
 
         for symbol in symbols:
             if isinstance(symbol, Stock):
-                replies.append(self.stock.spark_reply(symbol))
+                replies.append("Command not supported for stocks.")
+                # replies.append(self.stock.spark_reply(symbol))
             elif isinstance(symbol, Coin):
                 replies.append(self.crypto.spark_reply(symbol))
             else:
@@ -394,10 +329,7 @@ class Router:
             reply += "🔥Trending on the Stock Bot:\n`"
             reply += "━" * len("Trending on the Stock Bot:") + "`\n"
 
-            sorted_trending = [
-                s[0]
-                for s in sorted(self.trending_count.items(), key=lambda item: item[1])
-            ][::-1][0:5]
+            sorted_trending = [s[0] for s in sorted(self.trending_count.items(), key=lambda item: item[1])][::-1][0:5]
 
             for t in sorted_trending:
                 reply += self.spark_reply(self.find_symbols(t))[0] + "\n"
@@ -424,14 +356,8 @@ class Router:
             return "Trending data is not currently available."
 
     def random_pick(self) -> str:
-
-        choice = random.choice(
-            list(self.stock.symbol_list["description"])
-            + list(self.crypto.symbol_list["description"])
-        )
-        hold = (
-            datetime.date.today() + datetime.timedelta(random.randint(1, 365))
-        ).strftime("%b %d, %Y")
+        choice = random.choice(list(self.stock.symbol_list["description"]) + list(self.crypto.symbol_list["description"]))
+        hold = (datetime.date.today() + datetime.timedelta(random.randint(1, 365))).strftime("%b %d, %Y")
 
         return f"{choice}\nBuy and hold until: {hold}"
 

@@ -1,0 +1,6 @@
+-r requirements.txt
+black==23.3.0
+flake8==5.0.4
+Flake8-pyproject==1.2.3
+pylama==8.4.1
+mypy==1.2.0

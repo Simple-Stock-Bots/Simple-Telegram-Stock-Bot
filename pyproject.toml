@@ -1,0 +1,8 @@
+[tool.black]
+line-length = 130
+
+[tool.flake8]
+max-line-length = 130
+
+[tool.pycodestyle]
+max_line_length = 130

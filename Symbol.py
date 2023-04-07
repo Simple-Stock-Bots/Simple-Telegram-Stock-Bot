@@ -27,17 +27,13 @@ class Symbol:
 
 
 class Stock(Symbol):
-    """Stock Market Object. Gets data from IEX Cloud"""
+    """Stock Market Object. Gets data from MarketData"""
 
-    def __init__(self, symbol: pd.DataFrame) -> None:
-        if len(symbol) > 1:
-            logging.info(f"Crypto with shared id:\n\t{symbol.id}")
-            symbol = symbol.head(1)
-
-        self.symbol = symbol.symbol.values[0]
-        self.id = symbol.id.values[0]
-        self.name = symbol.name.values[0]
-        self.tag = symbol.type_id.values[0].upper()
+    def __init__(self, symbol: str) -> None:
+        self.symbol = symbol
+        self.id = symbol
+        self.name = "$" + symbol
+        self.tag = "$" + symbol.upper()
 
 
 class Coin(Symbol):
