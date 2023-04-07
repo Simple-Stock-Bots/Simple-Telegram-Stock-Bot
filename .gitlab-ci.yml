@@ -16,7 +16,7 @@ build:master:
       --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
       --destination "${CI_REGISTRY_IMAGE}:latest"
   rules:
-    - if: '${CI_COMMIT_BRANCH} == "master"'
+    - if: '$CI_COMMIT_BRANCH == "master"'
 
 
 build:branch:
@@ -31,4 +31,4 @@ build:branch:
       --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}"
       --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_BRANCH}"
   rules:
-    - if: '${CI_COMMIT_BRANCH} != "master"'
+    - if: '$CI_COMMIT_BRANCH != "master"'
