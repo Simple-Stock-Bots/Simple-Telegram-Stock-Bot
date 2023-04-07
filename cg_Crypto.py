@@ -1,10 +1,8 @@
 """Class with functions for running the bot with IEX Cloud.
 """
 
-import logging
-from datetime import datetime
-from logging import critical, debug, error, info, warning
-from typing import List, Optional, Tuple
+import logging as log
+from typing import List
 
 import pandas as pd
 import requests as r
@@ -21,8 +19,7 @@ class cg_Crypto:
 
     vs_currency = "usd"  # simple/supported_vs_currencies for list of options
 
-    searched_symbols = {}
-    trending_cache = None
+    trending_cache: List[str] = []
 
     def __init__(self) -> None:
         """Creates a Symbol Object
@@ -36,14 +33,13 @@ class cg_Crypto:
         schedule.every().day.do(self.get_symbol_list)
 
     def get(self, endpoint, params: dict = {}, timeout=10) -> dict:
-
         url = "https://api.coingecko.com/api/v3" + endpoint
         resp = r.get(url, params=params, timeout=timeout)
         # Make sure API returned a proper status code
         try:
             resp.raise_for_status()
         except r.exceptions.HTTPError as e:
-            logging.error(e)
+            log.error(e)
             return {}
 
         # Make sure API returned valid JSON
@@ -51,36 +47,27 @@ class cg_Crypto:
             resp_json = resp.json()
             return resp_json
         except r.exceptions.JSONDecodeError as e:
-            logging.error(e)
+            log.error(e)
             return {}
 
     def symbol_id(self, symbol) -> str:
         try:
-            return self.symbol_list[self.symbol_list["symbol"] == symbol]["id"].values[
-                0
-            ]
+            return self.symbol_list[self.symbol_list["symbol"] == symbol]["id"].values[0]
         except KeyError:
             return ""
 
-    def get_symbol_list(
-        self, return_df=False
-    ) -> Optional[Tuple[pd.DataFrame, datetime]]:
-
+    def get_symbol_list(self):
         raw_symbols = self.get("/coins/list")
         symbols = pd.DataFrame(data=raw_symbols)
 
         # Removes all binance-peg symbols
         symbols = symbols[~symbols["id"].str.contains("binance-peg")]
 
-        symbols["description"] = (
-            "$$" + symbols["symbol"].str.upper() + ": " + symbols["name"]
-        )
+        symbols["description"] = "$$" + symbols["symbol"].str.upper() + ": " + symbols["name"]
         symbols = symbols[["id", "symbol", "name", "description"]]
         symbols["type_id"] = "$$" + symbols["symbol"]
 
         self.symbol_list = symbols
-        if return_df:
-            return symbols, datetime.now()
 
     def status(self) -> str:
         """Checks CoinGecko /ping endpoint for API issues.
@@ -97,8 +84,10 @@ class cg_Crypto:
 
         try:
             status.raise_for_status()
-            return f"CoinGecko API responded that it was OK with a {status.status_code} in {status.elapsed.total_seconds()} Seconds."
-        except:
+            return (
+                f"CoinGecko API responded that it was OK with a {status.status_code} in {status.elapsed.total_seconds()} Seconds."
+            )
+        except r.HTTPError:
             return f"CoinGecko API returned an error code {status.status_code} in {status.elapsed.total_seconds()} Seconds."
 
     def price_reply(self, coin: Coin) -> str:
@@ -167,9 +156,7 @@ class cg_Crypto:
             f"/coins/{symbol.id}/ohlc",
             params={"vs_currency": self.vs_currency, "days": 1},
         ):
-            df = pd.DataFrame(
-                resp, columns=["Date", "Open", "High", "Low", "Close"]
-            ).dropna()
+            df = pd.DataFrame(resp, columns=["Date", "Open", "High", "Low", "Close"]).dropna()
             df["Date"] = pd.to_datetime(df["Date"], unit="ms")
             df = df.set_index("Date")
             return df
@@ -195,9 +182,7 @@ class cg_Crypto:
             f"/coins/{symbol.id}/ohlc",
             params={"vs_currency": self.vs_currency, "days": 30},
         ):
-            df = pd.DataFrame(
-                resp, columns=["Date", "Open", "High", "Low", "Close"]
-            ).dropna()
+            df = pd.DataFrame(resp, columns=["Date", "Open", "High", "Low", "Close"]).dropna()
             df["Date"] = pd.to_datetime(df["Date"], unit="ms")
             df = df.set_index("Date")
             return df
@@ -223,7 +208,6 @@ class cg_Crypto:
                 "localization": "false",
             },
         ):
-
             return f"""
                 [{data['name']}]({data['links']['homepage'][0]}) Statistics:
                 Market Cap: ${data['market_data']['market_cap'][self.vs_currency]:,}
@@ -251,14 +235,14 @@ class cg_Crypto:
         """
 
         if resp := self.get(
-            f"/simple/price",
+            "/simple/price",
             params={
                 "ids": coin.id,
                 "vs_currencies": self.vs_currency,
                 "include_market_cap": "true",
             },
         ):
-            debug(resp)
+            log.debug(resp)
             try:
                 data = resp[coin.id]
 
@@ -270,7 +254,10 @@ class cg_Crypto:
             if cap == 0:
                 return f"The market cap for {coin.name} is not available for unknown reasons."
 
-            message = f"The current price of {coin.name} is $**{price:,}** and its market cap is $**{cap:,.2f}** {self.vs_currency.upper()}"
+            message = (
+                f"The current price of {coin.name} is $**{price:,}** and"
+                + " its market cap is $**{cap:,.2f}** {self.vs_currency.upper()}"
+            )
 
         else:
             message = f"The Coin: {coin.name} was not found or returned and error."
@@ -303,7 +290,7 @@ class cg_Crypto:
 
     def spark_reply(self, symbol: Coin) -> str:
         change = self.get(
-            f"/simple/price",
+            "/simple/price",
             params={
                 "ids": symbol.id,
                 "vs_currencies": self.vs_currency,
@@ -331,7 +318,7 @@ class cg_Crypto:
                 sym = c["symbol"].upper()
                 name = c["name"]
                 change = self.get(
-                    f"/simple/price",
+                    "/simple/price",
                     params={
                         "ids": c["id"],
                         "vs_currencies": self.vs_currency,
@@ -344,7 +331,7 @@ class cg_Crypto:
                 trending.append(msg)
 
         except Exception as e:
-            logging.warning(e)
+            log.warning(e)
             return self.trending_cache
 
         self.trending_cache = trending
@@ -365,7 +352,7 @@ class cg_Crypto:
         query = ",".join([c.id for c in coins])
 
         prices = self.get(
-            f"/simple/price",
+            "/simple/price",
             params={
                 "ids": query,
                 "vs_currencies": self.vs_currency,

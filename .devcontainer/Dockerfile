@@ -1,11 +1,11 @@
-FROM python:3.9-buster AS builder
+FROM python:3.11-buster AS builder
 
 
 COPY requirements.txt /requirements.txt
 RUN pip install --user -r requirements.txt
 
 
-FROM python:3.9-slim
+FROM python:3.11-slim
 
 ENV MPLBACKEND=Agg
 

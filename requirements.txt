@@ -1,6 +1,6 @@
 python-telegram-bot==13.5
 requests==2.25.1
-pandas==1.2.1
+pandas==2.0.0
 schedule==1.0.0
 mplfinance==0.12.7a5
 markdownify==0.6.5

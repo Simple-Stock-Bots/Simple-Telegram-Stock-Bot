@@ -8,7 +8,7 @@ import os
 import random
 import string
 import traceback
-from logging import critical, debug, error, info, warning
+import logging as log
 from uuid import uuid4
 
 import mplfinance as mpf
@@ -38,23 +38,21 @@ try:
     STRIPE_TOKEN = os.environ["STRIPE"]
 except KeyError:
     STRIPE_TOKEN = ""
-    warning("Starting without a STRIPE Token will not allow you to accept Donations!")
+    log.warning("Starting without a STRIPE Token will not allow you to accept Donations!")
 
 s = Router()
 t = T_info()
 
 # Enable logging
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
-)
+logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 
 logger = logging.getLogger(__name__)
-info("Bot script started.")
+log.info("Bot script started.")
 
 
 def start(update: Update, context: CallbackContext):
     """Send help text when the command /start is issued."""
-    info(f"Start command ran by {update.message.chat.username}")
+    log.info(f"Start command ran by {update.message.chat.username}")
     update.message.reply_text(
         text=t.help_text,
         parse_mode=telegram.ParseMode.MARKDOWN,
@@ -64,7 +62,7 @@ def start(update: Update, context: CallbackContext):
 
 def help(update: Update, context: CallbackContext):
     """Send help text when the command /help is issued."""
-    info(f"Help command ran by {update.message.chat.username}")
+    log.info(f"Help command ran by {update.message.chat.username}")
     update.message.reply_text(
         text=t.help_text,
         parse_mode=telegram.ParseMode.MARKDOWN,
@@ -74,7 +72,7 @@ def help(update: Update, context: CallbackContext):
 
 def license(update: Update, context: CallbackContext):
     """Send bots license when the /license command is issued."""
-    info(f"License command ran by {update.message.chat.username}")
+    log.info(f"License command ran by {update.message.chat.username}")
     update.message.reply_text(
         text=t.license,
         parse_mode=telegram.ParseMode.MARKDOWN,
@@ -84,14 +82,10 @@ def license(update: Update, context: CallbackContext):
 
 def status(update: Update, context: CallbackContext):
     """Gather status of bot and dependant services and return important status updates."""
-    warning(f"Status command ran by {update.message.chat.username}")
-    bot_resp_time = (
-        datetime.datetime.now(update.message.date.tzinfo) - update.message.date
-    )
+    log.warning(f"Status command ran by {update.message.chat.username}")
+    bot_resp_time = datetime.datetime.now(update.message.date.tzinfo) - update.message.date
 
-    bot_status = s.status(
-        f"It took {bot_resp_time.total_seconds()} seconds for the bot to get your message."
-    )
+    bot_status = s.status(f"It took {bot_resp_time.total_seconds()} seconds for the bot to get your message.")
 
     update.message.reply_text(
         text=bot_status,
@@ -101,7 +95,7 @@ def status(update: Update, context: CallbackContext):
 
 def donate(update: Update, context: CallbackContext):
     """Sets up donation."""
-    info(f"Donate command ran by {update.message.chat.username}")
+    log.info(f"Donate command ran by {update.message.chat.username}")
     chat_id = update.message.chat_id
 
     if update.message.text.strip() == "/donate" or "/donate@" in update.message.text:
@@ -110,16 +104,16 @@ def donate(update: Update, context: CallbackContext):
             parse_mode=telegram.ParseMode.MARKDOWN,
             disable_notification=True,
         )
-        amount = 1
+        amount = 1.0
     else:
-        amount = update.message.text.replace("/donate", "").replace("$", "").strip()
+        amount = float(update.message.text.replace("/donate", "").replace("$", "").strip())
 
     try:
-        price = int(float(amount) * 100)
+        price = int(amount * 100)
     except ValueError:
         update.message.reply_text(f"{amount} is not a valid donation amount or number.")
         return
-    info(f"Donation amount: {price} by {update.message.chat.username}")
+    log.info(f"Donation amount: {price} by {update.message.chat.username}")
 
     context.bot.send_invoice(
         chat_id=chat_id,
@@ -139,7 +133,7 @@ def donate(update: Update, context: CallbackContext):
 
 def precheckout_callback(update: Update, context: CallbackContext):
     """Approves donation"""
-    info(f"precheckout_callback queried")
+    log.info("precheckout_callback queried")
     query = update.pre_checkout_query
 
     query.answer(ok=True)
@@ -153,10 +147,8 @@ def precheckout_callback(update: Update, context: CallbackContext):
 
 def successful_payment_callback(update: Update, context: CallbackContext):
     """Thanks user for donation"""
-    info(f"Successful payment!")
-    update.message.reply_text(
-        "Thank you for your donation! It goes a long way to keeping the bot free!"
-    )
+    log.info("Successful payment!")
+    update.message.reply_text("Thank you for your donation! It goes a long way to keeping the bot free!")
 
 
 def symbol_detect_image(update: Update, context: CallbackContext):
@@ -179,16 +171,16 @@ def symbol_detect(update: Update, context: CallbackContext):
         chat_id = update.message.chat_id
         if "$" in message:
             symbols = s.find_symbols(message)
-            info("Looking for Symbols")
+            log.info("Looking for Symbols")
         else:
             return
     except AttributeError as ex:
-        info(ex)
+        log.info(ex)
         return
     if symbols:
         # Let user know bot is working
         context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-        info(f"Symbols found: {symbols}")
+        log.info(f"Symbols found: {symbols}")
 
         for reply in s.price_reply(symbols):
             update.message.reply_text(
@@ -198,113 +190,9 @@ def symbol_detect(update: Update, context: CallbackContext):
             )
 
 
-def dividend(update: Update, context: CallbackContext):
-    """/dividend or /div command and then finds dividend info on that symbol."""
-    info(f"Dividend command ran by {update.message.chat.username}")
-    message = update.message.text
-    chat_id = update.message.chat_id
-
-    if message.strip().split("@")[0] == "/dividend":
-        update.message.reply_text(
-            "This command gives info on the next dividend date for a symbol.\nExample: /dividend $tsla"
-        )
-        return
-
-    symbols = s.find_symbols(message)
-
-    if symbols:
-        context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-        for reply in s.dividend_reply(symbols):
-            update.message.reply_text(
-                text=reply,
-                parse_mode=telegram.ParseMode.MARKDOWN,
-                disable_notification=True,
-            )
-
-
-def news(update: Update, context: CallbackContext):
-    """/news command then finds news info on that symbol."""
-    info(f"News command ran by {update.message.chat.username}")
-    message = update.message.text
-    chat_id = update.message.chat_id
-
-    if message.strip().split("@")[0] == "/news":
-        update.message.reply_text(
-            "This command gives the most recent english news for a symbol.\nExample: /news $tsla"
-        )
-        return
-
-    symbols = s.find_symbols(message, trending_weight=10)
-
-    if symbols:
-        context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-
-        for reply in s.news_reply(symbols):
-            update.message.reply_text(
-                text=reply,
-                parse_mode=telegram.ParseMode.MARKDOWN,
-                disable_notification=True,
-            )
-
-
-def information(update: Update, context: CallbackContext):
-    """/info command then finds info on that symbol."""
-    info(f"Information command ran by {update.message.chat.username}")
-    message = update.message.text
-    chat_id = update.message.chat_id
-
-    if message.strip().split("@")[0] == "/info":
-        update.message.reply_text(
-            "This command gives information on a symbol.\nExample: /info $tsla"
-        )
-        return
-
-    symbols = s.find_symbols(message)
-
-    if symbols:
-        context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-
-        for reply in s.info_reply(symbols):
-            update.message.reply_text(
-                text=reply,
-                parse_mode=telegram.ParseMode.MARKDOWN,
-                disable_notification=True,
-            )
-
-
-def search(update: Update, context: CallbackContext):
-    """
-    Searches on full list of stocks and crypto descriptions
-    then returns the top matches in order of smallest symbol name length.
-    """
-    info(f"Search command ran by {update.message.chat.username}")
-    message = update.message.text.replace("/search ", "")
-    chat_id = update.message.chat_id
-
-    if message.strip().split("@")[0] == "/search":
-        update.message.reply_text(
-            "This command searches for symbols supported by the bot.\nExample: /search Tesla Motors or /search $tsla"
-        )
-        return
-
-    context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-    queries = s.inline_search(message, matches=10)
-    if not queries.empty:
-        reply = "*Search Results:*\n`$ticker` : Company Name\n`" + ("-" * 21) + "`\n"
-        for _, query in queries.iterrows():
-            desc = query["description"]
-            reply += "`" + desc.replace(": ", "` : ") + "\n"
-
-        update.message.reply_text(
-            text=reply,
-            parse_mode=telegram.ParseMode.MARKDOWN,
-            disable_notification=True,
-        )
-
-
 def intra(update: Update, context: CallbackContext):
     """returns a chart of intraday data for a symbol"""
-    info(f"Intra command ran by {update.message.chat.username}")
+    log.info(f"Intra command ran by {update.message.chat.username}")
 
     message = update.message.text
     chat_id = update.message.chat_id
@@ -333,16 +221,14 @@ def intra(update: Update, context: CallbackContext):
         )
         return
 
-    context.bot.send_chat_action(
-        chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO
-    )
+    context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
 
     buf = io.BytesIO()
     mpf.plot(
         df,
         type="renko",
         title=f"\n{symbol.name}",
-        volume="volume" in df.keys(),
+        volume="Volume" in df.keys(),
         style="yahoo",
         savefig=dict(fname=buf, dpi=400, bbox_inches="tight"),
     )
@@ -360,7 +246,7 @@ def intra(update: Update, context: CallbackContext):
 
 def chart(update: Update, context: CallbackContext):
     """returns a chart of the past month of data for a symbol"""
-    info(f"Chart command ran by {update.message.chat.username}")
+    log.info(f"Chart command ran by {update.message.chat.username}")
 
     message = update.message.text
     chat_id = update.message.chat_id
@@ -387,16 +273,14 @@ def chart(update: Update, context: CallbackContext):
             disable_notification=True,
         )
         return
-    context.bot.send_chat_action(
-        chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO
-    )
+    context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
 
     buf = io.BytesIO()
     mpf.plot(
         df,
         type="candle",
         title=f"\n{symbol.name}",
-        volume="volume" in df.keys(),
+        volume="Volume" in df.keys(),
         style="yahoo",
         savefig=dict(fname=buf, dpi=400, bbox_inches="tight"),
     )
@@ -411,66 +295,16 @@ def chart(update: Update, context: CallbackContext):
     )
 
 
-def stat(update: Update, context: CallbackContext):
-    """returns key statistics on symbol"""
-    info(f"Stat command ran by {update.message.chat.username}")
-    message = update.message.text
-    chat_id = update.message.chat_id
-
-    if message.strip().split("@")[0] == "/stat":
-        update.message.reply_text(
-            "This command returns key statistics for a symbol.\nExample: /stat $tsla"
-        )
-        return
-
-    symbols = s.find_symbols(message)
-
-    if symbols:
-        context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-
-        for reply in s.stat_reply(symbols):
-            update.message.reply_text(
-                text=reply,
-                parse_mode=telegram.ParseMode.MARKDOWN,
-                disable_notification=True,
-            )
-
-
-def cap(update: Update, context: CallbackContext):
-    """returns market cap for symbol"""
-    info(f"Cap command ran by {update.message.chat.username}")
-    message = update.message.text
-    chat_id = update.message.chat_id
-
-    if message.strip().split("@")[0] == "/cap":
-        update.message.reply_text(
-            "This command returns the market cap for a symbol.\nExample: /cap $tsla"
-        )
-        return
-
-    symbols = s.find_symbols(message)
-
-    if symbols:
-        context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
-
-        for reply in s.cap_reply(symbols):
-            update.message.reply_text(
-                text=reply,
-                parse_mode=telegram.ParseMode.MARKDOWN,
-                disable_notification=True,
-            )
-
-
 def trending(update: Update, context: CallbackContext):
     """returns currently trending symbols and how much they've moved in the past trading day."""
-    info(f"Trending command ran by {update.message.chat.username}")
+    log.info(f"Trending command ran by {update.message.chat.username}")
 
     chat_id = update.message.chat_id
 
     context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
     trending_list = s.trending()
-    info(trending_list)
+    log.info(trending_list)
 
     update.message.reply_text(
         text=trending_list,
@@ -485,13 +319,14 @@ def inline_query(update: Update, context: CallbackContext):
         in the symbol and returns matches in alphabetical order.
     """
     # info(f"Inline command ran by {update.message.chat.username}")
-    info(f"Query: {update.inline_query.query}")
+    log.info(f"Query: {update.inline_query.query}")
 
     ignored_queries = {"$", "$$", " ", ""}
 
     if update.inline_query.query.strip() in ignored_queries:
         default_message = """
-        You can type:\n@SimpleStockBot `[search]`\nin any chat or direct message to search for the stock bots full list of stock and crypto symbols and return the price.
+        You can type:\n@SimpleStockBot `[search]`
+        in any chat or direct message to search for the stock bots full list of stock and crypto symbols and return the price.
         """
 
         update.inline_query.answer(
@@ -499,9 +334,7 @@ def inline_query(update: Update, context: CallbackContext):
                 InlineQueryResultArticle(
                     str(uuid4()),
                     title="Please enter a query. It can be a ticker or a name of a company.",
-                    input_message_content=InputTextMessageContent(
-                        default_message, parse_mode=telegram.ParseMode.MARKDOWN
-                    ),
+                    input_message_content=InputTextMessageContent(default_message, parse_mode=telegram.ParseMode.MARKDOWN),
                 )
             ]
         )
@@ -510,29 +343,24 @@ def inline_query(update: Update, context: CallbackContext):
 
     results = []
     for _, row in matches.iterrows():
-
         results.append(
             InlineQueryResultArticle(
                 str(uuid4()),
                 title=row["description"],
-                input_message_content=InputTextMessageContent(
-                    row["price_reply"], parse_mode=telegram.ParseMode.MARKDOWN
-                ),
+                input_message_content=InputTextMessageContent(row["price_reply"], parse_mode=telegram.ParseMode.MARKDOWN),
             )
         )
 
         if len(results) == 5:
             update.inline_query.answer(results, cache_time=60 * 60)
-            info("Inline Command was successful")
+            log.info("Inline Command was successful")
             return
     update.inline_query.answer(results)
 
 
 def rand_pick(update: Update, context: CallbackContext):
     """For the gamblers. Returns a random symbol to buy and a sell date"""
-    info(
-        f"Someone is gambling! Random_pick command ran by {update.message.chat.username}"
-    )
+    log.info(f"Someone is gambling! Random_pick command ran by {update.message.chat.username}")
 
     update.message.reply_text(
         text=s.random_pick(),
@@ -543,15 +371,13 @@ def rand_pick(update: Update, context: CallbackContext):
 
 def error(update: Update, context: CallbackContext):
     """Log Errors caused by Updates."""
-    warning('Update "%s" caused error "%s"', update, error)
+    log.warning('Update "%s" caused error "%s"', update, error)
 
-    tb_list = traceback.format_exception(
-        None, context.error, context.error.__traceback__
-    )
+    tb_list = traceback.format_exception(None, context.error, context.error.__traceback__)
     tb_string = "".join(tb_list)
 
     err_code = "".join([random.choice(string.ascii_lowercase) for i in range(5)])
-    warning(f"Logging error: {err_code}")
+    log.warning(f"Logging error: {err_code}")
 
     if update:
         message = (
@@ -562,18 +388,14 @@ def error(update: Update, context: CallbackContext):
             f"<pre>context.user_data = {html.escape(str(context.user_data))}</pre>\n\n"
             f"<pre>{html.escape(tb_string)}</pre>"
         )
-        warning(message)
+        log.warning(message)
     else:
-        warning(tb_string)
+        log.warning(tb_string)
 
-    # update.message.reply_text(
-    #     text=f"An error has occured. Please inform @MisterBiggs if the error persists. Error Code: `{err_code}`",
-    #     parse_mode=telegram.ParseMode.MARKDOWN,
-    # )
-
-    # Finally, send the message
-    # update.message.reply_text(text=message, parse_mode=telegram.ParseMode.HTML)
-    # update.message.reply_text(text="Please inform the bot admin of this issue.")
+    update.message.reply_text(
+        text=f"An error has occured. Please inform @MisterBiggs if the error persists. Error Code: `{err_code}`",
+        parse_mode=telegram.ParseMode.MARKDOWN,
+    )
 
 
 def main():
@@ -588,15 +410,7 @@ def main():
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
     dp.add_handler(CommandHandler("license", license))
-    dp.add_handler(CommandHandler("dividend", dividend))
-    dp.add_handler(CommandHandler("div", dividend))
-    dp.add_handler(CommandHandler("news", news))
-    dp.add_handler(CommandHandler("info", information))
-    dp.add_handler(CommandHandler("stat", stat))
-    dp.add_handler(CommandHandler("stats", stat))
-    dp.add_handler(CommandHandler("cap", cap))
     dp.add_handler(CommandHandler("trending", trending))
-    dp.add_handler(CommandHandler("search", search))
     dp.add_handler(CommandHandler("random", rand_pick))
     dp.add_handler(CommandHandler("donate", donate))
     dp.add_handler(CommandHandler("status", status))
@@ -620,9 +434,7 @@ def main():
     dp.add_handler(PreCheckoutQueryHandler(precheckout_callback))
 
     # Payment success
-    dp.add_handler(
-        MessageHandler(Filters.successful_payment, successful_payment_callback)
-    )
+    dp.add_handler(MessageHandler(Filters.successful_payment, successful_payment_callback))
 
     # log all errors
     dp.add_error_handler(error)
