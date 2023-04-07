@@ -19,7 +19,7 @@ build:master:
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
 
 
-build:master:
+build:branch:
   stage: build
   image:
     name: gcr.io/kaniko-project/executor:v1.9.0-debug
@@ -30,3 +30,5 @@ build:master:
       --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
       --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}"
       --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_BRANCH}"
+  rules:
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME != "master"'
