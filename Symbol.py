@@ -32,8 +32,8 @@ class Stock(Symbol):
     def __init__(self, symbol: str) -> None:
         self.symbol = symbol
         self.id = symbol
-        self.name = "$" + symbol
-        self.tag = "$" + symbol.upper()
+        self.name = "$" + symbol.upper()
+        self.tag = "$" + symbol.lower()
 
 
 class Coin(Symbol):

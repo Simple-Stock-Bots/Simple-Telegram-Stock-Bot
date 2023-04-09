@@ -101,8 +101,19 @@ class MarketData:
         """
 
         if quoteResp := self.get(f"stocks/quotes/{symbol}/"):
-            return f"The current price of {quoteResp['symbol']} is ${quoteResp['last']}"
+            price = round(quoteResp["last"][0], 2)
+            changePercent = round(quoteResp["changepct"][0], 2)
 
+            message = f"The current price of {symbol.name} is ${price} and "
+
+            if changePercent > 0.0:
+                message += f"is currently up {changePercent}% for the day."
+            elif changePercent < 0.0:
+                message += f"is currently down {changePercent}% for the day."
+            else:
+                message += "hasn't shown any movement for the day."
+
+            return message
         else:
             return f"Getting a quote for {symbol} encountered an error."
 
