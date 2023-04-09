@@ -85,7 +85,27 @@ class MarketData:
         self.charts = {}
 
     def status(self) -> str:
-        return "status isnt implemented by marketdata.app"
+        # TODO: At the moment this API is poorly documented, this function likely needs to be revisited later.
+
+        try:
+            status = r.get(
+                "https://stats.uptimerobot.com/api/getMonitorList/6Kv3zIow0A",
+                timeout=5,
+            )
+            status.raise_for_status()
+        except r.HTTPError:
+            return f"API returned an HTTP error code {status.status_code} in {status.elapsed.total_seconds()} Seconds."
+        except r.Timeout:
+            return "API timed out before it was able to give status. This is likely due to a surge in usage or a complete outage."
+
+        statusJSON = status.json()
+
+        if statusJSON["status"] == "ok":
+            return (
+                f"CoinGecko API responded that it was OK with a {status.status_code} in {status.elapsed.total_seconds()} Seconds."
+            )
+        else:
+            return f"MarketData.app is currently reporting the following status: {statusJSON['status']}"
 
     def price_reply(self, symbol: Stock) -> str:
         """Returns price movement of Stock for the last market day, or after hours.
