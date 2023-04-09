@@ -13,7 +13,7 @@ COPY --from=builder /root/.local /root/.local
 
 RUN pip install --no-cache-dir black
 ENV TELEGRAM=TOKEN
-ENV IEX=TOKEN
+ENV MARKETDATA=TOKEN
 
 COPY . .
 

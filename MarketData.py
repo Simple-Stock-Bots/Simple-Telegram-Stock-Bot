@@ -1,10 +1,6 @@
-"""Class with functions for running the bot with IEX Cloud.
-"""
-
 import logging
 import os
 import datetime as dt
-from logging import warning
 from typing import Dict
 
 import pandas as pd
@@ -12,6 +8,8 @@ import requests as r
 import schedule
 
 from Symbol import Stock
+
+log = logging.getLogger(__name__)
 
 
 class MarketData:
@@ -38,7 +36,7 @@ class MarketData:
                 self.MARKETDATA_TOKEN = ""
         except KeyError:
             self.MARKETDATA_TOKEN = ""
-            warning("Starting without an MarketData.app Token will not allow you to get market data!")
+            log.warning("Starting without an MarketData.app Token will not allow you to get market data!")
 
         if self.MARKETDATA_TOKEN != "":
             schedule.every().day.do(self.clear_charts)
@@ -136,6 +134,14 @@ class MarketData:
             return message
         else:
             return f"Getting a quote for {symbol} encountered an error."
+
+    def spark_reply(self, symbol: Stock) -> str:
+        if quoteResp := self.get(f"stocks/quotes/{symbol}/"):
+            changePercent = round(quoteResp["changepct"][0], 2)
+            return f"`{symbol.tag}`: {changePercent}%"
+        else:
+            logging.warning(f"{symbol} did not have 'changepct' field.")
+            return f"`{symbol.tag}`"
 
     def intra_reply(self, symbol: Stock) -> pd.DataFrame:
         """Returns price data for a symbol of the past month up until the previous trading days close.
