@@ -5,7 +5,7 @@ import datetime
 import logging
 import random
 import re
-from logging import critical, debug, error, info, warning
+import logging as log
 
 import pandas as pd
 import schedule
@@ -15,11 +15,13 @@ from cg_Crypto import cg_Crypto
 from MarketData import MarketData
 from Symbol import Coin, Stock, Symbol
 
+from typing import Dict
+
 
 class Router:
     STOCK_REGEX = "(?:^|[^\\$])\\$([a-zA-Z.]{1,6})"
     CRYPTO_REGEX = "[$]{2}([a-zA-Z]{1,20})"
-    trending_count = {}
+    trending_count: Dict[str, float] = {}
 
     def __init__(self):
         self.stock = MarketData()
@@ -43,9 +45,9 @@ class Router:
             t_copy.pop(dead)
 
         self.trending_count = t_copy.copy()
-        info("Decayed trending symbols.")
+        log.info("Decayed trending symbols.")
 
-    def find_symbols(self, text: str, *, trending_weight: int = 1) -> list[Symbol]:
+    def find_symbols(self, text: str, *, trending_weight: int = 1) -> list[Stock | Symbol]:
         """Finds stock tickers starting with a dollar sign, and cryptocurrencies with two dollar signs
         in a blob of text and returns them in a list.
 
@@ -61,7 +63,7 @@ class Router:
         """
         schedule.run_pending()
 
-        symbols = []
+        symbols: list[Symbol] = []
         stocks = set(re.findall(self.STOCK_REGEX, text))
         for stock in stocks:
             # Market data lacks tools to check if a symbol is valid.
@@ -70,16 +72,16 @@ class Router:
         coins = set(re.findall(self.CRYPTO_REGEX, text))
         for coin in coins:
             sym = self.crypto.symbol_list[self.crypto.symbol_list["symbol"].str.fullmatch(coin.lower(), case=False)]
-            if ~sym.empty:
-                symbols.append(Coin(sym))
+            if sym.empty:
+                log.info(f"{coin} is not in list of coins")
             else:
-                info(f"{coin} is not in list of coins")
+                symbols.append(Coin(sym))
         if symbols:
-            info(symbols)
+            log.info(symbols)
             for symbol in symbols:
                 self.trending_count[symbol.tag] = self.trending_count.get(symbol.tag, 0) + trending_weight
 
-            return symbols
+        return symbols
 
     def status(self, bot_resp) -> str:
         """Checks for any issues with APIs.
@@ -101,7 +103,7 @@ class Router:
         {self.crypto.status()}
         """
 
-        warning(stats)
+        log.warning(stats)
 
         return stats
 
@@ -150,13 +152,13 @@ class Router:
         replies = []
 
         for symbol in symbols:
-            info(symbol)
+            log.info(symbol)
             if isinstance(symbol, Stock):
                 replies.append(self.stock.price_reply(symbol))
             elif isinstance(symbol, Coin):
                 replies.append(self.crypto.price_reply(symbol))
             else:
-                info(f"{symbol} is not a Stock or Coin")
+                log.info(f"{symbol} is not a Stock or Coin")
 
         return replies
 
@@ -182,7 +184,7 @@ class Router:
             elif isinstance(symbol, Coin):
                 replies.append(self.crypto.info_reply(symbol))
             else:
-                debug(f"{symbol} is not a Stock or Coin")
+                log.debug(f"{symbol} is not a Stock or Coin")
 
         return replies
 
@@ -206,7 +208,7 @@ class Router:
         elif isinstance(symbol, Coin):
             return self.crypto.intra_reply(symbol)
         else:
-            debug(f"{symbol} is not a Stock or Coin")
+            log.debug(f"{symbol} is not a Stock or Coin")
             return pd.DataFrame()
 
     def chart_reply(self, symbol: Symbol) -> pd.DataFrame:
@@ -229,7 +231,7 @@ class Router:
         elif isinstance(symbol, Coin):
             return self.crypto.chart_reply(symbol)
         else:
-            debug(f"{symbol} is not a Stock or Coin")
+            log.debug(f"{symbol} is not a Stock or Coin")
             return pd.DataFrame()
 
     def stat_reply(self, symbols: list[Symbol]) -> list[str]:
@@ -254,7 +256,7 @@ class Router:
             elif isinstance(symbol, Coin):
                 replies.append(self.crypto.stat_reply(symbol))
             else:
-                debug(f"{symbol} is not a Stock or Coin")
+                log.debug(f"{symbol} is not a Stock or Coin")
 
         return replies
 
@@ -280,7 +282,7 @@ class Router:
             elif isinstance(symbol, Coin):
                 replies.append(self.crypto.cap_reply(symbol))
             else:
-                debug(f"{symbol} is not a Stock or Coin")
+                log.debug(f"{symbol} is not a Stock or Coin")
 
         return replies
 
@@ -306,7 +308,7 @@ class Router:
             elif isinstance(symbol, Coin):
                 replies.append(self.crypto.spark_reply(symbol))
             else:
-                debug(f"{symbol} is not a Stock or Coin")
+                log.debug(f"{symbol} is not a Stock or Coin")
 
         return replies
 
@@ -352,7 +354,7 @@ class Router:
         if reply:
             return reply
         else:
-            warning("Failed to collect trending data.")
+            log.warning("Failed to collect trending data.")
             return "Trending data is not currently available."
 
     def random_pick(self) -> str:
@@ -385,7 +387,7 @@ class Router:
             elif isinstance(symbol, Coin):
                 coins.append(symbol)
             else:
-                debug(f"{symbol} is not a Stock or Coin")
+                log.debug(f"{symbol} is not a Stock or Coin")
 
         if stocks:
             # IEX batch endpoint doesnt seem to be working right now
