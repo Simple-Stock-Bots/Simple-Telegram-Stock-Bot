@@ -1,7 +1,4 @@
-"""Class with functions for running the bot with IEX Cloud.
-"""
-
-import logging as log
+import logging
 from typing import List
 
 import pandas as pd
@@ -10,6 +7,8 @@ import schedule
 from markdownify import markdownify
 
 from Symbol import Coin
+
+log = logging.getLogger(__name__)
 
 
 class cg_Crypto:
@@ -22,13 +21,6 @@ class cg_Crypto:
     trending_cache: List[str] = []
 
     def __init__(self) -> None:
-        """Creates a Symbol Object
-
-        Parameters
-        ----------
-        IEX_TOKEN : str
-            IEX Token
-        """
         self.get_symbol_list()
         schedule.every().day.do(self.get_symbol_list)
 

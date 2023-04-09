@@ -26,20 +26,15 @@ Simply calling a symbol in any message that the bot can see will also return the
 
 **Commands**
         - `/donate [amount in USD]` to donate. 🎗️
-        - `/dividend $[symbol]` Dividend information for the symbol. 📅
         - `/intra $[symbol]` Plot of the stocks movement since the last market open.  📈
         - `/chart $[symbol]` Plot of the stocks movement for the past 1 month. 📊
-        - `/news $[symbol]` News about the symbol. 📰
-        - `/info $[symbol]` General information about the symbol. ℹ️
-        - `/stat $[symbol]` Key statistics about the symbol. 🔢
-        - `/cap $[symbol]` Market Capitalization of symbol. 💰
         - `/trending` Trending Stocks and Cryptos. 💬
         - `/help` Get some help using the bot. 🆘
 
 **Inline Features**
     You can type @SimpleStockBot `[search]` in any chat or direct message to search for the stock bots full list of stock and crypto symbols and return the price. Then once you select the ticker want the bot will send a message as you in that chat with the latest stock price. Prices may be delayed by up to an hour.
-    
-    Market data is provided by [IEX Cloud](https://iexcloud.io)
+
+    Market data is provided by [Market Data](https://www.marketdata.app/)
 
     If you believe the bot is not behaving properly run `/status` or [get in touch](https://docs.simplestockbot.com/contact).
     """
@@ -47,7 +42,7 @@ Simply calling a symbol in any message that the bot can see will also return the
     donate_text = """
 Simple Stock Bot is run entirely on donations[.](https://www.buymeacoffee.com/Anson)
 All donations go directly towards paying for servers, and market data is provided by
-[IEX Cloud](https://iexcloud.io/).
+[Market Data](https://www.marketdata.app/).
 
 The easiest way to donate is to run the `/donate [amount in USD]` command with US dollars you would like to donate.
 

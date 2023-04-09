@@ -8,7 +8,6 @@ import os
 import random
 import string
 import traceback
-import logging as log
 from uuid import uuid4
 
 import mplfinance as mpf
@@ -32,6 +31,10 @@ from telegram.ext import (
 from symbol_router import Router
 from T_info import T_info
 
+# Enable logging
+logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
+log = logging.getLogger(__name__)
+
 TELEGRAM_TOKEN = os.environ["TELEGRAM"]
 
 try:
@@ -43,10 +46,7 @@ except KeyError:
 s = Router()
 t = T_info()
 
-# Enable logging
-logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 
-logger = logging.getLogger(__name__)
 log.info("Bot script started.")
 
 
@@ -304,7 +304,6 @@ def trending(update: Update, context: CallbackContext):
     context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
 
     trending_list = s.trending()
-    log.info(trending_list)
 
     update.message.reply_text(
         text=trending_list,
@@ -380,22 +379,21 @@ def error(update: Update, context: CallbackContext):
     log.warning(f"Logging error: {err_code}")
 
     if update:
-        message = (
+        log.warning(
             f"An exception was raised while handling an update\n"
-            f"<pre>update = {html.escape(json.dumps(update.to_dict(), indent=2, ensure_ascii=False))}"
-            "</pre>\n\n"
-            f"<pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n\n"
-            f"<pre>context.user_data = {html.escape(str(context.user_data))}</pre>\n\n"
-            f"<pre>{html.escape(tb_string)}</pre>"
+            f"\tupdate = {html.escape(json.dumps(update.to_dict(), indent=2, ensure_ascii=False))}\n"
+            f"\tcontext.chat_data = {str(context.chat_data)}\n"
+            f"\tcontext.user_data = {str(context.user_data)}\n"
+            f"\t{html.escape(tb_string)}"
         )
-        log.warning(message)
-    else:
-        log.warning(tb_string)
 
-    update.message.reply_text(
-        text=f"An error has occured. Please inform @MisterBiggs if the error persists. Error Code: `{err_code}`",
-        parse_mode=telegram.ParseMode.MARKDOWN,
-    )
+        update.message.reply_text(
+            text=f"An error has occured. Please inform @MisterBiggs if the error persists. Error Code: `{err_code}`",
+            parse_mode=telegram.ParseMode.MARKDOWN,
+        )
+    else:
+        log.warning("No message to send to user.")
+        log.warning(tb_string)
 
 
 def main():

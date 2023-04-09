@@ -15,7 +15,7 @@ https://docs.simplestockbot.com/commands/
 
 ## Donate
 
-Simple Stock Bot is run entirely on donations, and costs about $420 a year to run. All donations go directly towards paying for servers, and premium market data provided by [IEX Cloud](https://iexcloud.io/).
+Simple Stock Bot is run entirely on donations, and costs about $420 a year to run. All donations go directly towards paying for servers, and premium market data provided by [Market Data](https://www.marketdata.app/).
 
 The best way to donate is through [Buy Me A Coffee](https://www.buymeacoffee.com/Anson) which accepts Paypal or Credit card.
 
@@ -29,4 +29,4 @@ If you have any questions get in [touch.](contact.md)
 - Contribute to the project on [GitLab](https://gitlab.com/simple-stock-bots) or just leave a star
 - Using my referral links to host your own Bot
   - [DigitalOcean](https://m.do.co/c/6b5df7ef55b6)
-  - [IEX Cloud](https://iexcloud.io/s/62c8503e)
+  - [Market Data](https://www.marketdata.app/)

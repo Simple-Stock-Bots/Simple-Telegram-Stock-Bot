@@ -5,7 +5,6 @@ import datetime
 import logging
 import random
 import re
-import logging as log
 
 import pandas as pd
 import schedule
@@ -16,6 +15,8 @@ from MarketData import MarketData
 from Symbol import Coin, Stock, Symbol
 
 from typing import Dict
+
+log = logging.getLogger(__name__)
 
 
 class Router:
@@ -77,9 +78,9 @@ class Router:
             else:
                 symbols.append(Coin(sym))
         if symbols:
-            log.info(symbols)
             for symbol in symbols:
                 self.trending_count[symbol.tag] = self.trending_count.get(symbol.tag, 0) + trending_weight
+                log.warning(self.trending_count)
 
         return symbols
 
@@ -303,8 +304,7 @@ class Router:
 
         for symbol in symbols:
             if isinstance(symbol, Stock):
-                replies.append("Command not supported for stocks.")
-                # replies.append(self.stock.spark_reply(symbol))
+                replies.append(self.stock.spark_reply(symbol))
             elif isinstance(symbol, Coin):
                 replies.append(self.crypto.spark_reply(symbol))
             else:
@@ -322,25 +322,20 @@ class Router:
             List of preformatted strings to be sent to user.
         """
 
-        stocks = self.stock.trending()
+        # stocks = self.stock.trending()
         coins = self.crypto.trending()
 
         reply = ""
 
+        log.warning(self.trending_count)
         if self.trending_count:
             reply += "🔥Trending on the Stock Bot:\n`"
             reply += "━" * len("Trending on the Stock Bot:") + "`\n"
 
             sorted_trending = [s[0] for s in sorted(self.trending_count.items(), key=lambda item: item[1])][::-1][0:5]
-
+            log.warning(sorted_trending)
             for t in sorted_trending:
                 reply += self.spark_reply(self.find_symbols(t))[0] + "\n"
-
-        if stocks:
-            reply += "\n\n💵Trending Stocks:\n`"
-            reply += "━" * len("Trending Stocks:") + "`\n"
-            for stock in stocks:
-                reply += stock + "\n"
 
         if coins:
             reply += "\n\n🦎Trending Crypto:\n`"
@@ -390,7 +385,6 @@ class Router:
                 log.debug(f"{symbol} is not a Stock or Coin")
 
         if stocks:
-            # IEX batch endpoint doesnt seem to be working right now
             for stock in stocks:
                 replies.append(self.stock.price_reply(stock))
         if coins:
