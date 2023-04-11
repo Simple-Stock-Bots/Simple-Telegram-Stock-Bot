@@ -156,9 +156,12 @@ def symbol_detect_image(update: Update, context: CallbackContext):
     Makes image captions into text then passes the `update` and `context`
         to symbol detect so that it can reply cashtags in image captions.
     """
-    if update.message.caption:
-        update.message.text = update.message.caption
-        symbol_detect(update, context)
+    try:
+        if update.message.caption:
+            update.message.text = update.message.caption
+            symbol_detect(update, context)
+    except AttributeError:
+        return
 
 
 def symbol_detect(update: Update, context: CallbackContext):
