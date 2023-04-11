@@ -37,6 +37,8 @@ class MarketData:
         except KeyError:
             self.MARKETDATA_TOKEN = ""
             log.warning("Starting without an MarketData.app Token will not allow you to get market data!")
+            log.warning("Use this affiliate link so that the bot can stay free:")
+            log.warning("https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=repo")
 
         if self.MARKETDATA_TOKEN != "":
             schedule.every().day.do(self.clear_charts)
@@ -45,7 +47,11 @@ class MarketData:
         url = "https://api.marketdata.app/v1/" + endpoint
 
         # set token param if it wasn't passed.
-        params["token"] = params.get("token", self.MARKETDATA_TOKEN)
+        params["token"] = self.MARKETDATA_TOKEN
+
+        # Undocumented query variable that ensures bot usage can be
+        # monitored even if someone doesn't make it through an affiliate link.
+        params["application"] = "simplestockbot"
 
         resp = r.get(url, params=params, timeout=timeout)
 
