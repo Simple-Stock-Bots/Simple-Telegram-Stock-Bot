@@ -1,4 +1,4 @@
-python-telegram-bot==13.5
+python-telegram-bot==20
 requests==2.25.1
 pandas==2.0.0
 schedule==1.0.0
