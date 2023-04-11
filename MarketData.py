@@ -1,9 +1,10 @@
+import datetime as dt
 import logging
 import os
-import datetime as dt
 from typing import Dict
 
 import pandas as pd
+import pytz
 import requests as r
 import schedule
 
@@ -21,6 +22,9 @@ class MarketData:
 
     charts: Dict[Stock, pd.DataFrame] = {}
 
+    openTime = dt.time(hour=9, minute=30, second=0)
+    marketTimeZone = pytz.timezone("US/Eastern")
+
     def __init__(self) -> None:
         """Creates a Symbol Object
 
@@ -29,6 +33,7 @@ class MarketData:
         MARKETDATA_TOKEN : str
             MarketData.app API Token
         """
+
         try:
             self.MARKETDATA_TOKEN = os.environ["MARKETDATA"]
 
@@ -170,18 +175,21 @@ class MarketData:
         except KeyError:
             pass
 
-        resolution = "5"  # minutes
+        resolution = "15"  # minutes
+        now = dt.datetime.now(self.marketTimeZone)
+
+        if self.openTime < now.time():
+            startTime = now.replace(hour=9, minute=30)
+        else:
+            startTime = now - dt.timedelta(days=1)
 
         if data := self.get(
             f"stocks/candles/{resolution}/{symbol}",
-            params={
-                "from": dt.datetime.now().strftime("%Y-%m-%d"),
-                "to": dt.datetime.now().isoformat(),
-            },
+            params={"from": startTime.timestamp(), "to": now.timestamp(), "extended": True},
         ):
             data.pop("s")
             df = pd.DataFrame(data)
-            df["t"] = pd.to_datetime(df["t"], unit="s")
+            df["t"] = pd.to_datetime(df["t"], unit="s", utc=True)
             df.set_index("t", inplace=True)
 
             df.rename(

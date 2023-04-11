@@ -80,7 +80,7 @@ class Router:
         if symbols:
             for symbol in symbols:
                 self.trending_count[symbol.tag] = self.trending_count.get(symbol.tag, 0) + trending_weight
-                log.warning(self.trending_count)
+                log.debug(self.trending_count)
 
         return symbols
 
