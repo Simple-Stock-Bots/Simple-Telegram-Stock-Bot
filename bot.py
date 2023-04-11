@@ -237,7 +237,7 @@ def intra(update: Update, context: CallbackContext):
     update.message.reply_photo(
         photo=buf,
         caption=f"\nIntraday chart for {symbol.name} from {df.first_valid_index().strftime('%d %b at %H:%M')} to"
-        + f" {df.last_valid_index().strftime('%d %b at %H:%M')}"
+        + f" {df.last_valid_index().strftime('%d %b at %H:%M %Z')}"
         + f"\n\n{s.price_reply([symbol])[0]}",
         parse_mode=telegram.ParseMode.MARKDOWN,
         disable_notification=True,
