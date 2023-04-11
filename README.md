@@ -15,7 +15,7 @@ https://docs.simplestockbot.com/commands/
 
 ## Donate
 
-Simple Stock Bot is run entirely on donations, and costs about $420 a year to run. All donations go directly towards paying for servers, and premium market data provided by [Market Data](https://www.marketdata.app/).
+Simple Stock Bot is run entirely on donations, and costs about $420 a year to run. All donations go directly towards paying for servers, and premium market data provided by [marketdata.app](https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=repo).
 
 The best way to donate is through [Buy Me A Coffee](https://www.buymeacoffee.com/Anson) which accepts Paypal or Credit card.
 
@@ -29,4 +29,4 @@ If you have any questions get in [touch.](contact.md)
 - Contribute to the project on [GitLab](https://gitlab.com/simple-stock-bots) or just leave a star
 - Using my referral links to host your own Bot
   - [DigitalOcean](https://m.do.co/c/6b5df7ef55b6)
-  - [Market Data](https://www.marketdata.app/)
+  - [marketdata.app](https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=repo)
