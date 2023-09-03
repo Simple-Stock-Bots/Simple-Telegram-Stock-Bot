@@ -1,8 +1,7 @@
 FROM python:3.11-buster AS builder
 
 
-COPY telegram/requirements.txt .
-
+COPY requirements.txt /requirements.txt
 RUN pip install --user -r requirements.txt
 
 
@@ -13,9 +12,6 @@ ENV MPLBACKEND=Agg
 COPY --from=builder /root/.local /root/.local
 
 
-COPY common common
-COPY telegram .
-
-
+COPY . .
 
 CMD [ "python", "./bot.py" ]

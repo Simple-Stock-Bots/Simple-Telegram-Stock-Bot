@@ -8,7 +8,7 @@ import pytz
 import requests as r
 import schedule
 
-from common.Symbol import Stock
+from Symbol import Stock
 
 log = logging.getLogger(__name__)
 
