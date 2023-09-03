@@ -4,4 +4,5 @@ services:
     build:
       context: .
       dockerfile: telegram/Dockerfile
+    image: registry.gitlab.com/simple-stock-bots/simple-telegram-stock-bot
     env_file: .env
