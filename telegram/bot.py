@@ -28,7 +28,7 @@ from telegram.ext import (
     Updater,
 )
 
-from symbol_router import Router
+from common.symbol_router import Router
 from T_info import T_info
 
 # Enable logging

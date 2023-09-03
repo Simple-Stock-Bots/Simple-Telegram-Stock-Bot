@@ -1,7 +1,8 @@
 FROM python:3.11-buster AS builder
 
 
-COPY requirements.txt /requirements.txt
+COPY discord/requirements.txt .
+
 RUN pip install --user -r requirements.txt
 
 
@@ -11,7 +12,7 @@ ENV MPLBACKEND=Agg
 
 COPY --from=builder /root/.local /root/.local
 
-
-COPY . .
+COPY common common
+COPY discord .
 
 CMD [ "python", "./bot.py" ]
