@@ -42,7 +42,7 @@ async def status(ctx: commands):
     message = ""
     try:
         message = "Contact MisterBiggs#0465 if you need help.\n"
-        message += s.status(f"Bot recieved your message in: {bot.latency*1000:.4f}ms") + "\n"
+        message += s.status(f"Bot recieved your message in: {bot.latency*10:.4f} seconds") + "\n"
 
     except Exception as ex:
         logging.critical(ex)

@@ -103,7 +103,7 @@ class MarketData:
             )
             status.raise_for_status()
         except r.HTTPError:
-            return f"API returned an HTTP error code {status.status_code} in {status.elapsed.total_seconds()} Seconds."
+            return f"API returned an HTTP error code {status.status_code} in {status.elapsed.total_seconds()} seconds."
         except r.Timeout:
             return "API timed out before it was able to give status. This is likely due to a surge in usage or a complete outage."
 
@@ -111,7 +111,7 @@ class MarketData:
 
         if statusJSON["status"] == "ok":
             return (
-                f"CoinGecko API responded that it was OK with a {status.status_code} in {status.elapsed.total_seconds()} Seconds."
+                f"CoinGecko API responded that it was OK with a {status.status_code} in {status.elapsed.total_seconds()} seconds."
             )
         else:
             return f"MarketData.app is currently reporting the following status: {statusJSON['status']}"
@@ -131,7 +131,11 @@ class MarketData:
 
         if quoteResp := self.get(f"stocks/quotes/{symbol}/"):
             price = round(quoteResp["last"][0], 2)
-            changePercent = round(quoteResp["changepct"][0], 2)
+
+            try:
+                changePercent = round(quoteResp["changepct"][0], 2)
+            except TypeError:
+                return f"The price of {symbol} is {price}"
 
             message = f"The current price of {symbol.name} is ${price} and "
 
@@ -148,11 +152,13 @@ class MarketData:
 
     def spark_reply(self, symbol: Stock) -> str:
         if quoteResp := self.get(f"stocks/quotes/{symbol}/"):
-            changePercent = round(quoteResp["changepct"][0], 2)
-            return f"`{symbol.tag}`: {changePercent}%"
-        else:
-            logging.warning(f"{symbol} did not have 'changepct' field.")
-            return f"`{symbol.tag}`"
+            try:
+                changePercent = round(quoteResp["changepct"][0], 2)
+                return f"`{symbol.tag}`: {changePercent}%"
+            except TypeError:
+                pass
+
+        return f"`{symbol.tag}`"
 
     def intra_reply(self, symbol: Stock) -> pd.DataFrame:
         """Returns price data for a symbol of the past month up until the previous trading days close.

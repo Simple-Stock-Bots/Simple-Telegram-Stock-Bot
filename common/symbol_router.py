@@ -123,7 +123,8 @@ class Router:
             Each tuple contains: (Symbol, Issue Name).
         """
 
-        df = pd.concat([self.stock.symbol_list, self.crypto.symbol_list])
+        # df = pd.concat([self.stock.symbol_list, self.crypto.symbol_list])
+        df = self.crypto.symbol_list
 
         df = df[df["description"].str.contains(search, regex=False, case=False)].sort_values(
             by="type_id", key=lambda x: x.str.len()
@@ -338,8 +339,8 @@ class Router:
                 reply += self.spark_reply(self.find_symbols(t))[0] + "\n"
 
         if coins:
-            reply += "\n\n🦎Trending Crypto:\n`"
-            reply += "━" * len("Trending Crypto:") + "`\n"
+            reply += "\n\n🦎Trending on CoinGecko:\n`"
+            reply += "━" * len("Trending on CoinGecko:") + "`\n"
             for coin in coins:
                 reply += coin + "\n"
 
@@ -353,7 +354,8 @@ class Router:
             return "Trending data is not currently available."
 
     def random_pick(self) -> str:
-        choice = random.choice(list(self.stock.symbol_list["description"]) + list(self.crypto.symbol_list["description"]))
+        # choice = random.choice(list(self.stock.symbol_list["description"]) + list(self.crypto.symbol_list["description"]))
+        choice = random.choice(list(self.crypto.symbol_list["description"]))
         hold = (datetime.date.today() + datetime.timedelta(random.randint(1, 365))).strftime("%b %d, %Y")
 
         return f"{choice}\nBuy and hold until: {hold}"
