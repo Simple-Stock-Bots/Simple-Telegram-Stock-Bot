@@ -77,10 +77,10 @@ class cg_Crypto:
         try:
             status.raise_for_status()
             return (
-                f"CoinGecko API responded that it was OK with a {status.status_code} in {status.elapsed.total_seconds()} Seconds."
+                f"CoinGecko API responded that it was OK with a {status.status_code} in {status.elapsed.total_seconds()} seconds."
             )
         except r.HTTPError:
-            return f"CoinGecko API returned an error code {status.status_code} in {status.elapsed.total_seconds()} Seconds."
+            return f"CoinGecko API returned an error code {status.status_code} in {status.elapsed.total_seconds()} seconds."
 
     def price_reply(self, coin: Coin) -> str:
         """Returns current market price or after hours if its available for a given coin symbol.

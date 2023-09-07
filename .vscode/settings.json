@@ -1,5 +1,8 @@
 {
-    "python.formatting.provider": "black",
-    "python.linting.mypyEnabled": true,
-    "python.linting.flake8Enabled": true,
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "editor.formatOnSaveMode": "modificationsIfAvailable",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+    }
 }

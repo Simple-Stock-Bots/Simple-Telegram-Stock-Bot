@@ -18,14 +18,15 @@ from telegram import (
     LabeledPrice,
     Update,
 )
+
 from telegram.ext import (
-    CallbackContext,
+    Application,
     CommandHandler,
-    Filters,
     InlineQueryHandler,
-    MessageHandler,
     PreCheckoutQueryHandler,
-    Updater,
+    MessageHandler,
+    filters,
+    ContextTypes,
 )
 
 from common.symbol_router import Router
@@ -33,6 +34,10 @@ from T_info import T_info
 
 # Enable logging
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
+
+# set higher logging level for httpx to avoid all GET and POST requests being logged
+logging.getLogger("httpx").setLevel(logging.WARNING)
+
 log = logging.getLogger(__name__)
 
 TELEGRAM_TOKEN = os.environ["TELEGRAM"]
@@ -50,58 +55,58 @@ t = T_info()
 log.info("Bot script started.")
 
 
-def start(update: Update, context: CallbackContext):
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Send help text when the command /start is issued."""
     log.info(f"Start command ran by {update.message.chat.username}")
-    update.message.reply_text(
+    await update.message.reply_text(
         text=t.help_text,
-        parse_mode=telegram.ParseMode.MARKDOWN,
+        parse_mode=telegram.constants.ParseMode.MARKDOWN,
         disable_notification=True,
     )
 
 
-def help(update: Update, context: CallbackContext):
+async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Send help text when the command /help is issued."""
     log.info(f"Help command ran by {update.message.chat.username}")
-    update.message.reply_text(
+    await update.message.reply_text(
         text=t.help_text,
-        parse_mode=telegram.ParseMode.MARKDOWN,
+        parse_mode=telegram.constants.ParseMode.MARKDOWN,
         disable_notification=True,
     )
 
 
-def license(update: Update, context: CallbackContext):
+async def license(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Send bots license when the /license command is issued."""
     log.info(f"License command ran by {update.message.chat.username}")
-    update.message.reply_text(
+    await update.message.reply_text(
         text=t.license,
-        parse_mode=telegram.ParseMode.MARKDOWN,
+        parse_mode=telegram.constants.ParseMode.MARKDOWN,
         disable_notification=True,
     )
 
 
-def status(update: Update, context: CallbackContext):
+async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Gather status of bot and dependant services and return important status updates."""
     log.warning(f"Status command ran by {update.message.chat.username}")
     bot_resp_time = datetime.datetime.now(update.message.date.tzinfo) - update.message.date
 
     bot_status = s.status(f"It took {bot_resp_time.total_seconds()} seconds for the bot to get your message.")
 
-    update.message.reply_text(
+    await update.message.reply_text(
         text=bot_status,
-        parse_mode=telegram.ParseMode.MARKDOWN,
+        parse_mode=telegram.constants.ParseMode.MARKDOWN,
     )
 
 
-def donate(update: Update, context: CallbackContext):
+async def donate(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Sets up donation."""
     log.info(f"Donate command ran by {update.message.chat.username}")
     chat_id = update.message.chat_id
 
     if update.message.text.strip() == "/donate" or "/donate@" in update.message.text:
-        update.message.reply_text(
+        await update.message.reply_text(
             text=t.donate_text,
-            parse_mode=telegram.ParseMode.MARKDOWN,
+            parse_mode=telegram.constants.ParseMode.MARKDOWN,
             disable_notification=True,
         )
         amount = 1.0
@@ -111,11 +116,11 @@ def donate(update: Update, context: CallbackContext):
     try:
         price = int(amount * 100)
     except ValueError:
-        update.message.reply_text(f"{amount} is not a valid donation amount or number.")
+        await update.message.reply_text(f"{amount} is not a valid donation amount or number.")
         return
     log.info(f"Donation amount: {price} by {update.message.chat.username}")
 
-    context.bot.send_invoice(
+    await context.bot.send_invoice(
         chat_id=chat_id,
         title="Simple Stock Bot Donation",
         description=f"Simple Stock Bot Donation of ${amount} by {update.message.chat.username}",
@@ -131,27 +136,27 @@ def donate(update: Update, context: CallbackContext):
     )
 
 
-def precheckout_callback(update: Update, context: CallbackContext):
+async def precheckout_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Approves donation"""
     log.info("precheckout_callback queried")
     query = update.pre_checkout_query
 
-    query.answer(ok=True)
+    await query.answer(ok=True)
     # I dont think I need to check since its only donations.
     # if query.invoice_payload == "simple-stock-bot":
     #     # answer False pre_checkout_query
-    #     query.answer(ok=True)
+    #     await query.answer(ok=True)
     # else:
-    #     query.answer(ok=False, error_message="Something went wrong...")
+    #     await query.answer(ok=False, error_message="Something went wrong...")
 
 
-def successful_payment_callback(update: Update, context: CallbackContext):
+async def successful_payment_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Thanks user for donation"""
     log.info("Successful payment!")
-    update.message.reply_text("Thank you for your donation! It goes a long way to keeping the bot free!")
+    await update.message.reply_text("Thank you for your donation! It goes a long way to keeping the bot free!")
 
 
-def symbol_detect_image(update: Update, context: CallbackContext):
+async def symbol_detect_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Makes image captions into text then passes the `update` and `context`
         to symbol detect so that it can reply cashtags in image captions.
@@ -159,12 +164,12 @@ def symbol_detect_image(update: Update, context: CallbackContext):
     try:
         if update.message.caption:
             update.message.text = update.message.caption
-            symbol_detect(update, context)
+            await symbol_detect(update, context)
     except AttributeError:
         return
 
 
-def symbol_detect(update: Update, context: CallbackContext):
+async def symbol_detect(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Runs on any message that doesn't have a command and searches for cashtags,
         then returns the prices of any symbols found.
@@ -182,18 +187,18 @@ def symbol_detect(update: Update, context: CallbackContext):
         return
     if symbols:
         # Let user know bot is working
-        context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+        await context.bot.send_chat_action(chat_id=chat_id, action=telegram.constants.ChatAction.TYPING)
         log.info(f"Symbols found: {symbols}")
 
         for reply in s.price_reply(symbols):
-            update.message.reply_text(
+            await update.message.reply_text(
                 text=reply,
-                parse_mode=telegram.ParseMode.MARKDOWN,
+                parse_mode=telegram.constants.ParseMode.MARKDOWN,
                 disable_notification=True,
             )
 
 
-def intra(update: Update, context: CallbackContext):
+async def intra(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """returns a chart of intraday data for a symbol"""
     log.info(f"Intra command ran by {update.message.chat.username}")
 
@@ -201,7 +206,7 @@ def intra(update: Update, context: CallbackContext):
     chat_id = update.message.chat_id
 
     if message.strip().split("@")[0] == "/intra":
-        update.message.reply_text(
+        await update.message.reply_text(
             "This command returns a chart of the stocks movement since the most recent market open.\nExample: /intra $tsla"
         )
         return
@@ -212,19 +217,19 @@ def intra(update: Update, context: CallbackContext):
     if len(symbols):
         symbol = symbols[0]
     else:
-        update.message.reply_text("No symbols or coins found.")
+        await update.message.reply_text("No symbols or coins found.")
         return
 
     df = s.intra_reply(symbol)
     if df.empty:
-        update.message.reply_text(
+        await update.message.reply_text(
             text="Invalid symbol please see `/help` for usage details.",
-            parse_mode=telegram.ParseMode.MARKDOWN,
+            parse_mode=telegram.constants.ParseMode.MARKDOWN,
             disable_notification=True,
         )
         return
 
-    context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+    await context.bot.send_chat_action(chat_id=chat_id, action=telegram.constants.ChatAction.UPLOAD_PHOTO)
 
     buf = io.BytesIO()
     mpf.plot(
@@ -237,17 +242,17 @@ def intra(update: Update, context: CallbackContext):
     )
     buf.seek(0)
 
-    update.message.reply_photo(
+    await update.message.reply_photo(
         photo=buf,
         caption=f"\nIntraday chart for {symbol.name} from {df.first_valid_index().strftime('%d %b at %H:%M')} to"
         + f" {df.last_valid_index().strftime('%d %b at %H:%M %Z')}"
         + f"\n\n{s.price_reply([symbol])[0]}",
-        parse_mode=telegram.ParseMode.MARKDOWN,
+        parse_mode=telegram.constants.ParseMode.MARKDOWN,
         disable_notification=True,
     )
 
 
-def chart(update: Update, context: CallbackContext):
+async def chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """returns a chart of the past month of data for a symbol"""
     log.info(f"Chart command ran by {update.message.chat.username}")
 
@@ -255,7 +260,7 @@ def chart(update: Update, context: CallbackContext):
     chat_id = update.message.chat_id
 
     if message.strip().split("@")[0] == "/chart":
-        update.message.reply_text(
+        await update.message.reply_text(
             "This command returns a chart of the stocks movement for the past month.\nExample: /chart $tsla"
         )
         return
@@ -265,18 +270,18 @@ def chart(update: Update, context: CallbackContext):
     if len(symbols):
         symbol = symbols[0]
     else:
-        update.message.reply_text("No symbols or coins found.")
+        await update.message.reply_text("No symbols or coins found.")
         return
 
     df = s.chart_reply(symbol)
     if df.empty:
-        update.message.reply_text(
+        await update.message.reply_text(
             text="Invalid symbol please see `/help` for usage details.",
-            parse_mode=telegram.ParseMode.MARKDOWN,
+            parse_mode=telegram.constants.ParseMode.MARKDOWN,
             disable_notification=True,
         )
         return
-    context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.UPLOAD_PHOTO)
+    await context.bot.send_chat_action(chat_id=chat_id, action=telegram.constants.ChatAction.UPLOAD_PHOTO)
 
     buf = io.BytesIO()
     mpf.plot(
@@ -289,39 +294,42 @@ def chart(update: Update, context: CallbackContext):
     )
     buf.seek(0)
 
-    update.message.reply_photo(
+    await update.message.reply_photo(
         photo=buf,
         caption=f"\n1 Month chart for {symbol.name} from {df.first_valid_index().strftime('%d, %b %Y')}"
         + f" to {df.last_valid_index().strftime('%d, %b %Y')}\n\n{s.price_reply([symbol])[0]}",
-        parse_mode=telegram.ParseMode.MARKDOWN,
+        parse_mode=telegram.constants.ParseMode.MARKDOWN,
         disable_notification=True,
     )
 
 
-def trending(update: Update, context: CallbackContext):
+async def trending(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """returns currently trending symbols and how much they've moved in the past trading day."""
     log.info(f"Trending command ran by {update.message.chat.username}")
 
     chat_id = update.message.chat_id
 
-    context.bot.send_chat_action(chat_id=chat_id, action=telegram.ChatAction.TYPING)
+    await context.bot.send_chat_action(chat_id=chat_id, action=telegram.constants.ChatAction.TYPING)
 
     trending_list = s.trending()
 
-    update.message.reply_text(
+    await update.message.reply_text(
         text=trending_list,
-        parse_mode=telegram.ParseMode.MARKDOWN,
+        parse_mode=telegram.constants.ParseMode.MARKDOWN,
         disable_notification=True,
     )
 
 
-def inline_query(update: Update, context: CallbackContext):
+async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Handles inline query. Searches by looking if query is contained
         in the symbol and returns matches in alphabetical order.
     """
-    # info(f"Inline command ran by {update.message.chat.username}")
-    log.info(f"Query: {update.inline_query.query}")
+
+    if not update.inline_query.query:
+        return
+
+    print(f"Query: {update.inline_query.query}")
 
     ignored_queries = {"$", "$$", " ", ""}
 
@@ -331,12 +339,14 @@ def inline_query(update: Update, context: CallbackContext):
         in any chat or direct message to search for the stock bots full list of stock and crypto symbols and return the price.
         """
 
-        update.inline_query.answer(
+        await update.inline_query.answer(
             [
                 InlineQueryResultArticle(
                     str(uuid4()),
                     title="Please enter a query. It can be a ticker or a name of a company.",
-                    input_message_content=InputTextMessageContent(default_message, parse_mode=telegram.ParseMode.MARKDOWN),
+                    input_message_content=InputTextMessageContent(
+                        default_message, parse_mode=telegram.constants.ParseMode.MARKDOWN
+                    ),
                 )
             ]
         )
@@ -349,29 +359,31 @@ def inline_query(update: Update, context: CallbackContext):
             InlineQueryResultArticle(
                 str(uuid4()),
                 title=row["description"],
-                input_message_content=InputTextMessageContent(row["price_reply"], parse_mode=telegram.ParseMode.MARKDOWN),
+                input_message_content=InputTextMessageContent(
+                    row["price_reply"], parse_mode=telegram.constants.ParseMode.MARKDOWN
+                ),
             )
         )
 
         if len(results) == 5:
-            update.inline_query.answer(results, cache_time=60 * 60)
+            await update.inline_query.answer(results, cache_time=60 * 60)
             log.info("Inline Command was successful")
             return
-    update.inline_query.answer(results)
+    await update.inline_query.answer(results)
 
 
-def rand_pick(update: Update, context: CallbackContext):
+async def rand_pick(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """For the gamblers. Returns a random symbol to buy and a sell date"""
     log.info(f"Someone is gambling! Random_pick command ran by {update.message.chat.username}")
 
-    update.message.reply_text(
+    await update.message.reply_text(
         text=s.random_pick(),
-        parse_mode=telegram.ParseMode.MARKDOWN,
+        parse_mode=telegram.constants.ParseMode.MARKDOWN,
         disable_notification=True,
     )
 
 
-def error(update: Update, context: CallbackContext):
+async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Log Errors caused by Updates."""
     log.warning('Update "%s" caused error "%s"', update, error)
 
@@ -390,9 +402,9 @@ def error(update: Update, context: CallbackContext):
             f"\t{html.escape(tb_string)}"
         )
 
-        update.message.reply_text(
+        await update.message.reply_text(
             text=f"An error has occured. Please inform @MisterBiggs if the error persists. Error Code: `{err_code}`",
-            parse_mode=telegram.ParseMode.MARKDOWN,
+            parse_mode=telegram.constants.ParseMode.MARKDOWN,
         )
     else:
         log.warning("No message to send to user.")
@@ -402,48 +414,43 @@ def error(update: Update, context: CallbackContext):
 def main():
     """Start the context.bot."""
     # Create the EventHandler and pass it your bot's token.
-    updater = Updater(TELEGRAM_TOKEN)
-
-    # Get the dispatcher to register handlers
-    dp = updater.dispatcher
+    application = Application.builder().token(TELEGRAM_TOKEN).build()
 
     # on different commands - answer in Telegram
-    dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(CommandHandler("help", help))
-    dp.add_handler(CommandHandler("license", license))
-    dp.add_handler(CommandHandler("trending", trending))
-    dp.add_handler(CommandHandler("random", rand_pick))
-    dp.add_handler(CommandHandler("donate", donate))
-    dp.add_handler(CommandHandler("status", status))
-    dp.add_handler(CommandHandler("inline", inline_query))
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("help", help))
+    application.add_handler(CommandHandler("license", license))
+    application.add_handler(CommandHandler("trending", trending))
+    application.add_handler(CommandHandler("random", rand_pick))
+    application.add_handler(CommandHandler("donate", donate))
+    application.add_handler(CommandHandler("status", status))
+    application.add_handler(CommandHandler("inline", inline_query))
 
     # Charting can be slow so they run async.
-    dp.add_handler(CommandHandler("intra", intra, run_async=True))
-    dp.add_handler(CommandHandler("intraday", intra, run_async=True))
-    dp.add_handler(CommandHandler("day", intra, run_async=True))
-    dp.add_handler(CommandHandler("chart", chart, run_async=True))
-    dp.add_handler(CommandHandler("month", chart, run_async=True))
+    application.add_handler(CommandHandler("intra", intra, block=False))
+    application.add_handler(CommandHandler("intraday", intra, block=False))
+    application.add_handler(CommandHandler("day", intra, block=False))
+    application.add_handler(CommandHandler("chart", chart, block=False))
+    application.add_handler(CommandHandler("month", chart, block=False))
 
     # on noncommand i.e message - echo the message on Telegram
-    dp.add_handler(MessageHandler(Filters.text, symbol_detect))
-    dp.add_handler(MessageHandler(Filters.photo, symbol_detect_image))
+    application.add_handler(MessageHandler(filters.TEXT, symbol_detect))
+    application.add_handler(MessageHandler(filters.PHOTO, symbol_detect_image))
 
     # Inline Bot commands
-    dp.add_handler(InlineQueryHandler(inline_query))
+    application.add_handler(InlineQueryHandler(inline_query))
 
     # Pre-checkout handler to final check
-    dp.add_handler(PreCheckoutQueryHandler(precheckout_callback))
+    application.add_handler(PreCheckoutQueryHandler(precheckout_callback))
 
     # Payment success
-    dp.add_handler(MessageHandler(Filters.successful_payment, successful_payment_callback))
+    application.add_handler(MessageHandler(filters.SUCCESSFUL_PAYMENT, successful_payment_callback))
 
     # log all errors
-    dp.add_error_handler(error)
+    application.add_error_handler(error)
 
     # Start the Bot
-    updater.start_polling()
-
-    updater.idle()
+    application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 
 if __name__ == "__main__":
