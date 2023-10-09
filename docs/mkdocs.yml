@@ -1,0 +1,74 @@
+site_name: Simple Stock Bot Docs
+site_url: https://docs.simplestockbot.com
+edit_uri: /simple-stock-bots/site/tree/master/docs
+repo_url: https://gitlab.com/simple-stock-bots
+repo_name: Simple Stock Bots
+
+site_description: Simple Discord and Telegram chat bots for Stock Market Data.
+site_author: Anson Biggs
+copyright: <a href="https://ansonbiggs.com">Anson Biggs</a> 2018 </br> Available Under an <a href="/LICENSE/">MIT LICENSE</a> </br>
+
+
+nav:
+  - Home: index.md
+  - Commands: commands.md
+  - Hosting: host.md
+  - Donate: donate.md
+  - Contact: contact.md
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.footer
+  icon:
+    logo: material/robot-love
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      primary: green
+      scheme: default
+      toggle:
+        icon: material/lightbulb-outline
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      primary: green
+      scheme: slate
+      toggle:
+        icon: material/lightbulb
+        name: Switch to light mode
+
+extra:
+  social:
+    - icon: fontawesome/solid/house
+      link: https://simplestockbot.com/
+    - icon: fontawesome/brands/telegram
+      link: https://t.me/SimpleStockBot
+      name: Get the Telegram bot
+    - icon: fontawesome/brands/discord
+      link: https://discordapp.com/api/oauth2/authorize?client_id=532045200823025666&permissions=36507338752&scope=bot
+      name: Get the Discord Bot
+    - icon: material/chart-line-stacked
+      link: https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=repo
+      name: MarketData.app for stock data
+
+
+
+
+extra_css:
+  - stylesheets/phone.css
+
+
+plugins:
+  - search
+  - social
+
+
+markdown_extensions:
+- attr_list
+- pymdownx.emoji:
+    emoji_index: !!python/name:materialx.emoji.twemoji
+    emoji_generator: !!python/name:materialx.emoji.to_svg

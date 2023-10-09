@@ -1,5 +1,21 @@
+stages:
+  - lint
+  - deploy
+
 black:
-  # stage: .pre
+  stage: lint
   image: registry.gitlab.com/pipeline-components/black:latest
   script:
     - black --check --verbose -- .
+
+ruff:
+  stage: lint
+  # image: registry.gitlab.com/pipeline-components/ruff:latest
+  image: python:3.11-slim
+  script:
+    - pip3 install ruff
+    - ruff --output-format gitlab .
+
+
+include:
+  - local: /docs/.gitlab-ci.yml
