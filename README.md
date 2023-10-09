@@ -1,32 +1,44 @@
-# Simple Telegram Stock Bot
+# Simple Stock Bots
 
-
-[![Platform](https://img.shields.io/badge/platform-Telegram-blue.svg)](https://t.me/SimpleStockBot)
+[![Platform](https://img.shields.io/badge/platform-Telegram%20%7C%20Discord-blue.svg)](https://t.me/SimpleStockBot)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
-[![Author](https://img.shields.io/badge/Maintainer-Anson-blue)](https://ansonbiggs.com)
+[![Maintainer](https://img.shields.io/badge/Maintainer-Anson-blue)](https://ansonbiggs.com)
 
-## Docs
+Enhance your group chats on Telegram and Discord with real-time stock and cryptocurrency insights. Simple Stock Bots deliver timely stock quotes, charts, and market trends directly to your chats, making financial discussions more engaging and informed.
 
-https://docs.simplestockbot.com/
+## Documentation
 
-## Usage
+Comprehensive documentation is available to help you understand the features and capabilities of Simple Stock Bots:
+- [Official Documentation](https://docs.simplestockbot.com/)
+- [Command Reference](https://docs.simplestockbot.com/commands/)
 
-https://docs.simplestockbot.com/commands/
+## Support the Project
 
-## Donate
+Simple Stock Bots is sustained entirely through donations, with an annual expense of about $420 for server and premium market data subscriptions from [marketdata.app](https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=repo).
 
-Simple Stock Bot is run entirely on donations, and costs about $420 a year to run. All donations go directly towards paying for servers, and premium market data provided by [marketdata.app](https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=repo).
+You can contribute by:
+- Donating through [Buy Me A Coffee](https://www.buymeacoffee.com/Anson) (PayPal or Credit Card accepted).
+- Using the `/donate` [command](commands.md#donate-amount-in-usd) on Telegram.
+- [Getting in touch](contact.md) for any inquiries or suggestions.
 
-The best way to donate is through [Buy Me A Coffee](https://www.buymeacoffee.com/Anson) which accepts Paypal or Credit card.
+### Additional Support:
 
-Alternatively, you can donate on Telegram with the `/donate` [command](commands.md#donate-amount-in-usd).
-
-If you have any questions get in [touch.](contact.md)
-
-## Other Ways to Help:
-
-- Follow me on [twitter](https://twitter.com/AnsonBiggs)
-- Contribute to the project on [GitLab](https://gitlab.com/simple-stock-bots) or just leave a star
-- Using my referral links to host your own Bot
+- Follow on [Twitter](https://twitter.com/AnsonBiggs)
+- Contribute or star the project on [GitLab](https://gitlab.com/simple-stock-bots)
+- Utilize referral links for self-hosting:
   - [DigitalOcean](https://m.do.co/c/6b5df7ef55b6)
-  - [marketdata.app](https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=repo)
+  - [marketdata.app](https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=web)
+
+## Hosting
+
+Self-hosting instructions are provided for those interested in running the bot on their own servers:
+- [Hosting Guide](https://docs.simplestockbot.com/hosting/)
+
+## Contact
+
+Reach out for bug reports, feature requests, or other inquiries:
+- [Contact Page](https://docs.simplestockbot.com/contact/)
+
+---
+
+Your support in any form is immensely appreciated and ensures the continuous improvement and availability of Simple Stock Bots for everyone.

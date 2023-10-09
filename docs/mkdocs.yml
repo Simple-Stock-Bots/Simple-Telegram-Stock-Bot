@@ -1,7 +1,7 @@
-site_name: Simple Stock Bot Docs
-site_url: https://docs.simplestockbot.com
+site_name: Simple Stock Bot
+site_url: https://simplestockbot.com
 edit_uri: /simple-stock-bots/site/tree/master/docs
-repo_url: https://gitlab.com/simple-stock-bots
+repo_url: https://gitlab.com/simple-stock-bots/simple-telegram-stock-bot
 repo_name: Simple Stock Bots
 
 site_description: Simple Discord and Telegram chat bots for Stock Market Data.
@@ -12,7 +12,7 @@ copyright: <a href="https://ansonbiggs.com">Anson Biggs</a> 2018 </br> Available
 nav:
   - Home: index.md
   - Commands: commands.md
-  - Hosting: host.md
+  - Self-Host: host.md
   - Donate: donate.md
   - Contact: contact.md
 
@@ -24,7 +24,7 @@ theme:
     - navigation.tracking
     - navigation.tabs
     - navigation.tabs.sticky
-    - navigation.footer
+    - content.code.copy
   icon:
     logo: material/robot-love
   palette:
@@ -52,7 +52,7 @@ extra:
       link: https://discordapp.com/api/oauth2/authorize?client_id=532045200823025666&permissions=36507338752&scope=bot
       name: Get the Discord Bot
     - icon: material/chart-line-stacked
-      link: https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=repo
+      link: https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=web
       name: MarketData.app for stock data
 
 
@@ -68,7 +68,10 @@ plugins:
 
 
 markdown_extensions:
-- attr_list
-- pymdownx.emoji:
-    emoji_index: !!python/name:materialx.emoji.twemoji
-    emoji_generator: !!python/name:materialx.emoji.to_svg
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences

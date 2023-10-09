@@ -1,15 +1,21 @@
-Simple Stock Bot is run entirely on donations, and costs about $420 a year to run. All donations go directly towards paying for servers, and premium market data provided by [matketdata.app](https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=repo).
+# Support Simple Stock Bot
 
-The best way to donate is through [Buy Me A Coffee](https://www.buymeacoffee.com/Anson) which accepts Paypal or Credit card.
+Running Simple Stock Bot incurs a yearly expense of about $420, covering server costs and premium market data subscription from [marketdata.app](https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=repo). Every donation helps in maintaining the bot and ensuring its continued availability for all users.
 
-Alternatively, you can donate on Telegram with the `/donate` [command](commands.md#donate-amount-in-usd).
+Your support through [Buy Me A Coffee](https://www.buymeacoffee.com/Anson) is greatly appreciated, which accepts both PayPal and Credit Card donations.
 
-If you have any questions get in [touch.](contact.md)
+For Telegram users, a convenient way to donate is by using the `/donate` [command](commands.md#donate-amount-in-usd).
 
-## Other Ways to Help:
+Should you have any inquiries, feel free to get in [touch](contact.md).
 
-- Follow me on [twitter](https://twitter.com/AnsonBiggs)
-- Contribute to the project on [GitLab](https://gitlab.com/simple-stock-bots) or just leave a star
-- Using my referral links to host your own Bot
-  - [matketdata.app](https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=repo)
+## Additional Support:
+
+Your engagement also counts as support! Here are other ways to contribute:
+
+- Stay updated by following me on [Twitter](https://twitter.com/AnsonBiggs).
+- Contribute to the project or star it on [GitLab](https://gitlab.com/simple-stock-bots).
+- If you plan to host your own bot, consider using my referral links:
+  - [marketdata.app](https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=web)
   - [DigitalOcean](https://m.do.co/c/6b5df7ef55b6)
+
+Your support in any form is immensely appreciated and helps in keeping Simple Stock Bot operational and free for everyone.
