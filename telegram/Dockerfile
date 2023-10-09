@@ -1,9 +1,10 @@
 FROM python:3.11-buster AS builder
 
 
-COPY telegram/requirements.txt .
+COPY telegram/telegram-reqs.txt .
+COPY common/requirements.txt .
 
-RUN pip install --user -r requirements.txt
+RUN pip install --user -r telegram-reqs.txt
 
 
 FROM python:3.11-slim

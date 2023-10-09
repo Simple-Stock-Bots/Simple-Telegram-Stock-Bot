@@ -1,0 +1,40 @@
+/* https://codepen.io/RG/pen/bdfDI */
+.phone {
+  background: none repeat scroll 0 0 #fff;
+  /*border-left: 1px solid #ccc;
+      border-right: 1px solid #ccc;*/
+  color: #ffffff;
+  font-family: sans-serif;
+  line-height: 20px;
+  width: 80%;
+  margin: 0 auto;
+  overflow-x: hidden;
+  position: relative;
+  border-radius: 10px;
+  margin: 50px;
+}
+.messages-wrapper {
+  position: relative;
+}
+.message {
+  margin: 10px;
+  padding: 15px 20px;
+  position: relative;
+  overflow-x: auto;
+}
+.message.to {
+  border-radius: 20px 0px 20px 20px;
+  background-color: #2095fe;
+  color: #fff;
+  margin-left: 20%;
+}
+.message.from {
+  border-radius: 20px 20px 20px 0px;
+  background-color: #e5e4e9;
+  color: #363636;
+  margin-right: 20%;
+}
+.message.to + .message.to,
+.message.from + .message.from {
+  margin-top: -7px;
+}

@@ -1,4 +1,5 @@
--r telegram/requirements.txt
+-r common/requirements.txt
+-r docs/requirements.txt
 black==23.7.0
 flake8==6.1.0
 Flake8-pyproject==1.2.3
@@ -6,4 +7,4 @@ pylama==8.4.1
 mypy==1.5.1
 types-cachetools==5.3.0.6
 types-pytz==2023.3.0.1
-ruff==0.0.287
+ruff==0.0.292

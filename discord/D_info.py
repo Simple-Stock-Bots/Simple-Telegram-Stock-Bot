@@ -14,52 +14,46 @@ class D_info:
     )
 
     help_text = """
-Thanks for using this bot, consider supporting it by [buying me a beer.](https://www.buymeacoffee.com/Anson)
+Thanks for using this bot. If you like it, [support me with a beer](https://www.buymeacoffee.com/Anson). 🍻
 
-If you are interested in stock market data, or want to host your own bot, be sure to use my affiliate link so that the bot can stay free: [marketdata.app](https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=discord)
+For stock data or hosting your own bot, use my link. This helps keep the bot free:
+[marketdata.app](https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=discord).
 
-Keep up with the latest news for the bot in its discord Channel: https://t.me/simplestockbotnews
+**Updates**: Join the bot's discord: https://t.me/simplestockbotnews.
 
-Full documentation on using and running your own stock bot can be found on the bots [docs.](https://docs.simplestockbot.com)
+**Documentation**: All details about the bot are at [docs](https://docs.simplestockbot.com).
 
-The bot detects _"Symbols"_ using either one `$` or two `$$` dollar signs before the symbol. One dollar sign is for a stock market ticker, while two is for a cryptocurrency coin. `/chart $$eth` would return a chart of the past month of data for Ethereum, while `/dividend $psec` returns dividend information for Prospect Capital stock.
+The bot reads _"Symbols"_. Use `$` for stock tickers and `$$` for cryptocurrencies. For example:
+- `/chart $$eth` gives Ethereum's monthly chart.
+- `/dividend $psec` shows Prospect Capital's dividend.
 
-Simply calling a symbol in any message that the bot can see will also return the price. So a message like: `I wonder if $$btc will go to the Moon now that $tsla accepts it as payment` would return the current price for both Bitcoin and Tesla. 
+Type any symbol, and the bot shows its price. Like: `Is $$btc rising since $tsla accepts it?` will give Bitcoin and Tesla prices.
 
 **Commands**
-        - `/donate [amount in USD]` to donate. 🎗️
-        - `/intra $[symbol]` Plot of the stocks movement since the last market open.  📈
-        - `/chart $[symbol]` Plot of the stocks movement for the past 1 month. 📊
-        - `/trending` Trending Stocks and Cryptos. 💬
-        - `/help` Get some help using the bot. 🆘
+- `/donate [USD amount]`: Support the bot. 🎗️
+- `/intra $[symbol]`: See stock's latest movement. 📈
+- `/chart $[symbol]`: View a month's stock activity. 📊
+- `/trending`: Check trending stocks and cryptos. 💬
+- `/help`: Need help? Ask here. 🆘
 
 **Inline Features**
-    You can type @SimpleStockBot `[search]` in any chat or direct message to search for the stock bots full list of stock and crypto symbols and return the price. Then once you select the ticker want the bot will send a message as you in that chat with the latest stock price. Prices may be delayed by up to an hour.
+Type @SimpleStockBot `[search]` anywhere to find and get stock/crypto prices. Note: Prices might be delayed up to an hour.
 
-    Market data is provided by [marketdata.app](https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=discord)
+Data from: [marketdata.app](https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=discord).
 
-    If you believe the bot is not behaving properly run `/status` or [get in touch](https://docs.simplestockbot.com/contact).
+Issues with the bot? Use `/status` or [contact us](https://docs.simplestockbot.com/contact).
     """
 
     donate_text = """
-Simple Stock Bot is run entirely on donations[.](https://www.buymeacoffee.com/Anson)
-All donations go directly towards paying for servers, and market data is provided by
-[marketdata.app](https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=discord).
+Simple Stock Bot runs purely on [donations.](https://www.buymeacoffee.com/Anson)
+Every donation supports server costs and
+[marketdata.app](https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=discord) provides our data.
 
-The easiest way to donate is to run the `/donate [amount in USD]` command with US dollars you would like to donate.
+**How to Donate?**
+1. Use `/donate [amount in USD]` command.
+   - E.g., `/donate 2` donates 2 USD.
+2. Or, donate at [buymeacoffee](https://www.buymeacoffee.com/Anson).
+    - It's quick, doesn't need an account, and accepts Paypal or Credit card.
 
-Example: `/donate 2` would donate 2 USD.
-
-An alternative way to donate is through https://www.buymeacoffee.com/Anson which requires no account and accepts Paypal or Credit card.
-If you have any questions see the [website](https://docs.simplestockbot.com)
-
-    """
-
-
-commands = """ # Not used by the bot but for updating commands with BotFather
-donate - Donate to the bot 🎗️
-help - Get some help using the bot. 🆘
-trending - Trending Stocks and Cryptos. 💬
-intra - $[symbol] Plot since the last market open. 📈
-chart - $[chart] Plot of the past month. 📊
+Questions? Visit our [website](https://docs.simplestockbot.com).
 """
