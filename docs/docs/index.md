@@ -1,29 +1,31 @@
-# Simple Stock Bots
+# Elevate Your Groupchats with Real-time Stock Insights
 
-Simple Stock Bots is a family of messaging bots that aim to provide simple interface to stock market information.
+Discover a new level of financial discussion with Simple Stock Bot, your go-to solution for real-time stock market and cryptocurrency insights within your Telegram or Discord group chats. Transform your everyday discussions into an interactive financial exploration experience. With Simple Stock Bot, keeping up with the stock market or cryptocurrency trends has never been more seamless and engaging.
 
-## Getting Started
+## [Commands](commands.md)
 
-The bots can either be added to a server or can be direct messaged for the exact same functionality. Links for each platform are below:
+### Real-Time Stock and Cryptocurrency Updates
+- Get live price updates of stocks and cryptocurrencies.
+- Symbol Detection: Use `$` for stocks and `$$` for cryptocurrencies, e.g., `$tsla` for Tesla and `$$btc` for Bitcoin.
 
-[Telegram Bot :fontawesome-brands-telegram:](https://t.me/SimpleStockBot){ .md-button .md-button--primary }
+### Intraday and Historical Data Visualization
+- `/intra`: View a stock's movement since the last market open or a cryptocurrency's 24-hour chart.
+- `/chart`: Provides a chart of the last month's trading data up till the day before.
 
-[Discord Bot :fontawesome-brands-discord:](https://discordapp.com/api/oauth2/authorize?client_id=532045200823025666&permissions=36507338752&scope=bot){ .md-button .md-button--primary }
+### Trending Assets Awareness
+- `/trending`: Discover the latest trending stocks and cryptocurrencies and their price changes.
 
-Alternatively, this project is completely open source and instructions on how to run your own instance of the bot are provided on each of the bots pages. [Hosting](host.md)
+### In-App Assistance and Support
+- `/help`: Provides a quick summary of available commands for easy reference.
+- `/donate`: Support the maintenance of the bot to ensure continued free access.
 
-## Usage
+### User-Friendly Interaction
+- Easy symbol and command usage for a smooth user experience.
+- Engage with a community of financial enthusiasts and share insights effortlessly.
 
-The bots are nearly identical between platforms, but sometimes a platform will have a feature that only it supports such as Telegrams inline messaging or Discords embeds. For full information see [Commands](commands.md)
+## [Contact](contact.md)
+Need assistance or have inquiries? Feel free to reach out and I'll be happy to help.
 
-## Source Code
+## Powered by MarketData.app
 
-The source code for the bots is completely open and hosted on GitLab. The project is licensed with an MIT License which is incredibly permissive. [The full text of the license can be read here](./LICENSE)
-
-- [Telegram Bot Source](https://gitlab.com/simple-stock-bots/simple-telegram-stock-bot)
-- [Discord Bot Source](https://gitlab.com/simple-stock-bots/simple-discord-stock-bot)
-
-If you decide to host your own bots using my source code please consider using my referral links for marketdata.app and DigitalOcean. We both get a kickback when you use them.
-
-- [DigitalOcean](https://m.do.co/c/6b5df7ef55b6)
-- [matketdata.app](https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=repo)
+Simple Stock Bots is able to provide real-time stock market insights thanks to the data supplied by [MarketData.app](https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=web). MarketData.app delivers accurate and up-to-date financial data, fueling the bot's capabilities in delivering timely stock quotes, charts, and other market-related information directly to your Telegram or Discord groups. The robust data infrastructure provided by MarketData.app not only ensures the reliability and accuracy of the information you receive but also enables the offering of Simple Stock Bots for free to all users. By leveraging MarketData.app's comprehensive financial data, the goal is to foster informed financial discussions and make market monitoring an effortless and accessible experience for everyone.
