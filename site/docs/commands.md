@@ -1,11 +1,15 @@
 Symbols are used in headings to denote what platforms and symbol types a command supports.
 
-- Telegram Only :fontawesome-brands-telegram-plane:
+- Telegram Only :fontawesome-brands-telegram:
 - Discord Only :fontawesome-brands-discord:
 - Bot Commands :robot:
 - Cryptocurrency Support :material-currency-btc:
 - Stock Market Support :bank:
 - OTC Support :dollar:
+
+## Get the Bots
+
+[:fontawesome-brands-telegram: Telegram](https://t.me/SimpleStockBot){ .md-button } [:fontawesome-brands-discord: Discord](https://discordapp.com/api/oauth2/authorize?client_id=532045200823025666&permissions=36507338752&scope=bot){ .md-button }
 
 ## Symbol Detection :material-currency-btc: :bank: :dollar:
 

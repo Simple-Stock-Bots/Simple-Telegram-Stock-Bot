@@ -2,6 +2,10 @@
 
 Discover a new level of financial discussion with Simple Stock Bot, your go-to solution for real-time stock market and cryptocurrency insights within your Telegram or Discord group chats. Transform your everyday discussions into an interactive financial exploration experience. With Simple Stock Bot, keeping up with the stock market or cryptocurrency trends has never been more seamless and engaging.
 
+## Get the Bots
+
+[:fontawesome-brands-telegram: Telegram](https://t.me/SimpleStockBot){ .md-button } [:fontawesome-brands-discord: Discord](https://discordapp.com/api/oauth2/authorize?client_id=532045200823025666&permissions=36507338752&scope=bot){ .md-button }
+
 ## [Commands](commands.md)
 
 ### Real-Time Stock and Cryptocurrency Updates

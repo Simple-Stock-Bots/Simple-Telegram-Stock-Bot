@@ -2,6 +2,10 @@
 
 This guide provides step-by-step instructions for setting up and running this project on your local machine, whether for development, testing, or personal use.
 
+## Get the Bots
+
+[:fontawesome-brands-telegram: Telegram](https://t.me/SimpleStockBot){ .md-button } [:fontawesome-brands-discord: Discord](https://discordapp.com/api/oauth2/authorize?client_id=532045200823025666&permissions=36507338752&scope=bot){ .md-button }
+
 ## Pre-requisites
 
 Ensure the following are installed or obtained before proceeding:
