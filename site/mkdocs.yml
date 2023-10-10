@@ -1,6 +1,6 @@
 site_name: Simple Stock Bot
 site_url: https://simplestockbot.com
-edit_uri: /simple-stock-bots/site/tree/master/docs
+edit_uri: /simple-stock-bots/site/tree/master/site
 repo_url: https://gitlab.com/simple-stock-bots/simple-telegram-stock-bot
 repo_name: Simple Stock Bots
 
@@ -15,6 +15,7 @@ nav:
   - Self-Host: host.md
   - Donate: donate.md
   - Contact: contact.md
+  - Blog: /blog
 
 theme:
   name: material
@@ -65,6 +66,7 @@ extra_css:
 plugins:
   - search
   - social
+  - blog
 
 
 markdown_extensions:

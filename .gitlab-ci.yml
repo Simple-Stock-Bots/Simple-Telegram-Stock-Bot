@@ -1,6 +1,9 @@
 stages:
   - lint
+  - build
+  - build_site
   - deploy
+  - deploy_site
 
 black:
   stage: lint
@@ -18,4 +21,4 @@ ruff:
 
 
 include:
-  - local: /docs/.gitlab-ci.yml
+  - local: /site/.gitlab-ci.yml
