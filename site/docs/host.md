@@ -17,10 +17,10 @@ Ensure the following are installed or obtained before proceeding:
   - **[marketdata.app](https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=web)**: Sign up to get an API key. A free tier is available and should suffice for private groups. More details [here](https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=repo).
 
 !!! tip
-The bot will still operate without a [marketdata.app](https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=repo) key but will revert to using only cryptocurrency data.
+    The bot will still operate without a [marketdata.app](https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=repo) key but will revert to using only cryptocurrency data.
 
 !!! note
-To enable donation acceptance, obtain a Stripe API key and provide a `STRIPE` key to your bot. [https://stripe.com/]()
+    To enable donation acceptance, obtain a Stripe API key and provide a `STRIPE` key to your bot. [https://stripe.com/]()
 
 ## Setup Instructions
 
