@@ -65,10 +65,13 @@ class Router:
         schedule.run_pending()
 
         symbols: list[Symbol] = []
-        stocks = set(re.findall(self.STOCK_REGEX, text))
-        for stock in stocks:
+        stock_matches = set(re.findall(self.STOCK_REGEX, text))
+        for stock_match in stock_matches:
             # Market data lacks tools to check if a symbol is valid.
-            symbols.append(Stock(stock))
+            if stock_info := self.stock.symbol_id(stock_match):
+                symbols.append(Stock(stock_info))
+            else:
+                log.info(f"{stock_match} is not in list of stocks")
 
         coins = set(re.findall(self.CRYPTO_REGEX, text))
         for coin in coins:

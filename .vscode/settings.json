@@ -4,5 +4,7 @@
     "editor.formatOnSaveMode": "modificationsIfAvailable",
     "[python]": {
         "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true,
+        "editor.formatOnSaveMode": "file"
     }
 }

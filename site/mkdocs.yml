@@ -15,7 +15,7 @@ nav:
   - Self-Host: host.md
   - Donate: donate.md
   - Contact: contact.md
-  - Blog: /blog
+  - Blog: blog/index.md
 
 theme:
   name: material
