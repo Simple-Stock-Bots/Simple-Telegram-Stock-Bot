@@ -17,11 +17,11 @@
     "vscode": {
       "extensions": [
 		"ms-python.python",
-		"ms-python.black-formatter",
-		"ms-python.flake8",
+    "ms-python.black-formatter",
 		"ms-python.vscode-pylance",
 		"ms-python.isort",
-		"charliermarsh.ruff"
+    "charliermarsh.ruff",
+    "ms-toolsai.jupyter"
 	]
     }
   },

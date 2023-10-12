@@ -29,11 +29,12 @@ class Symbol:
 class Stock(Symbol):
     """Stock Market Object. Gets data from MarketData"""
 
-    def __init__(self, symbol: str) -> None:
-        self.symbol = symbol
-        self.id = symbol
-        self.name = "$" + symbol.upper()
-        self.tag = "$" + symbol.lower()
+    def __init__(self, symbol_info: dict) -> None:
+        self.symbol = symbol_info["ticker"]
+        self.id = symbol_info["ticker"]
+        self.name = symbol_info["title"]
+        self.tag = "$" + symbol_info["ticker"]
+        self.market_cap_rank = symbol_info["mkt_cap_rank"]
 
 
 class Coin(Symbol):

@@ -20,6 +20,7 @@ class MarketData:
 
     SYMBOL_REGEX = "[$]([a-zA-Z]{1,4})"
 
+    symbol_list: Dict[str, Dict] = {}
     charts: Dict[Stock, pd.DataFrame] = {}
 
     openTime = dt.time(hour=9, minute=30, second=0)
@@ -47,6 +48,9 @@ class MarketData:
 
         if self.MARKETDATA_TOKEN != "":
             schedule.every().day.do(self.clear_charts)
+
+        self.get_symbol_list()
+        schedule.every().day.do(self.get_symbol_list)
 
     def get(self, endpoint, params: dict = {}, timeout=10) -> dict:
         url = "https://api.marketdata.app/v1/" + endpoint
@@ -84,6 +88,21 @@ class MarketData:
             logging.error(e)
 
         return {}
+
+    def symbol_id(self, symbol: str) -> Dict[str, Dict]:
+        return self.symbol_list.get(symbol.upper(), None)
+
+    def get_symbol_list(self):
+        sec_resp = r.get("https://www.sec.gov/files/company_tickers.json")
+        sec_resp.raise_for_status()
+        sec_data = sec_resp.json()
+
+        for rank, ticker_info in sec_data.items():
+            self.symbol_list[ticker_info["ticker"]] = {
+                "ticker": ticker_info["ticker"],
+                "title": ticker_info["title"],
+                "mkt_cap_rank": rank,
+            }
 
     def clear_charts(self) -> None:
         """
@@ -129,13 +148,13 @@ class MarketData:
             Formatted markdown
         """
 
-        if quoteResp := self.get(f"stocks/quotes/{symbol}/"):
+        if quoteResp := self.get(f"stocks/quotes/{symbol.symbol}/"):
             price = round(quoteResp["last"][0], 2)
 
             try:
                 changePercent = round(quoteResp["changepct"][0], 2)
             except TypeError:
-                return f"The price of {symbol} is {price}"
+                return f"The price of {symbol.name} is ${price}"
 
             message = f"The current price of {symbol.name} is ${price} and "
 
