@@ -21,7 +21,7 @@ Want stock data or to host your own bot? Help keep this bot free by using my
 
 📢 Stay updated on the bot's Telegram: https://t.me/simplestockbotnews.
 
-**Guide**: All about using and setting up the bot is in the [docs](https://docs.simplestockbot.com).
+**Guide**: All about using and setting up the bot is in the [docs](https://simplestockbot.com).
 
 The bot recognizes _"Symbols"_. `$` for stocks and `$$` for cryptos. Example:
 - `/chart $$eth` gets a month's Ethereum chart.
@@ -43,7 +43,7 @@ Pick a ticker, and the bot shares the current price in chat. Note: Prices can la
 
 Data thanks to [marketdata.app](https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=telegram).
 
-Bot issues? Use `/status` or [contact us](https://docs.simplestockbot.com/contact).
+Bot issues? Use `/status` or [contact us](https://simplestockbot.com/contact).
 
     """
 
@@ -56,7 +56,7 @@ All funds help maintain servers, with data from
 1. Use `/donate [amount in USD]`. E.g., `/donate 2` donates 2 USD.
 2. Or, quickly donate at [buymeacoffee](https://www.buymeacoffee.com/Anson). No account needed, accepts Paypal & Credit card.
 
-For questions, visit our [website](https://docs.simplestockbot.com).
+For questions, visit our [website](https://simplestockbot.com).
 """
 
 

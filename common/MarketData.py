@@ -2,7 +2,9 @@ import datetime as dt
 import logging
 import os
 from typing import Dict
+from collections import OrderedDict
 
+import humanize
 import pandas as pd
 import pytz
 import requests as r
@@ -286,3 +288,58 @@ class MarketData:
             return df
 
         return pd.DataFrame()
+
+    def options_reply(self, request: str) -> str:
+        """Undocumented API Usage!"""
+
+        options_data = self.get(f"options/quotes/{request}")
+
+        for key in options_data.keys():
+            options_data[key] = options_data[key][0]
+
+        options_data["underlying"] = "$" + options_data["underlying"]
+
+        options_data["updated"] = humanize.naturaltime(dt.datetime.now() - dt.datetime.fromtimestamp(options_data["updated"]))
+
+        options_data["expiration"] = humanize.naturaltime(
+            dt.datetime.now() - dt.datetime.fromtimestamp(options_data["expiration"])
+        )
+
+        options_data["firstTraded"] = humanize.naturaltime(
+            dt.datetime.now() - dt.datetime.fromtimestamp(options_data["firstTraded"])
+        )
+
+        rename = {
+            "optionSymbol": "Option Symbol",
+            "underlying": "Underlying",
+            "expiration": "Expiration",
+            "side": "side",
+            "strike": "strike",
+            "firstTraded": "First Traded",
+            "updated": "Last Updated",
+            "bid": "bid",
+            "bidSize": "bidSize",
+            "mid": "mid",
+            "ask": "ask",
+            "askSize": "askSize",
+            "last": "last",
+            "openInterest": "Open Interest",
+            "volume": "Volume",
+            "inTheMoney": "inTheMoney",
+            "intrinsicValue": "Intrinsic Value",
+            "extrinsicValue": "Extrinsic Value",
+            "underlyingPrice": "Underlying Price",
+            "iv": "Implied Volatility",
+            "delta": "delta",
+            "gamma": "gamma",
+            "theta": "theta",
+            "vega": "vega",
+            "rho": "rho",
+        }
+
+        options_cleaned = OrderedDict()
+        for old, new in rename.items():
+            if old in options_data:
+                options_cleaned[new] = options_data[old]
+
+        return options_cleaned

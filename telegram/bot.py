@@ -178,17 +178,33 @@ async def symbol_detect(update: Update, context: ContextTypes.DEFAULT_TYPE):
         message = update.message.text
         chat_id = update.message.chat_id
         if "$" in message:
-            symbols = s.find_symbols(message)
             log.info("Looking for Symbols")
+            symbols = s.find_symbols(message)
         else:
             return
     except AttributeError as ex:
         log.info(ex)
         return
-    if symbols:
-        # Let user know bot is working
+
+    # Detect Options
+    if ("call" in message.lower()) or ("put" in message.lower()):
+        log.info("Options detected")
         await context.bot.send_chat_action(chat_id=chat_id, action=telegram.constants.ChatAction.TYPING)
+        try:
+            options_data = s.options(message, symbols)
+
+            await update.message.reply_text(
+                text=generate_options_reply(options_data),
+                parse_mode=telegram.constants.ParseMode.MARKDOWN,
+            )
+            return
+        except KeyError as ex:
+            logging.warning(ex)
+            pass
+
+    if symbols:
         log.info(f"Symbols found: {symbols}")
+        await context.bot.send_chat_action(chat_id=chat_id, action=telegram.constants.ChatAction.TYPING)
 
         for reply in s.price_reply(symbols):
             await update.message.reply_text(
@@ -196,6 +212,47 @@ async def symbol_detect(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 parse_mode=telegram.constants.ParseMode.MARKDOWN,
                 disable_notification=True,
             )
+
+
+def generate_options_reply(options_data: dict):
+    # Header with Option Symbol and Underlying
+    message_text = f"*{options_data['Option Symbol']} ({options_data['Underlying']})*\n\n"
+
+    # Key details
+    details = (
+        f"*Expiration:* `{options_data['Expiration']}`\n"
+        f"*Side:* `{options_data['side']}`\n"
+        f"*Strike:* `{options_data['strike']}`\n"
+        f"*First Traded:* `{options_data['First Traded']}`\n"
+        f"*Last Updated:* `{options_data['Last Updated']}`\n\n"
+    )
+    message_text += details
+
+    # Pricing info
+    pricing_info = (
+        f"*Bid:* `{options_data['bid']}` (Size: `{options_data['bidSize']}`)\n"
+        f"*Mid:* `{options_data['mid']}`\n"
+        f"*Ask:* `{options_data['ask']}` (Size: `{options_data['askSize']}`)\n"
+        f"*Last:* `{options_data['last']}`\n\n"
+    )
+    message_text += pricing_info
+
+    # Volume and open interest
+    volume_info = f"*Open Interest:* `{options_data['Open Interest']}`\n" f"*Volume:* `{options_data['Volume']}`\n\n"
+    message_text += volume_info
+
+    # Greeks
+    greeks_info = (
+        f"*IV:* `{options_data['Implied Volatility']}`\n"
+        f"*Delta:* `{options_data['delta']}`\n"
+        f"*Gamma:* `{options_data['gamma']}`\n"
+        f"*Theta:* `{options_data['theta']}`\n"
+        f"*Vega:* `{options_data['vega']}`\n"
+        f"*Rho:* `{options_data['rho']}`\n"
+    )
+    message_text += greeks_info
+
+    return message_text
 
 
 async def intra(update: Update, context: ContextTypes.DEFAULT_TYPE):

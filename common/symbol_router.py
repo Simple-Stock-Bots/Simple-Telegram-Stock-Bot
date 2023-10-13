@@ -5,6 +5,7 @@ import datetime
 import logging
 import random
 import re
+from typing import Dict
 
 import pandas as pd
 import schedule
@@ -13,8 +14,6 @@ from cachetools import TTLCache, cached
 from common.cg_Crypto import cg_Crypto
 from common.MarketData import MarketData
 from common.Symbol import Coin, Stock, Symbol
-
-from typing import Dict
 
 log = logging.getLogger(__name__)
 
@@ -38,7 +37,7 @@ class Router:
             t_copy = self.trending_count.copy()
             for key in t_copy.keys():
                 if t_copy[key] < 0.01:
-                    # This just makes sure were not keeping around keys that havent been called in a very long time.
+                    # Prune Keys
                     dead_keys.append(key)
                 else:
                     t_copy[key] = t_copy[key] * decay
@@ -48,7 +47,7 @@ class Router:
         self.trending_count = t_copy.copy()
         log.info("Decayed trending symbols.")
 
-    def find_symbols(self, text: str, *, trending_weight: int = 1) -> list[Stock | Symbol]:
+    def find_symbols(self, text: str, *, trending_weight: int = 1) -> list[Stock | Coin]:
         """Finds stock tickers starting with a dollar sign, and cryptocurrencies with two dollar signs
         in a blob of text and returns them in a list.
 
@@ -66,6 +65,8 @@ class Router:
 
         symbols: list[Symbol] = []
         stock_matches = set(re.findall(self.STOCK_REGEX, text))
+        coin_matches = set(re.findall(self.CRYPTO_REGEX, text))
+
         for stock_match in stock_matches:
             # Market data lacks tools to check if a symbol is valid.
             if stock_info := self.stock.symbol_id(stock_match):
@@ -73,11 +74,10 @@ class Router:
             else:
                 log.info(f"{stock_match} is not in list of stocks")
 
-        coins = set(re.findall(self.CRYPTO_REGEX, text))
-        for coin in coins:
-            sym = self.crypto.symbol_list[self.crypto.symbol_list["symbol"].str.fullmatch(coin.lower(), case=False)]
+        for coin_match in coin_matches:
+            sym = self.crypto.symbol_list[self.crypto.symbol_list["symbol"].str.fullmatch(coin_match.lower(), case=False)]
             if sym.empty:
-                log.info(f"{coin} is not in list of coins")
+                log.info(f"{coin_match} is not in list of coins")
             else:
                 symbols.append(Coin(sym))
         if symbols:
@@ -396,3 +396,12 @@ class Router:
             replies = replies + self.crypto.batch_price(coins)
 
         return replies
+
+    def options(self, request: str, symbols: list[Symbol]) -> Dict:
+        request = request.lower()
+        if len(symbols) == 1:
+            symbol = symbols[0]
+            request = request.replace(symbol.tag.lower(), symbol.symbol.lower())
+            return self.stock.options_reply(request)
+        else:
+            return self.stock.options_reply(request)

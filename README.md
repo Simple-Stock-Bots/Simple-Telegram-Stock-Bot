@@ -9,8 +9,8 @@ Enhance your group chats on Telegram and Discord with real-time stock and crypto
 ## Documentation
 
 Comprehensive documentation is available to help you understand the features and capabilities of Simple Stock Bots:
-- [Official Documentation](https://docs.simplestockbot.com/)
-- [Command Reference](https://docs.simplestockbot.com/commands/)
+- [Official Documentation](https://simplestockbot.com/)
+- [Command Reference](https://simplestockbot.com/commands/)
 
 ## Support the Project
 
@@ -32,12 +32,12 @@ You can contribute by:
 ## Hosting
 
 Self-hosting instructions are provided for those interested in running the bot on their own servers:
-- [Hosting Guide](https://docs.simplestockbot.com/hosting/)
+- [Hosting Guide](https://simplestockbot.com/hosting/)
 
 ## Contact
 
 Reach out for bug reports, feature requests, or other inquiries:
-- [Contact Page](https://docs.simplestockbot.com/contact/)
+- [Contact Page](https://simplestockbot.com/contact/)
 
 ---
 

@@ -1,19 +1,9 @@
-import keyboard
 import time
 
+import keyboard
 
 tests = """$$xno
-/info $tsla
-/info $$btc
-/news $tsla
-/news $$btc
-/stat $tsla
-/stat $$btc
-/cap $tsla
-/cap $$btc
-/dividend $tsla
-/dividend $msft
-/dividend $$btc
+$tsla
 /intra $tsla
 /intra $$btc
 /chart $tsla
