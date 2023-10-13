@@ -5,13 +5,12 @@ Symbols are used in headings to denote what platforms and symbol types a command
 - Bot Commands :robot:
 - Cryptocurrency Support :material-currency-btc:
 - Stock Market Support :bank:
-- OTC Support :dollar:
 
 ## Get the Bots
 
 [:fontawesome-brands-telegram: Telegram](https://t.me/SimpleStockBot){ .md-button } [:fontawesome-brands-discord: Discord](https://discordapp.com/api/oauth2/authorize?client_id=532045200823025666&permissions=36507338752&scope=bot){ .md-button }
 
-## Symbol Detection :material-currency-btc: :bank: :dollar:
+## Symbol Detection :material-currency-btc: :bank:  
 
 The Simple Stock Bot looks at every message it can see and tries to detect stock and cryptocurrency symbols. Stock market tickers are denoted with a single `$` and cryptocurrency coins are denoted with a double `$$`. So getting the price of Tesla is as simple as `$tsla` and Bitcoin `$$btc`. These symbols can be in any part of a message and there can be multiple of them aswell.
 
@@ -28,6 +27,13 @@ The Simple Stock Bot looks at every message it can see and tries to detect stock
         </div>
     </div>
 </div>
+
+## Options Detection :bank:
+
+This command allows you to query real-time data for stock options. By simply inputting the stock symbol, strike price, month, and specifying either a call or a put, you can get the latest options data right at your fingertips. For example, `AAPL $220 December call` will provide the current data for Apple's call option with a $220 strike price expiring in December.
+
+
+![Image of the telegram bot providing options info.](img/telegram_options.png)
 
 ## `/donate [Amount in USD]` :fontawesome-brands-telegram-plane: 
 
@@ -171,7 +177,7 @@ Bot Status:
 
 </div>
 
-## Inline Features :fontawesome-brands-telegram: :material-currency-btc: :bank: :dollar:
+## Inline Features :fontawesome-brands-telegram: :material-currency-btc: :bank:  
 
 You can type @SimpleStockBot `[search]` in any chat or direct message to search for the stock bots
 full list of stock symbols and return the price of the ticker. Then once you select the ticker

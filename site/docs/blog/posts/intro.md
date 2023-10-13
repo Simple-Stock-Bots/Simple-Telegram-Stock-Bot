@@ -51,11 +51,11 @@ Here are some simple commands to get you started:
 
 Simple Stock Bot is a community-supported project, thriving on the contributions from its users. It's sustained entirely through donations to cover server costs and premium market data subscriptions, ensuring it remains free for everyone.
 
-Feeling generous? You can support the project by [donating](https://docs.simplestockbot.com/donate/), following on [Twitter](https://twitter.com/AnsonBiggs), or contributing on [GitLab](https://gitlab.com/simple-stock-bot).
+Feeling generous? You can support the project by [donating](https://simplestockbot.com/donate/), following on [Twitter](https://twitter.com/AnsonBiggs), or contributing on [GitLab](https://gitlab.com/simple-stock-bot).
 
 ## Dive Deeper
 
-Craving more insights and features? Explore the [official documentation](https://docs.simplestockbot.com/) to uncover all the capabilities of Simple Stock Bot.
+Craving more insights and features? Explore the [official documentation](https://simplestockbot.com/) to uncover all the capabilities of Simple Stock Bot.
 
 Get ready to elevate your financial discussions with Simple Stock Bot! Your group chats will never be the same again.
 

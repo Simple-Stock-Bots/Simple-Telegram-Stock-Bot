@@ -5,9 +5,9 @@ import os
 
 import mplfinance as mpf
 import nextcord
+from D_info import D_info
 from nextcord.ext import commands
 
-from D_info import D_info
 from common.symbol_router import Router
 
 DISCORD_TOKEN = os.environ["DISCORD"]
@@ -38,7 +38,7 @@ async def on_ready():
 @bot.command()
 async def status(ctx: commands):
     """Debug command for diagnosing if the bot is experiencing any issues."""
-    logging.warning(f"Status command ran by {ctx.message.author}")
+    logging.info(f"Status command ran by {ctx.message.author}")
     message = ""
     try:
         message = "Contact MisterBiggs#0465 if you need help.\n"
@@ -183,20 +183,74 @@ async def trending(ctx: commands):
 
 @bot.event
 async def on_message(message):
+    # Ignore messages from the bot itself
     if message.author.id == bot.user.id:
         return
-    if message.content:
-        if message.content[0] == "/":
-            await bot.process_commands(message)
-            return
 
-        if "$" in message.content:
-            symbols = s.find_symbols(message.content)
+    content_lower = message.content.lower()
 
-            if symbols:
-                for reply in s.price_reply(symbols):
-                    await message.channel.send(reply)
-                return
+    # Process commands starting with "/"
+    if message.content.startswith("/"):
+        await bot.process_commands(message)
+        return
+
+    symbols = None
+    if "$" in message.content:
+        symbols = s.find_symbols(message.content)
+
+    if "call" in content_lower or "put" in content_lower:
+        await handle_options(message, symbols)
+        return
+
+    if symbols:
+        for reply in s.price_reply(symbols):
+            await message.channel.send(reply)
+        return
+
+
+async def handle_options(message, symbols):
+    logging.info("Options detected")
+    try:
+        options_data = s.options(message.content.lower(), symbols)
+
+        # Create the embed directly within the function
+        embed = nextcord.Embed(title=options_data["Option Symbol"], description=options_data["Underlying"], color=0x3498DB)
+
+        # Key details
+        details = (
+            f"Expiration: {options_data['Expiration']}\n" f"Side: {options_data['side']}\n" f"Strike: {options_data['strike']}"
+        )
+        embed.add_field(name="Details", value=details, inline=False)
+
+        # Pricing info
+        pricing_info = (
+            f"Bid: {options_data['bid']} (Size: {options_data['bidSize']})\n"
+            f"Mid: {options_data['mid']}\n"
+            f"Ask: {options_data['ask']} (Size: {options_data['askSize']})\n"
+            f"Last: {options_data['last']}"
+        )
+        embed.add_field(name="Pricing", value=pricing_info, inline=False)
+
+        # Volume and open interest
+        volume_info = f"Open Interest: {options_data['Open Interest']}\n" f"Volume: {options_data['Volume']}"
+        embed.add_field(name="Activity", value=volume_info, inline=False)
+
+        # Greeks
+        greeks_info = (
+            f"IV: {options_data['Implied Volatility']}\n"
+            f"Delta: {options_data['delta']}\n"
+            f"Gamma: {options_data['gamma']}\n"
+            f"Theta: {options_data['theta']}\n"
+            f"Vega: {options_data['vega']}\n"
+            f"Rho: {options_data['rho']}"
+        )
+        embed.add_field(name="Greeks", value=greeks_info, inline=False)
+
+        # Send the created embed
+        await message.channel.send(embed=embed)
+
+    except KeyError as ex:
+        logging.warning(f"KeyError processing options for message {message.content}: {ex}")
 
 
 bot.run(DISCORD_TOKEN)
