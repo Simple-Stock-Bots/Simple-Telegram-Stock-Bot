@@ -11,26 +11,20 @@ import traceback
 from uuid import uuid4
 
 import mplfinance as mpf
-import telegram
-from telegram import (
-    InlineQueryResultArticle,
-    InputTextMessageContent,
-    LabeledPrice,
-    Update,
-)
+from T_info import T_info
 
+import telegram
+from common.symbol_router import Router
+from telegram import InlineQueryResultArticle, InputTextMessageContent, LabeledPrice, Update
 from telegram.ext import (
     Application,
     CommandHandler,
-    InlineQueryHandler,
-    PreCheckoutQueryHandler,
-    MessageHandler,
-    filters,
     ContextTypes,
+    InlineQueryHandler,
+    MessageHandler,
+    PreCheckoutQueryHandler,
+    filters,
 )
-
-from common.symbol_router import Router
-from T_info import T_info
 
 # Enable logging
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)

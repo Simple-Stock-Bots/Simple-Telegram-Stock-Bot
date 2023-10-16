@@ -7,6 +7,7 @@ import schedule
 from markdownify import markdownify
 
 from common.Symbol import Coin
+from common.utilities import rate_limited
 
 log = logging.getLogger(__name__)
 
@@ -24,6 +25,11 @@ class cg_Crypto:
         self.get_symbol_list()
         schedule.every().day.do(self.get_symbol_list)
 
+    # Coingecko's rate limit is 30 requests per minute.
+    # Since there are two bots sharing the same IP, we allocate half of that limit to each bot.
+    # This results in a rate limit of 15 requests per minute for each bot.
+    # Given this, the rate limit effectively becomes 1 request every 4 seconds for each bot.
+    @rate_limited(0.25)
     def get(self, endpoint, params: dict = {}, timeout=10) -> dict:
         url = "https://api.coingecko.com/api/v3" + endpoint
         resp = r.get(url, params=params, timeout=timeout)
