@@ -4,7 +4,7 @@ date: 2023-10-10
 tags: [Simple Stock Bot, Introduction, Telegram, Discord, Financial Insights]
 authors: [Anson]
 description: >
-    Welcome to the world of Simple Stock Bot, where real-time financial insights are integrated seamlessly into your group chats on Telegram and Discord!
+  Welcome to the world of Simple Stock Bot, where real-time financial insights are integrated seamlessly into your group chats on Telegram and Discord!
 ---
 
 ## What is Simple Stock Bot?
@@ -26,6 +26,7 @@ Simple Stock Bot is a chatbot designed to enrich your financial discussions on T
 </div>
 
 With Simple Stock Bot, you can:
+
 - **Fetch Real-time Quotes**: Obtain the latest stock and cryptocurrency prices instantly within your group chat.
 - **View Charts**: Delve into intraday movements or assess a month's trading data right inside your group chat.
 - **Stay Updated on Market Trends**: Discover what's buzzing in the stock and crypto spheres.
@@ -36,13 +37,12 @@ With Simple Stock Bot, you can:
 
 [:fontawesome-brands-discord: Discord](https://discordapp.com/api/oauth2/authorize?client_id=532045200823025666&permissions=36507338752&scope=bot){ .md-button }
 
-
-
 ## Using the Bot
 
 Embarking on your journey with Simple Stock Bot is effortless. Just add the bot to your Telegram or Discord group, and you're all set to dive into financial discussions right from your chat!
 
 Here are some simple commands to get you started:
+
 - `/intra` to view intraday charts.
 - `/chart` for a glimpse of the last month's trading data.
 - `/trending` to catch up on the latest trending stocks and cryptocurrencies.
@@ -51,7 +51,7 @@ Here are some simple commands to get you started:
 
 Simple Stock Bot is a community-supported project, thriving on the contributions from its users. It's sustained entirely through donations to cover server costs and premium market data subscriptions, ensuring it remains free for everyone.
 
-Feeling generous? You can support the project by [donating](https://simplestockbot.com/donate/), following on [Twitter](https://twitter.com/AnsonBiggs), or contributing on [GitLab](https://gitlab.com/simple-stock-bot).
+Feeling generous? You can support the project by [donating](https://simplestockbot.com/donate/), following on [Twitter](https://twitter.com/AnsonBiggs), or contributing on [GitLab](https://gitlab.com/simple-stock-bots/simple-stock-bot).
 
 ## Dive Deeper
 

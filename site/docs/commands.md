@@ -10,7 +10,7 @@ Symbols are used in headings to denote what platforms and symbol types a command
 
 [:fontawesome-brands-telegram: Telegram](https://t.me/SimpleStockBot){ .md-button } [:fontawesome-brands-discord: Discord](https://discordapp.com/api/oauth2/authorize?client_id=532045200823025666&permissions=36507338752&scope=bot){ .md-button }
 
-## Symbol Detection :material-currency-btc: :bank:  
+## Symbol Detection :material-currency-btc: :bank:
 
 The Simple Stock Bot looks at every message it can see and tries to detect stock and cryptocurrency symbols. Stock market tickers are denoted with a single `$` and cryptocurrency coins are denoted with a double `$$`. So getting the price of Tesla is as simple as `$tsla` and Bitcoin `$$btc`. These symbols can be in any part of a message and there can be multiple of them aswell.
 
@@ -32,10 +32,9 @@ The Simple Stock Bot looks at every message it can see and tries to detect stock
 
 This command allows you to query real-time data for stock options. By simply inputting the stock symbol, strike price, month, and specifying either a call or a put, you can get the latest options data right at your fingertips. For example, `AAPL $220 December call` will provide the current data for Apple's call option with a $220 strike price expiring in December.
 
-
 ![Image of the telegram bot providing options info.](img/telegram_options.png)
 
-## `/donate [Amount in USD]` :fontawesome-brands-telegram-plane: 
+## `/donate [Amount in USD]` :fontawesome-brands-telegram-plane:
 
 The donate command is used to send money to the bot to help keep it free. The premium stock market data and server rentals add up so any amount helps. See the [Donate](donate.md) page for more information.
 
@@ -89,7 +88,7 @@ This command makes a chart of the last 1 month of trading data up until the day 
 
 </div>
 
-## `/trending` 
+## `/trending`
 
 Gets the latest trending stocks and their change in price
 
@@ -104,7 +103,9 @@ Gets the latest trending stocks and their change in price
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 $GME: Gamestop Corporation - Class A, 5.06%
 $MMAT: Meta Materials Inc, 4.77%
-$$BTC: Bitcoin, -0.83%
+
+$$
+BTC: Bitcoin, -0.83%
 $$ETH: Ethereum, 6.06%
 $$DOGE: Binance-Peg Dogecoin, 0.14%
 
@@ -177,10 +178,11 @@ Bot Status:
 
 </div>
 
-## Inline Features :fontawesome-brands-telegram: :material-currency-btc: :bank:  
+## Inline Features :fontawesome-brands-telegram: :material-currency-btc: :bank:
 
 You can type @SimpleStockBot `[search]` in any chat or direct message to search for the stock bots
 full list of stock symbols and return the price of the ticker. Then once you select the ticker
 want the bot will send a message as you in that chat with the latest stock price.
 The bot also looks at every message in any chat it is in for stock symbols.Symbols start with a
 `$` followed by the stock symbol. For example:$tsla would return price information for Tesla Motors.
+$$

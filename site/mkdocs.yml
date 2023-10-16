@@ -1,13 +1,11 @@
 site_name: Simple Stock Bot
 site_url: https://simplestockbot.com
-edit_uri: /simple-stock-bots/site/tree/master/site
-repo_url: https://gitlab.com/simple-stock-bots/simple-telegram-stock-bot
+repo_url: https://gitlab.com/simple-stock-bots/simple-stock-bot
 repo_name: Simple Stock Bots
 
 site_description: Simple Discord and Telegram chat bots for Stock Market Data.
 site_author: Anson Biggs
 copyright: <a href="https://ansonbiggs.com">Anson Biggs</a> 2018 </br> Available Under an <a href="/LICENSE/">MIT LICENSE</a> </br>
-
 
 nav:
   - Home: index.md
@@ -56,18 +54,13 @@ extra:
       link: https://dashboard.marketdata.app/marketdata/aff/go/misterbiggs?keyword=web
       name: MarketData.app for stock data
 
-
-
-
 extra_css:
   - stylesheets/phone.css
-
 
 plugins:
   - search
   - social
   - blog
-
 
 markdown_extensions:
   - attr_list

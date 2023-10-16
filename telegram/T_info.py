@@ -10,7 +10,7 @@ class T_info:
     license = re.sub(
         r"\b\n",
         " ",
-        r.get("https://gitlab.com/simple-stock-bots/simple-telegram-stock-bot/-/raw/master/LICENSE").text,
+        r.get("https://gitlab.com/simple-stock-bots/simple-stock-bot/-/raw/master/LICENSE").text,
     )
 
     help_text = """

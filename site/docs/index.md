@@ -9,25 +9,31 @@ Discover a new level of financial discussion with Simple Stock Bot, your go-to s
 ## [Commands](commands.md)
 
 ### Real-Time Stock and Cryptocurrency Updates
+
 - Get live price updates of stocks and cryptocurrencies.
 - Symbol Detection: Use `$` for stocks and `$$` for cryptocurrencies, e.g., `$tsla` for Tesla and `$$btc` for Bitcoin.
 
 ### Intraday and Historical Data Visualization
+
 - `/intra`: View a stock's movement since the last market open or a cryptocurrency's 24-hour chart.
 - `/chart`: Provides a chart of the last month's trading data up till the day before.
 
 ### Trending Assets Awareness
+
 - `/trending`: Discover the latest trending stocks and cryptocurrencies and their price changes.
 
 ### In-App Assistance and Support
+
 - `/help`: Provides a quick summary of available commands for easy reference.
 - `/donate`: Support the maintenance of the bot to ensure continued free access.
 
 ### User-Friendly Interaction
+
 - Easy symbol and command usage for a smooth user experience.
 - Engage with a community of financial enthusiasts and share insights effortlessly.
 
 ## [Contact](contact.md)
+
 Need assistance or have inquiries? Feel free to reach out and I'll be happy to help.
 
 ## Powered by MarketData.app
