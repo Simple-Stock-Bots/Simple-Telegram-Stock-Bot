@@ -1,8 +1,8 @@
 import datetime as dt
 import logging
 import os
-from typing import Dict
 from collections import OrderedDict
+from typing import Dict
 
 import humanize
 import pandas as pd
