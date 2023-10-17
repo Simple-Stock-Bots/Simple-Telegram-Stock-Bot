@@ -25,6 +25,8 @@ Simple Stock Bot is a chatbot designed to enrich your financial discussions on T
     </div>
 </div>
 
+<!-- more -->
+
 With Simple Stock Bot, you can:
 
 - **Fetch Real-time Quotes**: Obtain the latest stock and cryptocurrency prices instantly within your group chat.
