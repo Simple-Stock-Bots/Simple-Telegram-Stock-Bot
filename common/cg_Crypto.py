@@ -9,6 +9,8 @@ from markdownify import markdownify
 from common.Symbol import Coin
 from common.utilities import rate_limited
 
+import time
+
 log = logging.getLogger(__name__)
 
 
@@ -34,6 +36,12 @@ class cg_Crypto:
         url = "https://api.coingecko.com/api/v3" + endpoint
         resp = r.get(url, params=params, timeout=timeout)
         # Make sure API returned a proper status code
+
+        if resp.status_code == 429:
+            log.warning(f"CoinGecko returned 429 - Too Many Requests for endpoint: {endpoint}. Sleeping and trying again.")
+            time.sleep(10)
+            return self.get(endpoint=endpoint, params=params, timeout=timeout)
+
         try:
             resp.raise_for_status()
         except r.exceptions.HTTPError as e:
