@@ -54,8 +54,11 @@ class MarketData:
         self.get_symbol_list()
         schedule.every().day.do(self.get_symbol_list)
 
-    def get(self, endpoint, params: dict = {}, timeout=10) -> dict:
+    def get(self, endpoint, params=None, timeout=10, headers=None) -> dict:
         url = "https://api.marketdata.app/v1/" + endpoint
+
+        if params is None:
+            params = {}
 
         # set token param if it wasn't passed.
         params["token"] = self.MARKETDATA_TOKEN
@@ -64,7 +67,13 @@ class MarketData:
         # monitored even if someone doesn't make it through an affiliate link.
         params["application"] = "simplestockbot"
 
-        resp = r.get(url, params=params, timeout=timeout)
+        if headers is None:
+            headers = {}
+        headers = {"User-Agent": "Simple Stock Bot anson@ansonbiggs.com"} | headers
+
+        resp = r.get(url, params=params, timeout=timeout, headers=headers)
+
+        logging.error(resp.headers.items())
 
         # Make sure API returned a proper status code
         try:
@@ -95,7 +104,15 @@ class MarketData:
         return self.symbol_list.get(symbol.upper(), None)
 
     def get_symbol_list(self):
-        sec_resp = r.get("https://www.sec.gov/files/company_tickers.json")
+        # Doesn't use `self.get`` since needs are much different
+        sec_resp = r.get(
+            "https://www.sec.gov/files/company_tickers.json",
+            headers={
+                "User-Agent": "Simple Stock Bot anson@ansonbiggs.com",
+                "Accept-Encoding": "gzip, deflate",
+                "Host": "www.sec.gov",
+            },
+        )
         sec_resp.raise_for_status()
         sec_data = sec_resp.json()
 
