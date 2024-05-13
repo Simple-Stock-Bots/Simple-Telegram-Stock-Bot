@@ -5,7 +5,6 @@ import pandas as pd
 import requests as r
 import schedule
 from markdownify import markdownify
-
 from common.Symbol import Coin
 from common.utilities import rate_limited
 

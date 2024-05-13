@@ -27,7 +27,7 @@
       ]
     }
   },
-  "postCreateCommand": "pip3 install --user -r dev-reqs.txt && apt-get update && apt-get install -y nodejs npm && npm install"
+  "postCreateCommand": "pip3 install --user -r dev-reqs.txt && apt-get update && apt-get install -y nodejs npm --fix-missing && npm install"
   // Features to add to the dev container. More info: https://containers.dev/features.
   // "features": {},
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
