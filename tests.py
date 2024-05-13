@@ -9,9 +9,7 @@ $tsla
 /chart $tsla
 /chart $$btc
 /help
-/trending""".split(
-    "\n"
-)
+/trending""".split("\n")
 
 print("press enter to start")
 keyboard.wait("enter")

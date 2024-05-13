@@ -26,6 +26,9 @@ class Symbol:
     def __str__(self) -> str:
         return self.id
 
+    def __hash__(self):
+        return hash(self.id)
+
 
 class Stock(Symbol):
     """Stock Market Object. Gets data from MarketData"""

@@ -10,6 +10,7 @@ import pytz
 import requests as r
 import schedule
 
+
 from common.Symbol import Stock
 
 log = logging.getLogger(__name__)
@@ -104,7 +105,7 @@ class MarketData:
         return self.symbol_list.get(symbol.upper(), None)
 
     def get_symbol_list(self):
-        # Doesn't use `self.get`` since needs are much different
+        # Doesn't use `self.get()` since needs are much different
         sec_resp = r.get(
             "https://www.sec.gov/files/company_tickers.json",
             headers={
@@ -229,7 +230,11 @@ class MarketData:
 
         if data := self.get(
             f"stocks/candles/{resolution}/{symbol}",
-            params={"from": startTime.timestamp(), "to": now.timestamp(), "extended": True},
+            params={
+                "from": startTime.timestamp(),
+                "to": now.timestamp(),
+                "extended": True,
+            },
         ):
             data.pop("s")
             df = pd.DataFrame(data)

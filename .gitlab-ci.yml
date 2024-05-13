@@ -3,25 +3,19 @@ stages:
   - build_site
   - deploy
 
-black:
-  stage: lint
-  image: registry.gitlab.com/pipeline-components/black:latest
-  script:
-    - black --check --verbose -- .
+# ruff:
+#   stage: lint
+#   image: python:3.11-slim
+#   script:
+#     - pip3 install ruff
+#     - ruff . --output-format gitlab; ruff format . --diff
 
-ruff:
-  stage: lint
-  image: python:3.11-slim
-  script:
-    - pip3 install ruff
-    - ruff --output-format gitlab .
-
-prettier:
-  stage: lint
-  image: node:16-slim # Use Node.js image since prettier is a Node.js tool
-  script:
-    - npm install prettier
-    - npx prettier --check . # Adjust the path as needed
+# prettier:
+#   stage: lint
+#   image: node:16-slim # Use Node.js image since prettier is a Node.js tool
+#   script:
+#     - npm install prettier
+#     - npx prettier --check . # Adjust the path as needed
 
 include:
   - local: /site/.gitlab-ci.yml

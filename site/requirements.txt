@@ -1,4 +1,5 @@
-mkdocs-material==9.4.4
+mkdocs-material==9.5.22
+mkdocs-material-extensions==1.3.1
 
 # Required for Social Cards
 Pillow==10.0.1
